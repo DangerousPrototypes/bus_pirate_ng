@@ -10,6 +10,9 @@ enum
 #ifdef BP_USE_DUMMY1
 	DUMMY2,
 #endif
+#ifdef BP_USE_HWSPI
+	HWSPI,
+#endif
 	MAXPROTO
 };
 
@@ -46,6 +49,4 @@ void nullfunc1(void);
 uint32_t nullfunc2(uint32_t c);
 uint32_t nullfunc3(void);
 void nullfunc4(uint32_t c);
-void HiZpins(void);
-void HiZsettings(void);
 

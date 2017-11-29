@@ -9,6 +9,8 @@ typedef struct _modeConfig
 	uint8_t vpumode;				// vpu mode (0=ext, 1=5v, 2=3v3)
 	uint8_t bitorder;				// bitorder (0=msb, 1=lsb)
 	uint8_t psu;					// psu (0=off, 1=on)
+	uint8_t error;					// error occurred
+	uint8_t displaymode;				// display mode (dec, hex, oct, bin)
 } _modeConfig;
 
 
@@ -30,4 +32,7 @@ void initUI(void);
 void showstates(void);
 void changemode(void);
 void printhelp(void);
+void getuserinput(void);
+
+void changedisplaymode(void);
 

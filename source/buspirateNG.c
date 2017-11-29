@@ -39,8 +39,10 @@ int main(void)
 	// init clock
 	rcc_clock_setup_in_hse_8mhz_out_72mhz();
 
-	// enable clocks
+	// enable clocks for IO and alternate functions
 	rcc_periph_clock_enable(RCC_GPIOA);
+	rcc_periph_clock_enable(RCC_GPIOB);
+	rcc_periph_clock_enable(RCC_GPIOC);
 	rcc_periph_clock_enable(RCC_AFIO);
 
 	AFIO_MAPR |= AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON;		// disable jtag/enable swd

@@ -6,8 +6,10 @@
 #include "UI.h"
 #include "protocols.h"
 
+#include "HiZ.h"
 #include "dummy1.h"
 #include "dummy2.h"
+#include "HWSPI.h" 
 
 
 
@@ -38,15 +40,6 @@ void nullfunc4(uint32_t c)
 	cdcprintf("ERROR: command has no effect here\r\n");
 }
 
-void HiZpins(void)
-{
-	cdcprintf("-\t-\t-\t-");
-}
-
-void HiZsettings(void)
-{
-	cdcprintf("HiZ ()=()");
-}
 
 
 struct _protocol protocols[MAXPROTO]={
@@ -67,9 +60,9 @@ struct _protocol protocols[MAXPROTO]={
 	nullfunc3,				// read 1 bit (?)
 	nullfunc3,				// service to regular poll whether a byte ahs arrived
 	nullfunc4,				// macro
-	nullfunc1,				// setup UI
-	nullfunc1,				// real setup
-	nullfunc1,				// cleanup for HiZ
+	HiZsetup,				// setup UI
+	HiZsetup_exc,				// real setup
+	HiZcleanup,				// cleanup for HiZ
 	HiZpins,				// display pin config
 	HiZsettings,				// display settings 
 	"HiZ",					// friendly name (promptname)
@@ -122,6 +115,31 @@ struct _protocol protocols[MAXPROTO]={
 	dummy2_pins,				// display pin config
 	dummy2_settings,			// display settings 
 	"DUMMY2",				// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_HWSPI
+{
+	HWSPI_start,				// start
+	HWSPI_startr,				// start with read
+	HWSPI_stop,				// stop
+	HWSPI_stopr,				// stop with read
+	HWSPI_send,				// send(/read) max 32 bit
+	HWSPI_read,				// read max 32 bit
+	HWSPI_clkh,				// set clk high
+	HWSPI_clkl,				// set clk low
+	HWSPI_dath,				// set dat hi
+	HWSPI_datl,				// set dat lo
+	HWSPI_dats,				// toggle dat (?)
+	HWSPI_clk,				// toggle clk (?)
+	HWSPI_bitr,				// read 1 bit (?)
+	HWSPI_period,				// service to regular poll whether a byte ahs arrived
+	HWSPI_macro,				// macro
+	HWSPI_setup,				// setup UI
+	HWSPI_setup_exc,			// real setup
+	HWSPI_cleanup,				// cleanup for HiZ
+	HWSPI_pins,				// display pin config
+	HWSPI_settings,				// display settings 
+	"HW-SPI",				// friendly name (promptname)
 },
 #endif
 };

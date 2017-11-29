@@ -17,7 +17,7 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o
+OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o HiZ.o HWSPI.o
 
 BINARY = buspirateNG
 
