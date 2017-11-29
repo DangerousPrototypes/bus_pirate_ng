@@ -11,8 +11,8 @@
 // USB shit :/
 
 // we dont have a USB VID/PID yet so please supply your own
-#define		USB_VID		0x0483
-#define		USB_PID		0x5740
+//#define		USB_VID		0x
+//#define		USB_PID		0x
 #define		USB_VENDOR	"dangerousprototypes.com"
 #define		USB_PRODUCT	"buspirateNG"
 #define		USB_SERIAL	"00000000"
