@@ -15,7 +15,7 @@ typedef struct _modeConfig
 
 
 // define our globals
-extern int cmdhead, cmdtail;
+extern uint32_t cmdhead, cmdtail;
 extern char cmdbuff[CMDBUFFSIZE];
 extern struct _modeConfig modeConfig;
 extern const char vpumodes[][4];
@@ -33,6 +33,11 @@ void showstates(void);
 void changemode(void);
 void printhelp(void);
 void getuserinput(void);
-
 void changedisplaymode(void);
+uint32_t askint(const char *menu, uint32_t minval, uint32_t maxval, uint32_t defval);
+uint32_t getrepeat(void);
+uint32_t getnumbits(void);
+void printnum(uint32_t d);
 
+// macro
+#define SKIPCURCHAR	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);

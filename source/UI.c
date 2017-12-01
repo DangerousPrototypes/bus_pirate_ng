@@ -13,7 +13,7 @@
 #include "protocols.h"
 
 // globals
-int cmdhead, cmdtail;
+uint32_t cmdhead, cmdtail;
 char cmdbuff[CMDBUFFSIZE];
 struct _modeConfig modeConfig;
 
@@ -165,7 +165,7 @@ void doUI(void)
 	int go;
 	char c;
 
-	uint32_t temp;
+	uint32_t temp, repeat, received, bits;
 
 	go=0;
 
@@ -237,12 +237,24 @@ void doUI(void)
 				case '7':
 				case '8':
 				case '9':	temp=getint();
-						cdcprintf("TX: 0x%08X", temp);
-						temp=protocols[modeConfig.mode].protocol_send(temp);
-						if(modeConfig.wwr) cdcprintf(", RX:%08X",temp);
+						bits=getnumbits();		// sequence is important!
+						if(bits) modeConfig.numbits=bits;
+						repeat=getrepeat();
+						while(repeat--)
+						{
+							cdcprintf("TX: ");
+							printnum(temp);
+							received=protocols[modeConfig.mode].protocol_send(temp);
+							if(modeConfig.wwr) 
+							{
+								cdcprintf(", rX: ");
+								printnum(received);
+							}
+							if(repeat) cdcprintf("\r\n");
+						}
 						break;
 				case ' ':	break;
-				case ',':	break;	// reuse this??
+				case ',':	break;	// reuse this command??
 				default:	cdcprintf("Unknown command: %c", c);
 						modeConfig.error=1;
 						//go=0;
@@ -346,7 +358,7 @@ void changemode(void)
 		for(i=0; i<MAXPROTO; i++)
 			cdcprintf(" %d. %s\r\n", i+1, protocols[i].protocol_name);
 
-		cdcprintf("Mode>");
+		cdcprintf("Mode> ");
 		cmdtail=cmdhead;	// flush all input
 		getuserinput();
 		consumewhitechars();
@@ -466,5 +478,127 @@ void getuserinput(void)
 		}
 	}
 }
+
+uint32_t askint(const char *menu, uint32_t minval, uint32_t maxval, uint32_t defval)
+{
+	uint32_t temp;
+	uint8_t	done;
+
+	done=0;
+
+	while(!done)
+	{
+		cdcprintf(menu);
+
+		cmdtail=cmdhead;	// flush all input
+		getuserinput();
+		consumewhitechars();
+		temp=getint();
+
+		if(temp==0)		// assume user pressed enter
+		{
+			temp=defval;
+			done=1;
+		}
+		else if((temp>=minval)&&(temp<=maxval))
+			done=1;
+		else
+		{
+			cdcprintf("\x07");
+			done=0;
+		}
+	}
+
+	// clear errors
+	modeConfig.error=0;
+
+	return temp;
+}
+
+uint32_t getrepeat(void)
+{
+	uint32_t tail, repeat;
+
+	repeat=1;				// do at least one round :D
+	
+	tail=(cmdtail+1)&(CMDBUFFSIZE-1);	// advance one
+	if(tail!=cmdhead)			// did we reach the end?
+	{
+		if(cmdbuff[tail]==':')		// we have a repeat \o/
+		{
+			cmdtail=(cmdtail+2)&(CMDBUFFSIZE-1);
+			repeat=getint();
+		}
+	}
+	return repeat;
+}
+
+uint32_t getnumbits(void)
+{
+	uint32_t tail, numbits;
+
+	numbits=0;
+	
+	tail=(cmdtail+1)&(CMDBUFFSIZE-1);	// advance one
+	if(tail!=cmdhead)			// did we reach the end?
+	{
+		if(cmdbuff[tail]=='.')		// we have a change in bits \o/
+		{
+			cmdtail=(cmdtail+2)&(CMDBUFFSIZE-1);
+			numbits=getint();
+		}
+	}
+	return numbits;
+}
+
+void printnum(uint32_t d)
+{
+	// TODO numbits
+
+	uint32_t mask;
+
+	mask=(1<<(modeConfig.numbits))-1;
+	d&=mask;
+
+	switch(modeConfig.displaymode)
+	{
+		case 0:	if(modeConfig.numbits<=8)
+				cdcprintf("%3u", d);
+			else if(modeConfig.numbits<=16)
+				cdcprintf("%5u", d);
+			else if(modeConfig.numbits<=24)
+				cdcprintf("%8u", d);
+			else if(modeConfig.numbits<=32)
+				cdcprintf("%10u", d);
+			break;
+		case 1:	if(modeConfig.numbits<=8)
+				cdcprintf("0x%02X", d);
+			else if(modeConfig.numbits<=16)
+				cdcprintf("0x%04X", d);
+			else if(modeConfig.numbits<=24)
+				cdcprintf("0x%06X", d);
+			else if(modeConfig.numbits<=32)
+				cdcprintf("0x%08X", d);
+			break;
+		case 2:	if(modeConfig.numbits<=6)
+				cdcprintf("0%02o", d);
+			else if(modeConfig.numbits<=12)
+				cdcprintf("0%04o", d);
+			else if(modeConfig.numbits<=18)
+				cdcprintf("0%06o", d);
+			else if(modeConfig.numbits<=24)
+				cdcprintf("0%08o", d);
+			else if(modeConfig.numbits<=30)
+				cdcprintf("0%010o", d);
+			else if(modeConfig.numbits<=32)
+				cdcprintf("0%012o", d);
+			break;
+		case 3:	cdcprintf("--");
+			break;
+	}
+	if(modeConfig.numbits!=8) cdcprintf(".%d", modeConfig.numbits);
+}
+
+
 
 	
