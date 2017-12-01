@@ -553,8 +553,6 @@ uint32_t getnumbits(void)
 
 void printnum(uint32_t d)
 {
-	// TODO numbits
-
 	uint32_t mask;
 
 	mask=(1<<(modeConfig.numbits))-1;
