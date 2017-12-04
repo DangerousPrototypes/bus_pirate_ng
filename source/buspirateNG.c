@@ -7,14 +7,17 @@
 #include "cdcacm.h"
 #include "buspirateNG.h"
 #include "UI.h"
+#include "ADC.h"
 
 
 //globals
 uint32_t usbpolltime;				// usb poll timer
+volatile uint32_t systicks;
 
 void sys_tick_handler(void)
 {
 	usbpolltime++;
+	systicks++;
 
 
 	// check usb for new data
@@ -55,8 +58,13 @@ int main(void)
 	systick_set_reload(89);				// 10us
 	systick_interrupt_enable();
 	systick_counter_enable();				// go!
+	systicks=0;
 
+	//setup USB
 	cdcinit();
+
+	//setup ADC
+	initADC();
 
 	while (1)
 	{

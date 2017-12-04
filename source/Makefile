@@ -17,10 +17,15 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o HiZ.o HWSPI.o
+GIT_VERSION := $(shell git describe --dirty --always --tags)
+
+CFLAGS +=-DFWVER=\"$(GIT_VERSION)\" 
+
+OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o HiZ.o HWSPI.o AUX.o ADC.o
 
 BINARY = buspirateNG
 
 include ../Makefile.include
+
 
 

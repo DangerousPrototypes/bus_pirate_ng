@@ -4,10 +4,6 @@
 // UI stuff
 #define CMDBUFFSIZE	512		// must be power of 2
 
-// version info
-#define		FWVER		"v0.1 BETA"
-#define		BLVER		"N/A"
-
 // USB shit :/
 
 // we dont have a USB VID/PID yet so please supply your own
@@ -22,7 +18,11 @@
 #define 	BP_USE_DUMMY2
 #define		BP_USE_HWSPI
 
+// systicks (for delays) systick is 10us
+extern volatile uint32_t systicks;
 
+// include platform
+#include	"platform/testplatform.h"			// hw is not made yet
 
 
 

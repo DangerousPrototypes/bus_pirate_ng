@@ -18,26 +18,30 @@
 
 void nullfunc1(void)
 {
-	cdcprintf("ERROR: command has no effect here\r\n");
+	cdcprintf("ERROR: command has no effect here");
+	modeConfig.error=1;
 }
 
 uint32_t nullfunc2(uint32_t c)
 {	
 	(void) c;
-	cdcprintf("ERROR: command has no effect here\r\n");
+	cdcprintf("ERROR: command has no effect here");
+	modeConfig.error=1;
 	return 0x0000;
 }
 
 uint32_t nullfunc3(void)
 {	
-	cdcprintf("ERROR: command has no effect here\r\n");
+	cdcprintf("ERROR: command has no effect here");
+	modeConfig.error=1;
 	return 0x0000;
 }
 
 void nullfunc4(uint32_t c)
 {	
 	(void) c;
-	cdcprintf("ERROR: command has no effect here\r\n");
+	cdcprintf("ERROR: command has no effect here");
+	modeConfig.error=1;
 }
 
 

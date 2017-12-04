@@ -1,16 +1,12 @@
 #include <stdlib.h>
 #include <stdint.h>
-#if(0)
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
-#include <libopencm3/cm3/nvic.h>
-#include <libopencm3/cm3/systick.h>
-#endif
 #include "debug.h"
 #include "cdcacm.h"
 #include "buspirateNG.h"
 #include "UI.h"
 #include "protocols.h"
+#include "AUX.h"
+#include "ADC.h"
 
 // globals
 uint32_t cmdhead, cmdtail;
@@ -166,6 +162,7 @@ void doUI(void)
 	char c;
 
 	uint32_t temp, repeat, received, bits;
+	float voltage;
 
 	go=0;
 
@@ -207,6 +204,78 @@ void doUI(void)
 						break;
 				case '!':	protocols[modeConfig.mode].protocol_bitr();
 						break;
+				case '&':	repeat=getrepeat();
+						cdcprintf("Delaying");
+						while(repeat--)
+						{
+							cdcprintf(".");
+							delayms(1000);
+						}
+						break;
+				case 'a':	if(!modeConfig.hiz)
+						{
+							cdcprintf("SET AUX=1");
+							setAUX(0);
+						}
+						else
+						{
+							cdcprintf("Can't set AUX in HiZ mode!");
+							modeConfig.error=1;
+						}
+						break;
+				case 'A':	if(!modeConfig.hiz)
+						{
+							cdcprintf("SET AUX=0");
+							setAUX(1);
+						}
+						else
+						{
+							cdcprintf("Can't set AUX in HiZ mode!");
+							modeConfig.error=1;
+						}
+						break;
+				case '@':	if(!modeConfig.hiz)
+						{
+							cdcprintf("AUX=%d", getAUX());
+						}
+						else
+						{
+							cdcprintf("Can't read AUX in HiZ mode!");
+							modeConfig.error=1;
+						}
+						break;
+				case 'd':	if(!modeConfig.hiz)
+						{
+							temp=getADC(ADCCHAN);
+							voltage=3.3*temp;
+							voltage/=4096;
+							cdcprintf("ADC=%0.2fV", voltage);
+						}
+						else
+						{
+							cdcprintf("Can't read ADC in HiZ mode!");
+							modeConfig.error=1;
+						}
+						break;
+				case 'D':	if(!modeConfig.hiz)
+						{
+							cdcprintf("Press any key to exit\r\n");
+							while(!cdcbyteready())
+							{
+								temp=getADC(ADCCHAN);
+								voltage=3.3*temp;
+								voltage/=4096;
+								cdcprintf("ADC=%0.2fV\r", voltage);
+								delayms(250);
+							}
+							cdcgetc();
+						}
+						else
+						{
+							cdcprintf("Can't read ADC in HiZ mode!");
+							modeConfig.error=1;
+						}
+						break;
 				case 'h':
 				case '?':	printhelp();
 						break;
@@ -244,6 +313,7 @@ void doUI(void)
 						{
 							cdcprintf("TX: ");
 							printnum(temp);
+							cdcprintf(" ");
 							received=protocols[modeConfig.mode].protocol_send(temp);
 							if(modeConfig.wwr) 
 							{
@@ -292,7 +362,7 @@ void versioninfo(void)
 	else ramsize=96;
 
 	cdcprintf("Buspirate NextGen (ARM)\r\n");
-	cdcprintf("Firmware %s, bootloader %s\r\n", FWVER, BLVER);
+	cdcprintf("Firmware %s, bootloader N/A\r\n", FWVER);
 	cdcprintf("STM32 with %dK FLASH, %dK SRAM ", flashsize, ramsize);
 	cdcprintf("s/n: %08X%08X%08X\r\n", id[0], id[1], id[2]);
 	cdcprintf("https://dangerousprototypes.com/\r\n");
@@ -372,6 +442,8 @@ void changemode(void)
 	}	
 
 	protocols[modeConfig.mode].protocol_cleanup();		// switch to HiZ
+	if(mode!=1) modeConfig.hiz=0;
+		else modeConfig.hiz=1;
 	modeConfig.mode=mode-1;
 	protocols[modeConfig.mode].protocol_setup();		// setup the new mode
 	protocols[modeConfig.mode].protocol_setup_exc();
@@ -427,7 +499,7 @@ void printhelp(void)
 	cdcprintf(" ~\tSelftest\t\t\t[\tStart\r\n");
 	cdcprintf(" #\tReset the BP   \t\t\t]\tStop\r\n");
 	cdcprintf(" $\tJump to bootloader\t\t{\tStart with read\r\n");
-	cdcprintf(" &/%\tDelay 1 us/ms\t\t\t}\tStop\r\n");
+	cdcprintf(" &/%%\tDelay 1 us/ms\t\t\t}\tStop\r\n");
 	cdcprintf(" a/A/@\tAUXPIN (low/HI/READ)\t\t\"abc\"\tSend string\r\n");
 	cdcprintf(" b\tSet baudrate\t\t\t123\r\n");
 	cdcprintf(" c/C\tAUX assignment (aux/CS)\t\t0x123\r\n");
@@ -597,6 +669,16 @@ void printnum(uint32_t d)
 	if(modeConfig.numbits!=8) cdcprintf(".%d", modeConfig.numbits);
 }
 
+void delayms(uint32_t num)
+{
+	num*=1000; 		// convert to us
+	num/=10;
 
+	num+=systicks;		// should wrap ol
+
+	while(systicks!=num);	
+
+
+}
 
 	

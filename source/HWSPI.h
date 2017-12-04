@@ -28,6 +28,4 @@ void HWSPI_settings(void);
 #define SPICPHAMENU	"\r\nClock phase\r\n 1. leading edge\r\n 2. trailing edge*\r\ncpha> "
 #define SPICSIDLEMENU	"\r\nCS mode\r\n 1. CS\r\n 2. !CS*\r\ncs> "
 
-//
-#define BPSPIPORT	SPI1
-#define BPSPICLK	RCC_SPI1
+

@@ -1,6 +1,6 @@
 
-#include "buspirateNG.h"
 #include <stdint.h>
+#include "buspirateNG.h"
 #include <libopencm3/stm32/spi.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
@@ -83,6 +83,7 @@ void HWSPI_datl(void)
 uint32_t HWSPI_dats(void)
 {
 	uint32_t returnval;
+	returnval=0;
 	cdcprintf("HWSPI: dats()=%08X", returnval);
 	return returnval;
 }
@@ -93,12 +94,14 @@ void HWSPI_clk(void)
 uint32_t HWSPI_bitr(void)
 {
 	uint32_t returnval;
+	returnval=0;
 	cdcprintf("HWSPI: bitr()=%08X", returnval);
 	return returnval;
 }
 uint32_t HWSPI_period(void)
 {
 	uint32_t returnval;
+	returnval=0;
 	cdcprintf("HWSPI: period()=%08X", returnval);
 	return returnval;
 }
@@ -122,21 +125,21 @@ void HWSPI_setup(void)
 	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
 	consumewhitechars();
 	cpol=getint()-1;
-	if((cpol>=0)&&(cpol<=1)) cpol<<=1;
+	if(cpol<=1) cpol<<=1;
 		else modeConfig.error=1;
 
 	// clock phase
 	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
 	consumewhitechars();
 	cpha=getint()-1;
-	if((cpha>=0)&&(cpha<=1)) cpha=cpha;
+	if(cpha<=1) cpha=cpha;
 		else modeConfig.error=1;
 
 	// cs behauviour
 	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
 	consumewhitechars();
 	csidle=getint()-1;
-	if((csidle>=0)&&(csidle<=1)) csidle=csidle;
+	if(csidle<=1) csidle=csidle;
 		else modeConfig.error=1;
 
 	// did the user did it right?
