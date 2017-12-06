@@ -246,7 +246,7 @@ void doUI(void)
 						break;
 				case 'd':	if(!modeConfig.hiz)
 						{
-							temp=getADC(ADCCHAN);
+							temp=getADC(BPADCCHAN);
 							voltage=3.3*temp;
 							voltage/=4096;
 							cdcprintf("ADC=%0.2fV", voltage);
@@ -262,7 +262,7 @@ void doUI(void)
 							cdcprintf("Press any key to exit\r\n");
 							while(!cdcbyteready())
 							{
-								temp=getADC(ADCCHAN);
+								temp=getADC(BPADCCHAN);
 								voltage=3.3*temp;
 								voltage/=4096;
 								cdcprintf("ADC=%0.2fV\r", voltage);
@@ -291,8 +291,14 @@ void doUI(void)
 						break;
 				case 'o':	changedisplaymode();
 						break;
-				case 'r':	temp=protocols[modeConfig.mode].protocol_read();
-						cdcprintf("RX: 0x%08X", temp);
+				case 'r':	repeat=getrepeat();
+						while(repeat--)
+						{
+							received=protocols[modeConfig.mode].protocol_read();
+							cdcprintf("RX: ");
+							printnum(received);
+							if(repeat) cdcprintf("\r\n");
+						}
 						break;
 				case 'v':	showstates();
 						break;

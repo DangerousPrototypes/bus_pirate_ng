@@ -193,7 +193,10 @@ void HWSPI_cleanup(void)
 	spi_disable(BPSPIPORT);		// spi_clean_disable??
 
 	// set all used pins to input
+	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO4);
+	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO5);
 	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO6);
+	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO7);
 
 	// disable clock to save the planet warming up
 	rcc_periph_clock_enable(BPSPICLK);
@@ -204,6 +207,6 @@ void HWSPI_pins(void)
 }
 void HWSPI_settings(void)
 {
-	cdcprintf("HWSPI (br cpol cpha cs)=(%d, %d, %d, %d)", (br>>3), (cpol>>1)+1, cpha+1, csidle+1);
+	cdcprintf("HWSPI (br cpol cpha cs)=(%d %d %d %d)", (br>>3), (cpol>>1)+1, cpha+1, csidle+1);
 }
 

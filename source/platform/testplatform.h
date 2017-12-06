@@ -2,17 +2,31 @@
 
 // development test platform
 
-// spi hardware
+// SPI hardware (HW-SPI)
 #define BPSPIPORT	SPI1
 #define BPSPICLK	RCC_SPI1
 
-// aux
-#define AUXPORT		GPIOC
-#define AUXPIN		GPIO13
+// AUX
+#define BPAUXPORT	GPIOC
+#define BPAUXPIN	GPIO13
 
 // ADC
 #define BPADC		ADC1
 #define BPADCCLK	RCC_ADC1
-#define ADCCHAN		0		//pa0
+#define BPADCCHAN		0		//pa0
+
+// debug USART
+#define DEBUGTXPORT	GPIOA
+#define DEBUGTXPIN	GPIO_USART1_TX
+#define DEBUGUSART	USART1
+#define DEBUGUSARTCLK	RCC_USART1
+
+// regular USART (HW-USART)
+#define BPUSARTTXPORT	GPIOA
+#define BPUSARTRXPORT	GPIOA
+#define BPUSARTTXPIN	GPIO2
+#define BPUSARTRXPIN	GPIO3
+#define BPUSARTCLK	RCC_USART2
+#define BPUSART		USART2
 
 

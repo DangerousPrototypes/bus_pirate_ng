@@ -13,6 +13,9 @@ enum
 #ifdef BP_USE_HWSPI
 	HWSPI,
 #endif
+#ifdef BP_USE_HWUSART
+	HWUSART,
+#endif
 	MAXPROTO
 };
 

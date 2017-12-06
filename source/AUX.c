@@ -8,24 +8,24 @@
 
 void initAUX(void)
 {
-	gpio_set_mode(AUXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, AUXPIN);
+	gpio_set_mode(BPAUXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BPAUXPIN);
 }
 
 void setAUX(uint8_t state)
 {
-	gpio_set_mode(AUXPORT, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, AUXPIN);
+	gpio_set_mode(BPAUXPORT, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPAUXPIN);
 	
 	if(state)
-		gpio_set(AUXPORT, AUXPIN);
+		gpio_set(BPAUXPORT, BPAUXPIN);
 	else
-		gpio_clear(AUXPORT, AUXPIN);
+		gpio_clear(BPAUXPORT, BPAUXPIN);
 
 }
 
 uint8_t getAUX(void)
 {
-	gpio_set_mode(AUXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, AUXPIN);
+	gpio_set_mode(BPAUXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BPAUXPIN);
 
-	return (gpio_get(AUXPORT, AUXPIN)?1:0);
+	return (gpio_get(BPAUXPORT, BPAUXPIN)?1:0);
 } 
 

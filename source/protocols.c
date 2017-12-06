@@ -10,6 +10,7 @@
 #include "dummy1.h"
 #include "dummy2.h"
 #include "HWSPI.h" 
+#include "HWUSART.h"
 
 
 
@@ -144,6 +145,31 @@ struct _protocol protocols[MAXPROTO]={
 	HWSPI_pins,				// display pin config
 	HWSPI_settings,				// display settings 
 	"HW-SPI",				// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_HWUSART
+{
+	HWUSART_start,				// start
+	HWUSART_startr,				// start with read
+	HWUSART_stop,				// stop
+	HWUSART_stopr,				// stop with read
+	HWUSART_send,				// send(/read) max 32 bit
+	HWUSART_read,				// read max 32 bit
+	HWUSART_clkh,				// set clk high
+	HWUSART_clkl,				// set clk low
+	HWUSART_dath,				// set dat hi
+	HWUSART_datl,				// set dat lo
+	HWUSART_dats,				// toggle dat (?)
+	HWUSART_clk,				// toggle clk (?)
+	HWUSART_bitr,				// read 1 bit (?)
+	HWUSART_period,				// service to regular poll whether a byte ahs arrived
+	HWUSART_macro,				// macro
+	HWUSART_setup,				// setup UI
+	HWUSART_setup_exc,			// real setup
+	HWUSART_cleanup,				// cleanup for HiZ
+	HWUSART_pins,				// display pin config
+	HWUSART_settings,				// display settings 
+	"HW-USART",				// friendly name (promptname)
 },
 #endif
 };
