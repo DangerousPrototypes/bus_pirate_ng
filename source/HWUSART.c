@@ -200,6 +200,12 @@ void HWUSART_setup_exc(void)
 	// enable USART
 	usart_enable(BPUSART);
 
+	// update modeConfig pins
+	modeConfig.misoport=BPUSARTRXPORT;
+	modeConfig.mosiport=BPUSARTTXPORT;
+	modeConfig.misopin=BPUSARTRXPIN;
+	modeConfig.mosipin=BPUSARTTXPIN;
+
 }
 
 
@@ -217,6 +223,13 @@ void HWUSART_cleanup(void)
 	// set pins to HiZ
 	gpio_set_mode(BPUSARTTXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPUSARTTXPIN);
 	gpio_set_mode(BPUSARTRXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPUSARTRXPIN);
+
+	// update modeConfig pins
+	modeConfig.misoport=0;
+	modeConfig.mosiport=0;
+	modeConfig.misopin=0;
+	modeConfig.mosipin=0;
+
 }
 void HWUSART_pins(void)
 {
@@ -237,9 +250,6 @@ void HWUSART_settings(void)
 	}
 	cdcprintf("HWUSART (br parity numbits stopbits block)=(%d %d %d %d %d)", br, par, nbits, ((sbits>>12)+1), (block+1));
 }
-
-//#define USARTERRORS	(USART_SR_PE|USART_SR_FE|USART_SR_NE|USART_SR_ORE|USART_SR_LBD)
-
 
 void HWUSART_printerror(void)
 {

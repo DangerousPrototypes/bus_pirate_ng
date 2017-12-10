@@ -3,7 +3,7 @@ typedef struct _modeConfig
 {
 	uint8_t numbits;				// number of used bits
 	uint8_t wwr;					// write with read
-	uint8_t hiz;					// are we in HiZ?
+	uint8_t oc;					// are we in opencollector?
 	uint8_t mode;					// which mode we are in?
 	uint8_t pullups;				// pullup enabled? (0=off, 1=on)
 	uint8_t vpumode;				// vpu mode (0=ext, 1=5v, 2=3v3)
@@ -11,6 +11,15 @@ typedef struct _modeConfig
 	uint8_t psu;					// psu (0=off, 1=on)
 	uint8_t error;					// error occurred
 	uint8_t displaymode;				// display mode (dec, hex, oct, bin)
+
+	uint32_t csport;				// cs is located on this port/gpio
+	uint32_t cspin;
+	uint32_t misoport;				// cs is located on this port/gpio
+	uint32_t misopin;
+	uint32_t clkport;				// cs is located on this port/gpio
+	uint32_t clkpin;
+	uint32_t mosiport;				// cs is located on this port/gpio
+	uint32_t mosipin;
 } _modeConfig;
 
 
@@ -42,3 +51,4 @@ void delayms(uint32_t num);
 
 // macro
 #define SKIPCURCHAR	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+

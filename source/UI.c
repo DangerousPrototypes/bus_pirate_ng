@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <libopencm3/stm32/gpio.h>
 #include "debug.h"
 #include "cdcacm.h"
 #include "buspirateNG.h"
@@ -7,6 +8,7 @@
 #include "protocols.h"
 #include "AUX.h"
 #include "ADC.h"
+#include "bpflash.h"
 
 // globals
 uint32_t cmdhead, cmdtail;
@@ -146,7 +148,7 @@ void initUI(void)
 
 	modeConfig.wwr=0;
 	modeConfig.numbits=8;
-	modeConfig.hiz=1;
+	modeConfig.oc=0;
 	modeConfig.mode=0;
 	modeConfig.pullups=0;
 	modeConfig.vpumode=0;
@@ -154,6 +156,14 @@ void initUI(void)
 	modeConfig.bitorder=0;
 	modeConfig.error=0;
 	modeConfig.displaymode=0;
+	modeConfig.mosiport=0;
+	modeConfig.mosipin=0;
+	modeConfig.misoport=0;
+	modeConfig.misopin=0;
+	modeConfig.csport=0;
+	modeConfig.cspin=0;
+	modeConfig.clkport=0;
+	modeConfig.clkpin=0;
 }
 
 void doUI(void)
@@ -161,8 +171,8 @@ void doUI(void)
 	int go;
 	char c;
 
-	uint32_t temp, repeat, received, bits;
-	float voltage;
+	uint32_t temp, temp2, repeat, received, bits;
+	int i;
 
 	go=0;
 
@@ -212,9 +222,9 @@ void doUI(void)
 							delayms(1000);
 						}
 						break;
-				case 'a':	if(!modeConfig.hiz)
+				case 'a':	if(modeConfig.mode!=HIZ)
 						{
-							cdcprintf("SET AUX=1");
+							cdcprintf("SET AUX=0");
 							setAUX(0);
 						}
 						else
@@ -223,9 +233,9 @@ void doUI(void)
 							modeConfig.error=1;
 						}
 						break;
-				case 'A':	if(!modeConfig.hiz)
+				case 'A':	if(modeConfig.mode!=HIZ)
 						{
-							cdcprintf("SET AUX=0");
+							cdcprintf("SET AUX=1");
 							setAUX(1);
 						}
 						else
@@ -234,7 +244,7 @@ void doUI(void)
 							modeConfig.error=1;
 						}
 						break;
-				case '@':	if(!modeConfig.hiz)
+				case '@':	if(modeConfig.mode!=HIZ)
 						{
 							cdcprintf("AUX=%d", getAUX());
 						}
@@ -244,12 +254,9 @@ void doUI(void)
 							modeConfig.error=1;
 						}
 						break;
-				case 'd':	if(!modeConfig.hiz)
+				case 'd':	if(modeConfig.mode!=HIZ)
 						{
-							temp=getADC(BPADCCHAN);
-							voltage=3.3*temp;
-							voltage/=4096;
-							cdcprintf("ADC=%0.2fV", voltage);
+							cdcprintf("ADC=%0.2fV", voltage(BPADCCHAN, 1));
 						}
 						else
 						{
@@ -257,15 +264,12 @@ void doUI(void)
 							modeConfig.error=1;
 						}
 						break;
-				case 'D':	if(!modeConfig.hiz)
+				case 'D':	if(modeConfig.mode!=HIZ)
 						{
 							cdcprintf("Press any key to exit\r\n");
 							while(!cdcbyteready())
 							{
-								temp=getADC(BPADCCHAN);
-								voltage=3.3*temp;
-								voltage/=4096;
-								cdcprintf("ADC=%0.2fV\r", voltage);
+								cdcprintf("ADC=%0.2fV\r", voltage(BPADCCHAN, 1));
 								delayms(250);
 							}
 							cdcgetc();
@@ -331,6 +335,21 @@ void doUI(void)
 						break;
 				case ' ':	break;
 				case ',':	break;	// reuse this command??
+				case '$':	displayps();
+						break;
+				case '#':	fillps();
+						break;
+				case '=':	cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+						temp=getint();
+						temp2=modeConfig.displaymode;		// remember old displaymode
+						for(i=0; i<4; i++)
+						{
+							cdcprintf("=");
+							modeConfig.displaymode=i;
+							printnum(temp);
+						}
+						modeConfig.displaymode=temp2;
+						break;
 				default:	cdcprintf("Unknown command: %c", c);
 						modeConfig.error=1;
 						//go=0;
@@ -381,15 +400,16 @@ void versioninfo(void)
 	}
 	cdcprintf("\r\n");
 
-	if(1)	//!modeConfig.hiz)
+	protocols[modeConfig.mode].protocol_settings();
+	cdcprintf("\r\n");
+
+	if(modeConfig.mode!=HIZ)
 	{
-		protocols[modeConfig.mode].protocol_settings();
-		cdcprintf("\r\n");
 		cdcprintf("#bits: %d, ",modeConfig.numbits);
 		cdcprintf("bitorder: %s, ", bitorders[modeConfig.bitorder]);
 		cdcprintf("PU: %s, ", states[modeConfig.pullups]);
 		cdcprintf("Vpu mode: %s, ", vpumodes[modeConfig.vpumode]);
-		cdcprintf("Power: %s\r\n", states[modeConfig.psu]);
+		cdcprintf("Power: %s, ", states[modeConfig.psu]);
 		cdcprintf("Displaymode: %s\r\n", displaymodes[modeConfig.displaymode]);
 		showstates();
 	}
@@ -398,14 +418,44 @@ void versioninfo(void)
 
 void showstates(void)
 {
+	uint8_t auxstate, csstate, misostate, clkstate, mosistate;
+	float v50, v33, vpu, adc;
+
 	cdcprintf("1.GND\t2.+5v\t3.+3V3\t4.Vpu\t5.ADC\t6.AUX\t7.CS\t8.MISO\t9.CLK\t10.MOSI\r\n");
 	cdcprintf("GND\t+5v\t+3V3\tVpu\tADC\tAUX\t");
 	protocols[modeConfig.mode].protocol_pins();
 	cdcprintf("\r\n");
 	cdcprintf("PWR\tPWR\tPWR\tPWR\t2.5V\t1\t1\t1\t0\t1\r\n");
 
+	// pinstates
+	auxstate=(gpio_get(BPAUXPORT, BPAUXPIN)?1:0);
+	if(modeConfig.csport)
+		csstate=(gpio_get(modeConfig.csport, modeConfig.cspin)?1:0);
+	else
+		csstate=2;
+
+	if(modeConfig.misoport)
+		misostate=(gpio_get(modeConfig.misoport, modeConfig.misopin)?1:0);
+	else
+		misostate=2;
+
+	if(modeConfig.clkport)
+		clkstate=(gpio_get(modeConfig.clkport, modeConfig.clkpin)?1:0);
+	else
+		clkstate=2;
+	if(modeConfig.mosiport)
+		mosistate=(gpio_get(modeConfig.mosiport, modeConfig.mosipin)?1:0);
+	else
+		mosistate=2;
+
+	// adcs
+	v33=voltage(BP3V3CHAN, 0);
+	v50=voltage(BP5V0CHAN, 1);
+	vpu=voltage(BPVPUCHAN, 1);
+	adc=voltage(BPADCCHAN, 1);
+
 	//TODO adc/pinstate shit
-	cdcprintf("GND\t5.0V\t3.3V\t3.3V\t2.5V\t1\t1\t1\t0\t1\r\n");
+	cdcprintf("GND\t%0.2fV\t%0.2fV\t%0.2fV\t%0.2fV\t%d\t%d\t%d\t%d\t%d\r\n", v50, v33, vpu, adc, auxstate, csstate, misostate, clkstate, mosistate);
 
 
 }
@@ -448,8 +498,6 @@ void changemode(void)
 	}	
 
 	protocols[modeConfig.mode].protocol_cleanup();		// switch to HiZ
-	if(mode!=1) modeConfig.hiz=0;
-		else modeConfig.hiz=1;
 	modeConfig.mode=mode-1;
 	protocols[modeConfig.mode].protocol_setup();		// setup the new mode
 	protocols[modeConfig.mode].protocol_setup_exc();
@@ -686,5 +734,6 @@ void delayms(uint32_t num)
 
 
 }
+
 
 	

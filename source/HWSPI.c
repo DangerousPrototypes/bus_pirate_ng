@@ -165,8 +165,10 @@ void HWSPI_setup_exc(void)
 	rcc_periph_clock_enable(BPSPICLK);
 
 	// setup gpio asalternate function
-	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO4|GPIO5|GPIO7 );
-	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO6);
+	gpio_set_mode(BPSPIMOSIPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BPSPIMOSIPIN);
+	gpio_set_mode(BPSPICSPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BPSPICSPIN);
+	gpio_set_mode(BPSPICLKPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BPSPICLKPIN);
+	gpio_set_mode(BPSPIMISOPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPIMISOPIN);
 
 	// reset all registers
 	spi_reset(BPSPIPORT);
@@ -184,6 +186,16 @@ void HWSPI_setup_exc(void)
 	// unleash the beast
 	spi_enable(BPSPIPORT);
 
+	// update modeConfig pins
+	modeConfig.misoport=BPSPIMISOPORT;
+	modeConfig.mosiport=BPSPIMISOPORT;
+	modeConfig.csport=BPSPICSPORT;
+	modeConfig.clkport=BPSPICLKPORT;
+	modeConfig.misopin=BPSPIMISOPIN;
+	modeConfig.mosipin=BPSPIMOSIPIN;
+	modeConfig.cspin=BPSPICSPIN;
+	modeConfig.clkpin=BPSPICLKPIN;
+
 }
 void HWSPI_cleanup(void)
 {
@@ -193,13 +205,24 @@ void HWSPI_cleanup(void)
 	spi_disable(BPSPIPORT);		// spi_clean_disable??
 
 	// set all used pins to input
-	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO4);
-	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO5);
-	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO6);
-	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,GPIO7);
+	gpio_set_mode(BPSPIMISOPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPIMISOPIN);
+	gpio_set_mode(BPSPIMOSIPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPIMOSIPIN);
+	gpio_set_mode(BPSPICSPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPICSPIN);
+	gpio_set_mode(BPSPICLKPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPICLKPIN);
 
 	// disable clock to save the planet warming up
 	rcc_periph_clock_enable(BPSPICLK);
+
+	// update modeConfig pins
+	modeConfig.misoport=0;
+	modeConfig.mosiport=0;
+	modeConfig.csport=0;
+	modeConfig.clkport=0;
+	modeConfig.misopin=0;
+	modeConfig.mosipin=0;
+	modeConfig.cspin=0;
+	modeConfig.clkpin=0;
+
 }
 void HWSPI_pins(void)
 {
