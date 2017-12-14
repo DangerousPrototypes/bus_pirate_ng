@@ -1,7 +1,11 @@
 
 #include <stdint.h>
+#include <libopencm3/stm32/gpio.h>
+#include "buspirateNG.h"
 #include "HiZ.h"
 #include "cdcacm.h"
+#include "UI.h"
+	
 
 
 void HiZpins(void)
@@ -25,5 +29,11 @@ void HiZsetup(void)
 
 void HiZsetup_exc(void)
 {
+	cdcprintf("turning to HiZ");
+
 	// turn everything off
+	modeConfig.psu=0;
+	gpio_clear(BPPSUENPORT, BPPSUENPIN);
+	modeConfig.pullups=0;
+	gpio_clear(BPVPUENPORT, BPVPUENPIN);
 }

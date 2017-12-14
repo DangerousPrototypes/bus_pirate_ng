@@ -50,6 +50,8 @@ int main(void)
 
 	AFIO_MAPR |= AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON;		// disable jtag/enable swd
 
+	// setup pins
+
 	// enable debug
 	debuginit();
 
@@ -60,7 +62,13 @@ int main(void)
 	systick_counter_enable();				// go!
 	systicks=0;
 
-	//setup USB
+	//toggle the usb pullup
+	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
+	gpio_clear(GPIOA, GPIO12);
+
+	while(systicks<1000);
+	
+	// setup USB
 	cdcinit();
 
 	//setup ADC

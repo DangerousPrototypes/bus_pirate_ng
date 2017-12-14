@@ -18,8 +18,8 @@ struct _modeConfig modeConfig;
 // global constants
 const char vpumodes[][4] = {
 "EXT\0",
-"5V0\0",
-"3V3\0"
+"3V3\0",
+"5V0\0"
 };
 
 const char bitorders[][4] ={
@@ -254,6 +254,21 @@ void doUI(void)
 							modeConfig.error=1;
 						}
 						break;
+				case 'b':	temp=askint(VPUMENU, 1, 3, 1);
+						modeConfig.vpumode=temp-1;
+						switch(modeConfig.vpumode)
+						{
+							case 1:
+								gpio_clear(BPVPU50ENPORT, BPVPU50ENPIN);
+								gpio_set(BPVPU33ENPORT, BPVPU33ENPIN);
+							case 2:
+								gpio_clear(BPVPU33ENPORT, BPVPU33ENPIN);
+								gpio_set(BPVPU50ENPORT, BPVPU50ENPIN);
+							default:
+								gpio_clear(BPVPU50ENPORT, BPVPU50ENPIN);
+								gpio_clear(BPVPU33ENPORT, BPVPU33ENPIN);
+						}
+						break;
 				case 'd':	if(modeConfig.mode!=HIZ)
 						{
 							cdcprintf("ADC=%0.2fV", voltage(BPADCCHAN, 1));
@@ -295,6 +310,24 @@ void doUI(void)
 						break;
 				case 'o':	changedisplaymode();
 						break;
+				case 'p':	gpio_clear(BPVPUENPORT, BPVPUENPIN);	// always permitted 
+						cdcprintf("pullups: disabled");
+						modeConfig.pullups=0;
+						break;
+				case 'P':	if(modeConfig.mode!=0)		// reset vpu mode to externale??
+						{
+							gpio_set(BPVPUENPORT, BPVPUENPIN);
+							cdcprintf("pullups: enabled\r\n");
+							delayms(10);
+							cdcprintf("Vpu=%0.2fV (mode=%s)", voltage(BPVPUCHAN, 1), vpumodes[modeConfig.vpumode]);
+							modeConfig.pullups=1; 
+						}
+						else
+						{
+							cdcprintf("Cannot enable pullups in HiZ");
+							modeConfig.error=1;
+						}
+						break;
 				case 'r':	repeat=getrepeat();
 						while(repeat--)
 						{
@@ -306,6 +339,32 @@ void doUI(void)
 						break;
 				case 'v':	showstates();
 						break;
+				case 'w':	gpio_clear(BPPSUENPORT, BPPSUENPIN);	// always permitted to shut power off
+						cdcprintf("PSU: disabled");
+						modeConfig.psu=0;
+						break;
+				case 'W':	if(modeConfig.mode!=0)
+						{
+							gpio_set(BPPSUENPORT, BPPSUENPIN); 
+							cdcprintf("PSU: enabled\r\n");
+							delayms(10);
+							cdcprintf("V33=%0.2fV, V50=%0.2fV", voltage(BP3V3CHAN, 0), voltage(BP5V0CHAN, 1)); 
+							if((voltage(BP3V3CHAN, 0)<3.1)||(voltage(BP5V0CHAN, 1)<4.8))
+							{
+								cdcprintf("\r\nShort circuit!");
+								modeConfig.error=1;
+								gpio_clear(BPPSUENPORT, BPPSUENPIN);
+							}
+							else
+								modeConfig.psu=1;
+						}
+						else
+						{
+							cdcprintf("Cannot enable PSU in HiZ!");
+							modeConfig.error=1;
+						}
+						break;
+
 				case '0':
 				case '1':
 				case '2':
@@ -498,6 +557,7 @@ void changemode(void)
 	}	
 
 	protocols[modeConfig.mode].protocol_cleanup();		// switch to HiZ
+	protocols[0].protocol_setup_exc();			// disables powersuppy etc.
 	modeConfig.mode=mode-1;
 	protocols[modeConfig.mode].protocol_setup();		// setup the new mode
 	protocols[modeConfig.mode].protocol_setup_exc();
@@ -555,7 +615,7 @@ void printhelp(void)
 	cdcprintf(" $\tJump to bootloader\t\t{\tStart with read\r\n");
 	cdcprintf(" &/%%\tDelay 1 us/ms\t\t\t}\tStop\r\n");
 	cdcprintf(" a/A/@\tAUXPIN (low/HI/READ)\t\t\"abc\"\tSend string\r\n");
-	cdcprintf(" b\tSet baudrate\t\t\t123\r\n");
+	cdcprintf(" b\tSet vpumode\t\t\t123\r\n");
 	cdcprintf(" c/C\tAUX assignment (aux/CS)\t\t0x123\r\n");
 	cdcprintf(" d/D\tMeasure ADC (once/CONT.)\t0b110\tSend value\r\n");
 	cdcprintf(" f\tMeasure frequency\t\tr\tRead\r\n");

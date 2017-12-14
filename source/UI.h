@@ -52,3 +52,6 @@ void delayms(uint32_t num);
 // macro
 #define SKIPCURCHAR	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
 
+// 
+#define VPUMENU	"\r\nVPU mode:\r\n 1. External\r\n 2. 3V3\r\n 3. 5V0\r\nvpumode> "
+
