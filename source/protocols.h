@@ -16,6 +16,9 @@ enum
 #ifdef BP_USE_HWUSART
 	HWUSART,
 #endif
+#ifdef BP_USE_HWI2C
+	HWI2C,
+#endif
 	MAXPROTO
 };
 
@@ -42,7 +45,7 @@ typedef struct _protocol
 	void (*protocol_cleanup)(void);			// cleanup for HiZ
 	void (*protocol_pins)(void);			// display pin config
 	void (*protocol_settings)(void);		// display settings 
-	char protocol_name[8];				// friendly name (promptname)
+	char protocol_name[10];				// friendly name (promptname)
 } protocol;
 
 extern struct _protocol protocols[MAXPROTO];

@@ -7,8 +7,8 @@
 // USB shit :/
 
 // we dont have a USB VID/PID yet so please supply your own
-#define		USB_VID		0x0483 
-#define		USB_PID		0x5740
+#define		USB_VID		0x 
+#define		USB_PID		0x
 #define		USB_VENDOR	"dangerousprototypes.com"
 #define		USB_PRODUCT	"buspirateNG"
 #define		USB_SERIAL	"00000000"
@@ -18,6 +18,7 @@
 #define 	BP_USE_DUMMY2
 #define		BP_USE_HWSPI
 #define		BP_USE_HWUSART
+#define		BP_USE_HWI2C
 
 // systicks (for delays) systick is 10us
 extern volatile uint32_t systicks;

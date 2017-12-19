@@ -40,6 +40,13 @@
 #define BPUSARTCLK	RCC_USART2
 #define BPUSART		USART2
 
+// hw-i2c
+#define BPI2C		I2C2
+#define BPI2CCLK	RCC_I2C2
+
+
+
+
 // voltage regulators and pullupvoltages
 #define BPPSUENPORT	GPIOC
 #define BPPSUENPIN	GPIO13
@@ -49,6 +56,7 @@
 #define BPVPU33ENPIN	GPIO13
 #define BPVPU50ENPORT	GPIOC
 #define BPVPU50ENPIN	GPIO13
+
 
 
 

@@ -11,6 +11,7 @@
 #include "dummy2.h"
 #include "HWSPI.h" 
 #include "HWUSART.h"
+#include "HWI2C.h"
 
 
 
@@ -166,10 +167,35 @@ struct _protocol protocols[MAXPROTO]={
 	HWUSART_macro,				// macro
 	HWUSART_setup,				// setup UI
 	HWUSART_setup_exc,			// real setup
-	HWUSART_cleanup,				// cleanup for HiZ
+	HWUSART_cleanup,			// cleanup for HiZ
 	HWUSART_pins,				// display pin config
-	HWUSART_settings,				// display settings 
+	HWUSART_settings,			// display settings 
 	"HW-USART",				// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_HWI2C
+{
+	HWI2C_start,				// start
+	HWI2C_startr,				// start with read
+	HWI2C_stop,				// stop
+	HWI2C_stopr,				// stop with read
+	HWI2C_send,				// send(/read) max 32 bit
+	HWI2C_read,				// read max 32 bit
+	HWI2C_clkh,				// set clk high
+	HWI2C_clkl,				// set clk low
+	HWI2C_dath,				// set dat hi
+	HWI2C_datl,				// set dat lo
+	HWI2C_dats,				// toggle dat (?)
+	HWI2C_clk,				// toggle clk (?)
+	HWI2C_bitr,				// read 1 bit (?)
+	HWI2C_period,				// service to regular poll whether a byte ahs arrived
+	HWI2C_macro,				// macro
+	HWI2C_setup,				// setup UI
+	HWI2C_setup_exc,			// real setup
+	HWI2C_cleanup,				// cleanup for HiZ
+	HWI2C_pins,				// display pin config
+	HWI2C_settings,				// display settings 
+	"HW-I2C",				// friendly name (promptname)
 },
 #endif
 };
