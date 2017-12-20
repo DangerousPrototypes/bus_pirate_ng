@@ -21,7 +21,8 @@ GIT_VERSION := $(shell git describe --dirty --always --tags)
 
 CFLAGS +=-DFWVER=\"$(GIT_VERSION)\" 
 
-OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o HiZ.o HWSPI.o AUX.o ADC.o HWUSART.o bpflash.o HWI2C.o
+OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o HiZ.o HWSPI.o 
+OBJS += AUXpin.o ADC.o HWUSART.o bpflash.o HWI2C.o
 
 BINARY = buspirateNG
 

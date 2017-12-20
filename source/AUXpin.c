@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "buspirateNG.h"
 #include <libopencm3/stm32/gpio.h>
-#include "AUX.h"
+#include "AUXpin.h"
 
 
 void initAUX(void)

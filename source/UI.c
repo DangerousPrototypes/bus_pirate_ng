@@ -6,7 +6,7 @@
 #include "buspirateNG.h"
 #include "UI.h"
 #include "protocols.h"
-#include "AUX.h"
+#include "AUXpin.h"
 #include "ADC.h"
 #include "bpflash.h"
 
