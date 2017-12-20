@@ -121,6 +121,11 @@ uint32_t getint(void)
 				i++;
 			} 
 		}
+		else if(cmdbuff[((cmdtail+1)&(CMDBUFFSIZE-1))]==' ')				// just zero is zero :D
+		{
+			number=0;
+			i=1;
+		}
 		else									// ?! no good
 		{
 			modeConfig.error=1;

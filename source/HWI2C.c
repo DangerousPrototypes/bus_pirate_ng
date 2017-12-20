@@ -26,6 +26,20 @@ void HWI2C_startr(void)
 }
 void HWI2C_stop(void)
 {
+	if(!(I2C_SR2(BPI2C)&I2C_SR2_TRA))
+	{
+		cdcprintf("!!WARNING: two extra bytes read!!\r\n");
+
+	//	i2c_nack_current(BPI2C);
+		i2c_disable_ack(BPI2C);
+
+		// two bytes are buffered :(
+		while (!(I2C_SR1(BPI2C) & I2C_SR1_RxNE));		// wait until data available
+		(void)i2c_get_data(BPI2C);
+		while (!(I2C_SR1(BPI2C) & I2C_SR1_RxNE));		// wait until data available
+		(void)i2c_get_data(BPI2C);
+	}
+
 	cdcprintf("STOP");
 	i2c_send_stop(BPI2C);
 
@@ -92,7 +106,7 @@ uint32_t HWI2C_read(void)
 
 	if(!(I2C_SR2(BPI2C)&I2C_SR2_TRA))
 	{
-		i2c_enable_ack(BPI2C);				// TODO: clever way to nack last byte as per spec	
+		i2c_enable_ack(BPI2C);				// TODO: clever way to nack last byte as per spec
 
 		while (!(I2C_SR1(BPI2C) & I2C_SR1_RxNE));		// wait until data available
 
