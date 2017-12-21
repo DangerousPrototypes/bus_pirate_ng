@@ -5,7 +5,7 @@
 #include "HiZ.h"
 #include "cdcacm.h"
 #include "UI.h"
-	
+#include "AUXpin.h"	
 
 
 void HiZpins(void)
@@ -36,4 +36,8 @@ void HiZsetup_exc(void)
 	gpio_clear(BPPSUENPORT, BPPSUENPIN);
 	modeConfig.pullups=0;
 	gpio_clear(BPVPUENPORT, BPVPUENPIN);
+
+	// aux and pwm
+	(void)getAUX();
+	setPWM(0, 0);
 }

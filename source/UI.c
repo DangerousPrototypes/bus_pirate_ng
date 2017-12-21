@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <libopencm3/stm32/gpio.h>
+#include <libopencm3/stm32/timer.h>
 #include "debug.h"
 #include "cdcacm.h"
 #include "buspirateNG.h"
@@ -161,6 +162,7 @@ void initUI(void)
 	modeConfig.bitorder=0;
 	modeConfig.error=0;
 	modeConfig.displaymode=0;
+	modeConfig.pwm=0;
 	modeConfig.mosiport=0;
 	modeConfig.mosipin=0;
 	modeConfig.misoport=0;
@@ -298,6 +300,23 @@ void doUI(void)
 						{
 							cdcprintf("Can't read ADC in HiZ mode!");
 							modeConfig.error=1;
+						}
+						break;
+				case 'g':	setPWM(0, 0);				// disable PWM
+						break;
+				case 'G':	if(modeConfig.mode!=HIZ)
+						{
+							temp=askint(PWMMENUPERIOD, 1, 0xFFFFFFFF, 1000);
+							temp2=askint(PWMMENUOC, 1, 0xFFFFFFFF, 200);
+							setPWM(temp, temp2);			// enable PWM
+							if(modeConfig.pwm)							
+								cdcprintf("\r\nPWM on");
+							else
+								cdcprintf("\r\nPWM off");
+						}
+						else
+						{
+							cdcprintf("Can't use PWM in HiZ mode!");
 						}
 						break;
 				case 'h':
@@ -443,6 +462,7 @@ void versioninfo(void)
 	uint32_t *id = (uint32_t *)0x1FFFF7E8;
 	uint16_t flashsize = *(uint16_t *) 0x1FFFF7E0;
 	uint16_t ramsize=96;
+	uint32_t pwmperiod, pwmoc;
 
 	if(flashsize<=16) ramsize=6;
 	else if(flashsize<=32) ramsize=10;
@@ -473,8 +493,26 @@ void versioninfo(void)
 		cdcprintf("bitorder: %s, ", bitorders[modeConfig.bitorder]);
 		cdcprintf("PU: %s, ", states[modeConfig.pullups]);
 		cdcprintf("Vpu mode: %s, ", vpumodes[modeConfig.vpumode]);
-		cdcprintf("Power: %s, ", states[modeConfig.psu]);
-		cdcprintf("Displaymode: %s\r\n", displaymodes[modeConfig.displaymode]);
+		cdcprintf("Power: %s\r\n", states[modeConfig.psu]);
+		cdcprintf("Displaymode: %s, ", displaymodes[modeConfig.displaymode]);
+		cdcprintf("PWM: %s\r\n", states[modeConfig.pwm]);
+		if(modeConfig.pwm)
+		{
+			pwmperiod=TIM_ARR(BPPWMTIMER);
+#if(1)	// (BPPWMCHAN==TIM_OC1)	
+			pwmoc=TIM_CCR1(BPPWMTIMER);
+#endif
+#if(0)	// (BPPWMCHAN==TIM_OC2)	
+			pwmoc=TIM_CCR2(BPPWMTIMER);
+#endif
+#if(0)	// (BPPWMCHAN==TIM_OC3)	
+			pwmoc=TIM_CCR3(BPPWMTIMER);
+#endif
+#if(0)	// (BPPWMCHAN==TIM_OC4)	
+			pwmoc=TIM_CCR4(BPPWMTIMER);
+#endif
+			cdcprintf("PWM clock %d Hz, dutycycle %0.2f\r\n", (36000000/pwmperiod), (float)((pwmoc*1.0)/pwmperiod));
+		}
 		showstates();
 	}
 	

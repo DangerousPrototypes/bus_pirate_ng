@@ -11,6 +11,7 @@ typedef struct _modeConfig
 	uint8_t psu;					// psu (0=off, 1=on)
 	uint8_t error;					// error occurred
 	uint8_t displaymode;				// display mode (dec, hex, oct, bin)
+	uint8_t pwm;					// pwm active?
 
 	uint32_t csport;				// cs is located on this port/gpio
 	uint32_t cspin;
@@ -53,5 +54,9 @@ void delayms(uint32_t num);
 #define SKIPCURCHAR	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
 
 // 
-#define VPUMENU	"\r\nVPU mode:\r\n 1. External\r\n 2. 3V3\r\n 3. 5V0\r\nvpumode> "
+#define VPUMENU		"\r\nVPU mode:\r\n 1. External\r\n 2. 3V3\r\n 3. 5V0\r\nvpumode> "
+#define PWMMENUPERIOD	"\r\nPeriod in ticks (0..0xFFFFFFFF)> "
+#define PWMMENUOC	"\r\nOverflow in ticks (0..0xFFFFFFFF)> "
+
+
 
