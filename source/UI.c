@@ -178,7 +178,7 @@ void doUI(void)
 	int go;
 	char c;
 
-	uint32_t temp, temp2, repeat, received, bits;
+	uint32_t temp, temp2, temp3, repeat, received, bits;
 	int i;
 
 	go=0;
@@ -301,6 +301,8 @@ void doUI(void)
 							cdcprintf("Can't read ADC in HiZ mode!");
 							modeConfig.error=1;
 						}
+						break;
+				case 'f':	cdcprintf("freq=%ld Hz", getfreq());
 						break;
 				case 'g':	setPWM(0, 0);				// disable PWM
 						break;
@@ -425,6 +427,8 @@ void doUI(void)
 				case '=':	cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
 						temp=getint();
 						temp2=modeConfig.displaymode;		// remember old displaymode
+						temp3=modeConfig.numbits;		// remember old numbits
+						modeConfig.numbits=32;
 						for(i=0; i<4; i++)
 						{
 							cdcprintf("=");
@@ -432,6 +436,7 @@ void doUI(void)
 							printnum(temp);
 						}
 						modeConfig.displaymode=temp2;
+						modeConfig.numbits=temp3;
 						break;
 				default:	cdcprintf("Unknown command: %c", c);
 						modeConfig.error=1;
@@ -611,7 +616,7 @@ void changedisplaymode(void)
 	uint32_t displaymode;
 	int i;
 
-	
+
 	cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);	// pointer is set to 'o' we should advance 1
 	consumewhitechars();			// eat whitechars
 	displaymode=getint();
@@ -782,7 +787,7 @@ uint32_t getnumbits(void)
 
 void printnum(uint32_t d)
 {
-	uint32_t mask;
+	uint32_t mask, i;
 
 	mask=(1<<(modeConfig.numbits))-1;
 	d&=mask;
@@ -820,7 +825,15 @@ void printnum(uint32_t d)
 			else if(modeConfig.numbits<=32)
 				cdcprintf("0%012o", d);
 			break;
-		case 3:	cdcprintf("--");
+		case 3:	cdcprintf("0b");
+			for(i=0; i<modeConfig.numbits; i++)
+			{
+				mask=1<<(modeConfig.numbits-i-1);
+				if(d&mask)
+					cdcprintf("1");
+				else
+					cdcprintf("0");
+			}
 			break;
 	}
 	if(modeConfig.numbits!=8) cdcprintf(".%d", modeConfig.numbits);
@@ -839,4 +852,3 @@ void delayms(uint32_t num)
 }
 
 
-	
