@@ -12,6 +12,7 @@
 #include "HWSPI.h" 
 #include "HWUSART.h"
 #include "HWI2C.h"
+#include "LA.h"
 
 
 
@@ -196,6 +197,31 @@ struct _protocol protocols[MAXPROTO]={
 	HWI2C_pins,				// display pin config
 	HWI2C_settings,				// display settings 
 	"HW-I2C",				// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_LA
+{
+	LA_start,				// start
+	LA_startr,				// start with read
+	LA_stop,				// stop
+	LA_stopr,				// stop with read
+	LA_send,				// send(/read) max 32 bit
+	LA_read,				// read max 32 bit
+	LA_clkh,				// set clk high
+	LA_clkl,				// set clk low
+	LA_dath,				// set dat hi
+	LA_datl,				// set dat lo
+	LA_dats,				// toggle dat (?)
+	LA_clk,					// toggle clk (?)
+	LA_bitr,				// read 1 bit (?)
+	LA_period,				// service to regular poll whether a byte ahs arrived
+	LA_macro,				// macro
+	LA_setup,				// setup UI
+	LA_setup_exc,				// real setup
+	LA_cleanup,				// cleanup for HiZ
+	LA_pins,				// display pin config
+	LA_settings,				// display settings 
+	"LA",					// friendly name (promptname)
 },
 #endif
 };

@@ -1,0 +1,21 @@
+
+void LA_start(void);
+void LA_startr(void);
+void LA_stop(void);
+void LA_stopr(void);
+uint32_t LA_send(uint32_t d);
+uint32_t LA_read(void);
+void LA_clkh(void);
+void LA_clkl(void);
+void LA_dath(void);
+void LA_datl(void);
+uint32_t LA_dats(void);
+void LA_clk(void);
+uint32_t LA_bitr(void);
+uint32_t LA_period(void);
+void LA_macro(uint32_t macro);
+void LA_setup(void);
+void LA_setup_exc(void);
+void LA_cleanup(void);
+void LA_pins(void);
+void LA_settings(void);

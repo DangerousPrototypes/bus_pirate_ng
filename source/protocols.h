@@ -19,6 +19,9 @@ enum
 #ifdef BP_USE_HWI2C
 	HWI2C,
 #endif
+#ifdef BP_USE_LA
+	LA,
+#endif
 	MAXPROTO
 };
 

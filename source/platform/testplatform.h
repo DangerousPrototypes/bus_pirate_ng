@@ -56,7 +56,8 @@
 #define BPI2C		I2C2
 #define BPI2CCLK	RCC_I2C2
 
-
+// logic analyzer
+#define BPLABUFFSIZE	2048
 
 
 // voltage regulators and pullupvoltages

@@ -122,14 +122,11 @@ uint32_t getint(void)
 				i++;
 			} 
 		}
-		else if(cmdbuff[((cmdtail+1)&(CMDBUFFSIZE-1))]==' ')				// just zero is zero :D
+		else									// not perse wrong assume user entered 0
 		{
 			number=0;
 			i=1;
-		}
-		else									// ?! no good
-		{
-			modeConfig.error=1;
+			//	modeConfig.error=1;
 		}
 	}
 	else
@@ -195,6 +192,20 @@ void doUI(void)
 			c=cmdbuff[cmdtail];
 			switch (c)
 			{
+				case '(':	
+						cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);		// advance 1 position
+						temp=getint();
+						cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);		// advance 1
+						if(cmdbuff[cmdtail]==')')
+						{
+							protocols[modeConfig.mode].protocol_macro(temp);
+						}
+						else
+						{
+							modeConfig.error=1;
+							cdcprintf("Error parsing macro");
+						}
+						break;
 				case '[':	modeConfig.wwr=0;
 						protocols[modeConfig.mode].protocol_start();
 						break;
