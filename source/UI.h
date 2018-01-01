@@ -49,6 +49,8 @@ uint32_t getrepeat(void);
 uint32_t getnumbits(void);
 void printnum(uint32_t d);
 void delayms(uint32_t num);
+uint32_t orderbits(uint32_t d);
+
 
 // macro
 #define SKIPCURCHAR	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);

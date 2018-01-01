@@ -412,23 +412,53 @@ void doUI(void)
 				case '7':
 				case '8':
 				case '9':	temp=getint();
-						bits=getnumbits();		// sequence is important!
+						bits=getnumbits();		// sequence is important! TODO: make freeform
 						if(bits) modeConfig.numbits=bits;
 						repeat=getrepeat();
+						if (modeConfig.numbits<32) temp&=((1<<modeConfig.numbits)-1);
 						while(repeat--)
 						{
 							cdcprintf("TX: ");
 							printnum(temp);
 							cdcprintf(" ");
-							received=protocols[modeConfig.mode].protocol_send(temp);
+							received=protocols[modeConfig.mode].protocol_send(orderbits(temp));		// reshuffle bits if necessary
 							if(modeConfig.wwr) 
 							{
-								cdcprintf(", rX: ");
+								cdcprintf(", RX: ");
 								printnum(received);
 							}
 							if(repeat) cdcprintf("\r\n");
 						}
 						break;
+				case '\"':	temp=1;
+						modeConfig.error=1;
+						cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+						while((((cmdtail+temp)&(CMDBUFFSIZE-1))!=cmdhead)&&(cmdbuff[((cmdtail+temp)&(CMDBUFFSIZE-1))]!='\"'))
+						{
+							temp++;
+							if(cmdbuff[((cmdtail+temp)&(CMDBUFFSIZE-1))]=='\"') modeConfig.error=0;
+						}
+						if(!modeConfig.error)
+						{
+							temp=0;
+							while(cmdbuff[cmdtail]!='\"')
+							{
+								cdcprintf("TX: ");
+								printnum(cmdbuff[cmdtail]);
+								cdcprintf(" ");
+								received=protocols[modeConfig.mode].protocol_send(orderbits(cmdbuff[cmdtail])); // reshuffle bits if necessary
+								if(modeConfig.wwr) 
+								{
+									cdcprintf(", RX: ");
+									printnum(received);
+								}
+								cdcprintf("\r\n");
+								cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+							}
+
+						}
+						else
+							cdcprintf("missing terminating \"");
 				case ' ':	break;
 				case ',':	break;	// reuse this command??
 				case '$':	displayps();
@@ -446,7 +476,21 @@ void doUI(void)
 							modeConfig.displaymode=i;
 							printnum(temp);
 						}
-						modeConfig.displaymode=temp2;
+						modeConfig.numbits=temp3;
+						break;
+				case '|':	cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+						temp=getint();
+						temp2=modeConfig.displaymode;		// remember old displaymode
+						modeConfig.bitorder^=1;
+						temp3=modeConfig.numbits;		// remember old numbits
+						modeConfig.numbits=32;
+						for(i=0; i<4; i++)
+						{
+							cdcprintf("|");
+							modeConfig.displaymode=i;
+							printnum(orderbits(temp));
+						}
+						modeConfig.bitorder^=1;
 						modeConfig.numbits=temp3;
 						break;
 				default:	cdcprintf("Unknown command: %c", c);
@@ -709,7 +753,8 @@ void getuserinput(void)
 						cdcputs("\x08 \x08");
 					}
 					break;
-			case '\r':			// enter
+			case '\r':	//cmdbuff[cmdhead]=0x00;
+					//cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
 					go=1;
 					break;
 			default:	
@@ -800,7 +845,8 @@ void printnum(uint32_t d)
 {
 	uint32_t mask, i;
 
-	mask=(1<<(modeConfig.numbits))-1;
+	if (modeConfig.numbits<32) mask=((1<<modeConfig.numbits)-1);
+	else mask=0xFFFFFFFF;
 	d&=mask;
 
 	switch(modeConfig.displaymode)
@@ -848,6 +894,7 @@ void printnum(uint32_t d)
 			break;
 	}
 	if(modeConfig.numbits!=8) cdcprintf(".%d", modeConfig.numbits);
+		else cdcprintf(" (\'%c\')", d);
 }
 
 void delayms(uint32_t num)
@@ -858,8 +905,37 @@ void delayms(uint32_t num)
 	num+=systicks;		// should wrap ol
 
 	while(systicks!=num);	
-
-
 }
+
+// order bits according to lsb/msb setting
+uint32_t orderbits(uint32_t d)
+{
+	uint32_t result, mask;
+	int i;
+
+	if(!modeConfig.bitorder)			// 0=MSB
+		return d;
+	else
+	{
+		mask=0x80000000;
+		result=0;	
+
+		for(i=0; i<32; i++)
+		{
+			if(d&mask)
+			{
+				result|=(1<<(i));	
+			}
+			mask>>=1;
+		}
+
+		return result>>(32-modeConfig.numbits);
+	}
+}
+
+
+
+
+
 
 
