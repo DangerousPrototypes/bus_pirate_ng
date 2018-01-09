@@ -13,6 +13,8 @@
 #include "HWUSART.h"
 #include "HWI2C.h"
 #include "LA.h"
+#include "SW2W.h"
+#include "SW3W.h"
 
 
 
@@ -222,6 +224,56 @@ struct _protocol protocols[MAXPROTO]={
 	LA_pins,				// display pin config
 	LA_settings,				// display settings 
 	"LA",					// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_SW2W
+{
+	SW2W_start,				// start
+	SW2W_startr,				// start with read
+	SW2W_stop,				// stop
+	SW2W_stopr,				// stop with read
+	SW2W_send,				// send(/read) max 32 bit
+	SW2W_read,				// read max 32 bit
+	SW2W_clkh,				// set clk high
+	SW2W_clkl,				// set clk low
+	SW2W_dath,				// set dat hi
+	SW2W_datl,				// set dat lo
+	SW2W_dats,				// toggle dat (?)
+	SW2W_clk,				// toggle clk (?)
+	SW2W_bitr,				// read 1 bit (?)
+	SW2W_period,				// service to regular poll whether a byte ahs arrived
+	SW2W_macro,				// macro
+	SW2W_setup,				// setup UI
+	SW2W_setup_exc,				// real setup
+	SW2W_cleanup,				// cleanup for HiZ
+	SW2W_pins,				// display pin config
+	SW2W_settings,				// display settings 
+	"SW2W",					// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_SW3W
+{
+	SW3W_start,				// start
+	SW3W_startr,				// start with read
+	SW3W_stop,				// stop
+	SW3W_stopr,				// stop with read
+	SW3W_send,				// send(/read) max 32 bit
+	SW3W_read,				// read max 32 bit
+	SW3W_clkh,				// set clk high
+	SW3W_clkl,				// set clk low
+	SW3W_dath,				// set dat hi
+	SW3W_datl,				// set dat lo
+	SW3W_dats,				// toggle dat (?)
+	SW3W_clk,				// toggle clk (?)
+	SW3W_bitr,				// read 1 bit (?)
+	SW3W_period,				// service to regular poll whether a byte ahs arrived
+	SW3W_macro,				// macro
+	SW3W_setup,				// setup UI
+	SW3W_setup_exc,				// real setup
+	SW3W_cleanup,				// cleanup for HiZ
+	SW3W_pins,				// display pin config
+	SW3W_settings,				// display settings 
+	"SW3W",				// friendly name (promptname)
 },
 #endif
 };

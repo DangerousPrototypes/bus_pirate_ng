@@ -13,33 +13,37 @@ static uint32_t cpol, cpha, br, dff, lsbfirst, csidle;
 
 void HWSPI_start(void)
 {
-	cdcprintf("HWSPI: start()");
+	cdcprintf("set CS=%d", !csidle);
 
 	if(csidle) spi_set_nss_low(BPSPIPORT);
 		else spi_set_nss_high(BPSPIPORT);
 }
+
 void HWSPI_startr(void)
 {
-	cdcprintf("HWSPI: startr()");
+	cdcprintf("set CS=%d", !csidle);
 
 	if(csidle) spi_set_nss_low(BPSPIPORT);
 		else spi_set_nss_high(BPSPIPORT);
 }
+
 void HWSPI_stop(void)
 {
-	cdcprintf("HWSPI: stop()");
+	cdcprintf("set CS=%d", csidle);
 
 	if(csidle) spi_set_nss_high(BPSPIPORT);
 		else spi_set_nss_low(BPSPIPORT);
 }
+
 void HWSPI_stopr(void)
 {
-	cdcprintf("HWSPI: stopr()");
+	cdcprintf("set CS=%d", csidle);
 
 	if(csidle) spi_set_nss_high(BPSPIPORT);
 		else spi_set_nss_low(BPSPIPORT);
 
 }
+
 uint32_t HWSPI_send(uint32_t d)
 {
 	uint16_t returnval;
@@ -48,10 +52,9 @@ uint32_t HWSPI_send(uint32_t d)
 	
 	returnval=spi_xfer(BPSPIPORT, (uint16_t)d);
 
-	cdcprintf("HWSPI: send(%08X)=%08X", d, returnval);
-
 	return (uint16_t) returnval;
 }
+
 uint32_t HWSPI_read(void)
 {
 	uint16_t returnval;
@@ -60,26 +63,30 @@ uint32_t HWSPI_read(void)
 
 
 	returnval = spi_read(BPSPIPORT);
-	cdcprintf("HWSPI: read()=%08X", returnval);
 
 	return (uint16_t) returnval;
 }
+
 void HWSPI_clkh(void)
 {
 	cdcprintf("HWSPI: clkh()");
 }
+
 void HWSPI_clkl(void)
 {
 	cdcprintf("HWSPI: clkl()");
 }
+
 void HWSPI_dath(void)
 {
 	cdcprintf("HWSPI: dath()");
 }
+
 void HWSPI_datl(void)
 {
 	cdcprintf("HWSPI: datl()");
 }
+
 uint32_t HWSPI_dats(void)
 {
 	uint32_t returnval;
@@ -87,10 +94,12 @@ uint32_t HWSPI_dats(void)
 	cdcprintf("HWSPI: dats()=%08X", returnval);
 	return returnval;
 }
+
 void HWSPI_clk(void)
 {
 	cdcprintf("HWSPI: clk()");
 }
+
 uint32_t HWSPI_bitr(void)
 {
 	uint32_t returnval;
@@ -98,6 +107,7 @@ uint32_t HWSPI_bitr(void)
 	cdcprintf("HWSPI: bitr()=%08X", returnval);
 	return returnval;
 }
+
 uint32_t HWSPI_period(void)
 {
 	uint32_t returnval;
@@ -105,14 +115,14 @@ uint32_t HWSPI_period(void)
 	cdcprintf("HWSPI: period()=%08X", returnval);
 	return returnval;
 }
+
 void HWSPI_macro(uint32_t macro)
 {
 	cdcprintf("HWSPI: macro(%08X)", macro);
 }
+
 void HWSPI_setup(void)
 {
-	cdcprintf("HWSPI: setup()");
-
 	// did the user leave us arguments?
 	// baudrate
 	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
@@ -156,11 +166,9 @@ void HWSPI_setup(void)
 		lsbfirst=SPI_CR1_MSBFIRST;
 	}
 }
+
 void HWSPI_setup_exc(void)
 {
-	cdcprintf("HWSPI: setup_exc()");
-
-	// assuming BPSPIPORT for now until HW is finished
 	// start the clock
 	rcc_periph_clock_enable(BPSPICLK);
 
@@ -188,7 +196,7 @@ void HWSPI_setup_exc(void)
 
 	// update modeConfig pins
 	modeConfig.misoport=BPSPIMISOPORT;
-	modeConfig.mosiport=BPSPIMISOPORT;
+	modeConfig.mosiport=BPSPIMOSIPORT;
 	modeConfig.csport=BPSPICSPORT;
 	modeConfig.clkport=BPSPICLKPORT;
 	modeConfig.misopin=BPSPIMISOPIN;
@@ -199,8 +207,6 @@ void HWSPI_setup_exc(void)
 }
 void HWSPI_cleanup(void)
 {
-	cdcprintf("HWSPI: cleanup()");
-
 	// disable SPI peripheral
 	spi_disable(BPSPIPORT);		// spi_clean_disable??
 
@@ -224,10 +230,12 @@ void HWSPI_cleanup(void)
 	modeConfig.clkpin=0;
 
 }
+
 void HWSPI_pins(void)
 {
 	cdcprintf("CS\tMISO\tCLK\tMOSI");
 }
+
 void HWSPI_settings(void)
 {
 	cdcprintf("HWSPI (br cpol cpha cs)=(%d %d %d %d)", (br>>3), (cpol>>1)+1, cpha+1, csidle+1);

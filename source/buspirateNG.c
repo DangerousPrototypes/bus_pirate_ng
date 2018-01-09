@@ -57,7 +57,7 @@ int main(void)
 
 	// setup systick 
 	systick_set_clocksource(STK_CSR_CLKSOURCE_AHB_DIV8);	// 9000000 Hz
-	systick_set_reload(89);				// 10us
+	systick_set_reload(89);					// 10us 89
 	systick_interrupt_enable();
 	systick_counter_enable();				// go!
 	systicks=0;
@@ -66,7 +66,7 @@ int main(void)
 	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
 	gpio_clear(GPIOA, GPIO12);
 
-	while(systicks<1000);
+	delayms(100);
 	
 	// setup USB
 	cdcinit();

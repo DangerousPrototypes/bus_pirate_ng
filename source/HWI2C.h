@@ -21,3 +21,5 @@ void HWI2C_pins(void);
 void HWI2C_settings(void);
 void HWI2C_printI2Cflags(void);
 
+
+#define HWI2CSPEEDMENU	"\r\nSpeed\r\n 1. 100KHz\r\n 2. 400Khz\r\nspeed> "

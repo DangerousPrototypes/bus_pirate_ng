@@ -233,11 +233,18 @@ void doUI(void)
 				case '!':	protocols[modeConfig.mode].protocol_bitr();
 						break;
 				case '&':	repeat=getrepeat();
-						cdcprintf("Delaying");
+						if(repeat<10) repeat=10;			// minimum is 10us!
+						cdcprintf("Delaying %d us", repeat);
 						while(repeat--)
 						{
-							cdcprintf(".");
-							delayms(1000);
+							delayus(1);
+						}
+						break;
+				case '%':	repeat=getrepeat();
+						cdcprintf("Delaying %d ms", repeat);
+						while(repeat--)
+						{
+							delayms(1);
 						}
 						break;
 				case 'a':	if(modeConfig.mode!=HIZ)
@@ -894,7 +901,7 @@ void printnum(uint32_t d)
 			break;
 	}
 	if(modeConfig.numbits!=8) cdcprintf(".%d", modeConfig.numbits);
-		else cdcprintf(" (\'%c\')", d);
+		else cdcprintf(" (\'%c\')", ((d>=0x20)&&(d<0x7E)?d:0x20));
 }
 
 void delayms(uint32_t num)
@@ -902,7 +909,17 @@ void delayms(uint32_t num)
 	num*=1000; 		// convert to us
 	num/=10;
 
-	num+=systicks;		// should wrap ol
+	num+=systicks;		// should wrap around
+
+	while(systicks!=num);	
+}
+
+// minimum is 10us because of systick setup TODO: rewrite to a proper timer?
+void delayus(uint32_t num)
+{
+	num/=10;
+
+	num+=systicks;		// should wrap around
 
 	while(systicks!=num);	
 }

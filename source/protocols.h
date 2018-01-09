@@ -22,6 +22,12 @@ enum
 #ifdef BP_USE_LA
 	LA,
 #endif
+#ifdef BP_USE_SW2W
+	SW2W,
+#endif
+#ifdef BP_USE_SW3W
+	SW3W,
+#endif
 	MAXPROTO
 };
 

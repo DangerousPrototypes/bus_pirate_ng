@@ -20,6 +20,9 @@
 #define		BP_USE_HWUSART
 #define		BP_USE_HWI2C
 #define		BP_USE_LA
+#define		BP_USE_SW2W
+#define		BP_USE_SW3W
+
 
 // systicks (for delays) systick is 10us
 extern volatile uint32_t systicks;

@@ -98,8 +98,6 @@ void HWUSART_macro(uint32_t macro)
 
 void HWUSART_setup(void)
 {
-	cdcprintf("HWUSART setup()");
-
 	// did the user leave us arguments?
 	// baudrate
 	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
@@ -178,8 +176,6 @@ void HWUSART_setup(void)
 
 void HWUSART_setup_exc(void)
 {
-	cdcprintf("HWUSART setup_exc()");
-
 	// enable clock
 	rcc_periph_clock_enable(BPUSARTCLK);
 

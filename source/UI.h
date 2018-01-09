@@ -49,6 +49,7 @@ uint32_t getrepeat(void);
 uint32_t getnumbits(void);
 void printnum(uint32_t d);
 void delayms(uint32_t num);
+void delayus(uint32_t num);
 uint32_t orderbits(uint32_t d);
 
 

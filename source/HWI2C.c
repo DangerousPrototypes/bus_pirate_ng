@@ -10,20 +10,21 @@
 
 static uint8_t	speed;
 
-
 void HWI2C_start(void)
 {
-	cdcprintf("START");
+	cdcprintf("I2C START");
 	i2c_send_start(BPI2C);
 
 	// wait for start (SB), switched to master (MSL) and a taken bus (BUSY)
 	while (!((I2C_SR1(BPI2C)&I2C_SR1_SB)&(I2C_SR2(BPI2C)&(I2C_SR2_MSL|I2C_SR2_BUSY))));
 }
+
 void HWI2C_startr(void)
 {
 	cdcprintf("-HWI2C- startr()");
 	i2c_send_start(BPI2C);
 }
+
 void HWI2C_stop(void)
 {
 	if(!(I2C_SR2(BPI2C)&I2C_SR2_TRA))
@@ -40,16 +41,18 @@ void HWI2C_stop(void)
 		(void)i2c_get_data(BPI2C);
 	}
 
-	cdcprintf("STOP");
+	cdcprintf("I2C STOP");
 	i2c_send_stop(BPI2C);
 
 }
+
 void HWI2C_stopr(void)
 {
 	cdcprintf("-HWI2C- stopr()");
 	i2c_send_stop(BPI2C);
 
 }
+
 uint32_t HWI2C_send(uint32_t d)
 {
 	uint8_t ack;
@@ -100,6 +103,7 @@ uint32_t HWI2C_send(uint32_t d)
 
 	return (!ack);
 }
+
 uint32_t HWI2C_read(void)
 {
 	uint32_t returnval;
@@ -121,61 +125,86 @@ uint32_t HWI2C_read(void)
 
 	return returnval;
 }
+
 void HWI2C_clkh(void)
 {
 	cdcprintf("-HWI2C- clkh()");
 }
+
 void HWI2C_clkl(void)
 {
 	cdcprintf("-HWI2C- clkl()");
 }
+
 void HWI2C_dath(void)
 {
 	cdcprintf("-HWI2C- dath()");
 }
+
 void HWI2C_datl(void)
 {
 	cdcprintf("-HWI2C- datl()");
 }
+
 uint32_t HWI2C_dats(void)
 {
 	uint32_t returnval=0;
 	cdcprintf("-HWI2C- dats()=%08X", returnval);
 	return returnval;
 }
+
 void HWI2C_clk(void)
 {
 	cdcprintf("-HWI2C- clk()");
 }
+
 uint32_t HWI2C_bitr(void)
 {
 	uint32_t returnval=0;
 	cdcprintf("-HWI2C- bitr()=%08X", returnval);
 	return returnval;
 }
+
 uint32_t HWI2C_period(void)
 {
 	uint32_t returnval=0;
 	cdcprintf("-HWI2C- period()=%08X", returnval);
 	return returnval;
 }
+
 void HWI2C_macro(uint32_t macro)
 {
-	cdcprintf("-HWI2C- macro(%08X)", macro);
+	switch(macro)
+	{
+		case 0:		cdcprintf("No macros available");
+				break;
+		default:	cdcprintf("Macro not defined");
+				modeConfig.error=1;
+	}
 }
+
 void HWI2C_setup(void)
 {
-	cdcprintf("-HWI2C- setup()");
+	// speed
+	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+	consumewhitechars();
+	speed=getint();
+	if((speed>0)&&(speed<=2)) speed-=1;
+	else modeConfig.error=1;
 
-	speed=0;
+	// did the user did it right?
+	if(modeConfig.error)			// go interactive 
+	{
+		speed=(askint(HWI2CSPEEDMENU, 1, 2, 1));
+	}
 }
+
 void HWI2C_setup_exc(void)
 {
-	cdcprintf("-HWI2C- setup_exc()");
-
 	rcc_periph_clock_enable(BPI2CCLK);
 
-	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, GPIO_I2C2_SCL | GPIO_I2C2_SDA);
+	gpio_set_mode(BPHWI2CSDAPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, BPHWI2CSDAPIN);
+	gpio_set_mode(BPHWI2CCLKPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, BPHWI2CCLKPIN);
 
 	// i2c needs to be disabled before it can be programmed
 	i2c_peripheral_disable(BPI2C);
@@ -191,21 +220,42 @@ void HWI2C_setup_exc(void)
 
 	// go!
 	i2c_peripheral_enable(BPI2C);
+
+	// update modeConfig pins
+	modeConfig.mosiport=BPHWI2CSDAPORT;
+	modeConfig.clkport=BPHWI2CSDAPORT;
+	modeConfig.mosipin=BPHWI2CSDAPIN;
+	modeConfig.clkpin=BPHWI2CSDAPIN;
+
+
 }
 void HWI2C_cleanup(void)
 {
-	cdcprintf("-HWI2C- cleanup()");
-
 	rcc_periph_clock_disable(RCC_I2C2);
 	i2c_peripheral_disable(I2C2);
+	gpio_set_mode(BPHWI2CSDAPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BPHWI2CSDAPIN);
+	gpio_set_mode(BPHWI2CCLKPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BPHWI2CCLKPIN);
+
+	// update modeConfig pins
+	modeConfig.misoport=0;
+	modeConfig.mosiport=0;
+	modeConfig.csport=0;
+	modeConfig.clkport=0;
+	modeConfig.misopin=0;
+	modeConfig.mosipin=0;
+	modeConfig.cspin=0;
+	modeConfig.clkpin=0;
+
 }
+
 void HWI2C_pins(void)
 {
 	cdcprintf("-\t-\tSCL\tSDA");
 }
+
 void HWI2C_settings(void)
 {
-	cdcprintf("HWI2C (arg1 arg2)=(%d, %d)", 1, 2);
+	cdcprintf("HWI2C (speed)=(%d)", speed);
 }
 
 void HWI2C_printI2Cflags(void)
