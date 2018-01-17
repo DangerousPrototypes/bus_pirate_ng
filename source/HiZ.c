@@ -29,8 +29,6 @@ void HiZsetup(void)
 
 void HiZsetup_exc(void)
 {
-	cdcprintf("turning to HiZ");
-
 	// turn everything off
 	modeConfig.psu=0;
 	gpio_clear(BPPSUENPORT, BPPSUENPIN);

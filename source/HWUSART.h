@@ -1,18 +1,6 @@
 
-void HWUSART_start(void);
-void HWUSART_startr(void);
-void HWUSART_stop(void);
-void HWUSART_stopr(void);
 uint32_t HWUSART_send(uint32_t d);
 uint32_t HWUSART_read(void);
-void HWUSART_clkh(void);
-void HWUSART_clkl(void);
-void HWUSART_dath(void);
-void HWUSART_datl(void);
-uint32_t HWUSART_dats(void);
-void HWUSART_clk(void);
-uint32_t HWUSART_bitr(void);
-uint32_t HWUSART_period(void);
 void HWUSART_macro(uint32_t macro);
 void HWUSART_setup(void);
 void HWUSART_setup_exc(void);

@@ -19,12 +19,6 @@ void HWI2C_start(void)
 	while (!((I2C_SR1(BPI2C)&I2C_SR1_SB)&(I2C_SR2(BPI2C)&(I2C_SR2_MSL|I2C_SR2_BUSY))));
 }
 
-void HWI2C_startr(void)
-{
-	cdcprintf("-HWI2C- startr()");
-	i2c_send_start(BPI2C);
-}
-
 void HWI2C_stop(void)
 {
 	if(!(I2C_SR2(BPI2C)&I2C_SR2_TRA))
@@ -42,13 +36,6 @@ void HWI2C_stop(void)
 	}
 
 	cdcprintf("I2C STOP");
-	i2c_send_stop(BPI2C);
-
-}
-
-void HWI2C_stopr(void)
-{
-	cdcprintf("-HWI2C- stopr()");
 	i2c_send_stop(BPI2C);
 
 }
@@ -123,52 +110,6 @@ uint32_t HWI2C_read(void)
 		returnval=0;
 	}
 
-	return returnval;
-}
-
-void HWI2C_clkh(void)
-{
-	cdcprintf("-HWI2C- clkh()");
-}
-
-void HWI2C_clkl(void)
-{
-	cdcprintf("-HWI2C- clkl()");
-}
-
-void HWI2C_dath(void)
-{
-	cdcprintf("-HWI2C- dath()");
-}
-
-void HWI2C_datl(void)
-{
-	cdcprintf("-HWI2C- datl()");
-}
-
-uint32_t HWI2C_dats(void)
-{
-	uint32_t returnval=0;
-	cdcprintf("-HWI2C- dats()=%08X", returnval);
-	return returnval;
-}
-
-void HWI2C_clk(void)
-{
-	cdcprintf("-HWI2C- clk()");
-}
-
-uint32_t HWI2C_bitr(void)
-{
-	uint32_t returnval=0;
-	cdcprintf("-HWI2C- bitr()=%08X", returnval);
-	return returnval;
-}
-
-uint32_t HWI2C_period(void)
-{
-	uint32_t returnval=0;
-	cdcprintf("-HWI2C- period()=%08X", returnval);
 	return returnval;
 }
 

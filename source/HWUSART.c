@@ -9,27 +9,9 @@
 #include "HWUSART.h"
 #include "UI.h"
 
-static uint32_t returnval;
 
 static uint32_t br, nbits, sbits, parity, block;
 
-
-void HWUSART_start(void)
-{
-	cdcprintf("HWUSART start()");
-}
-void HWUSART_startr(void)
-{
-	cdcprintf("HWUSART startr()");
-}
-void HWUSART_stop(void)
-{
-	cdcprintf("HWUSART stop()");
-}
-void HWUSART_stopr(void)
-{
-	cdcprintf("HWUSART stopr()");
-}
 uint32_t HWUSART_send(uint32_t d)
 {
 	if(block)
@@ -54,47 +36,17 @@ uint32_t HWUSART_read(void)
 
 	return received;
 }
-void HWUSART_clkh(void)
-{
-	cdcprintf("HWUSART clkh()");
-}
-void HWUSART_clkl(void)
-{
-	cdcprintf("HWUSART clkl()");
-}
-void HWUSART_dath(void)
-{
-	cdcprintf("HWUSART dath()");
-}
-void HWUSART_datl(void)
-{
-	cdcprintf("HWUSART datl()");
-}
-uint32_t HWUSART_dats(void)
-{
-	cdcprintf("HWUSART dats()=%08X", returnval);
-	return returnval;
-}
-void HWUSART_clk(void)
-{
-	cdcprintf("HWUSART clk()");
-}
-uint32_t HWUSART_bitr(void)
-{
-	cdcprintf("HWUSART bitr()=%08X", returnval);
-	return returnval;
-}
-uint32_t HWUSART_period(void)
-{
-	cdcprintf("HWUSART period()=%08X", returnval);
-	return returnval;
-}
+
 void HWUSART_macro(uint32_t macro)
 {
-	cdcprintf("HWUSART macro(%08X)", macro);
+	switch(macro)
+	{
+		case 0:		cdcprintf("No macros available");
+				break;
+		default:	cdcprintf("Macro not defined");
+				modeConfig.error=1;
+	}
 }
-
-
 
 void HWUSART_setup(void)
 {
@@ -208,8 +160,6 @@ void HWUSART_setup_exc(void)
 
 void HWUSART_cleanup(void)
 {
-	cdcprintf("HWUSART cleanup()");
-
 	//disable usart
 	usart_enable(BPUSART);
 

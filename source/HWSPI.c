@@ -17,6 +17,8 @@ void HWSPI_start(void)
 
 	if(csidle) spi_set_nss_low(BPSPIPORT);
 		else spi_set_nss_high(BPSPIPORT);
+
+	modeConfig.wwr=0;
 }
 
 void HWSPI_startr(void)
@@ -25,6 +27,8 @@ void HWSPI_startr(void)
 
 	if(csidle) spi_set_nss_low(BPSPIPORT);
 		else spi_set_nss_high(BPSPIPORT);
+
+	modeConfig.wwr=1;
 }
 
 void HWSPI_stop(void)
@@ -33,6 +37,9 @@ void HWSPI_stop(void)
 
 	if(csidle) spi_set_nss_high(BPSPIPORT);
 		else spi_set_nss_low(BPSPIPORT);
+
+	modeConfig.wwr=0;
+
 }
 
 void HWSPI_stopr(void)
@@ -42,15 +49,27 @@ void HWSPI_stopr(void)
 	if(csidle) spi_set_nss_high(BPSPIPORT);
 		else spi_set_nss_low(BPSPIPORT);
 
+	modeConfig.wwr=0;
 }
 
 uint32_t HWSPI_send(uint32_t d)
 {
 	uint16_t returnval;
 
-	//TODO: check numbits, lsb
+	//TODO: lsb ??
+	if((modeConfig.numbits==8)||(modeConfig.numbits==16))
+	{
+		if(modeConfig.numbits==8) spi_set_dff_8bit(BPSPIPORT);			// is there a less overhead way of doing this?
+		if(modeConfig.numbits==16) spi_set_dff_16bit(BPSPIPORT);
 	
-	returnval=spi_xfer(BPSPIPORT, (uint16_t)d);
+		returnval=spi_xfer(BPSPIPORT, (uint16_t)d);
+	}
+	else
+	{
+		cdcprintf("Only 8 or 16 bits are allowed, use SW3W instead");
+		modeConfig.error=1;
+		returnval=0;
+	}
 
 	return (uint16_t) returnval;
 }
@@ -59,66 +78,33 @@ uint32_t HWSPI_read(void)
 {
 	uint16_t returnval;
 
-	//TODO: check numbits, lsb
+	//TODO: check lsb??
+	if((modeConfig.numbits==8)||(modeConfig.numbits==16))
+	{
+		if(modeConfig.numbits==8) spi_set_dff_8bit(BPSPIPORT);			// is there a less overhead way of doing this?
+		if(modeConfig.numbits==16) spi_set_dff_16bit(BPSPIPORT);
 
-
-	returnval = spi_read(BPSPIPORT);
+		returnval = spi_xfer(BPSPIPORT, 0xFF);					// is 0xFF ok?
+	}
+	else
+	{
+		cdcprintf("Only 8 or 16 bits are allowed, use SW3W instead");
+		modeConfig.error=1;
+		returnval=0;
+	}
 
 	return (uint16_t) returnval;
 }
 
-void HWSPI_clkh(void)
-{
-	cdcprintf("HWSPI: clkh()");
-}
-
-void HWSPI_clkl(void)
-{
-	cdcprintf("HWSPI: clkl()");
-}
-
-void HWSPI_dath(void)
-{
-	cdcprintf("HWSPI: dath()");
-}
-
-void HWSPI_datl(void)
-{
-	cdcprintf("HWSPI: datl()");
-}
-
-uint32_t HWSPI_dats(void)
-{
-	uint32_t returnval;
-	returnval=0;
-	cdcprintf("HWSPI: dats()=%08X", returnval);
-	return returnval;
-}
-
-void HWSPI_clk(void)
-{
-	cdcprintf("HWSPI: clk()");
-}
-
-uint32_t HWSPI_bitr(void)
-{
-	uint32_t returnval;
-	returnval=0;
-	cdcprintf("HWSPI: bitr()=%08X", returnval);
-	return returnval;
-}
-
-uint32_t HWSPI_period(void)
-{
-	uint32_t returnval;
-	returnval=0;
-	cdcprintf("HWSPI: period()=%08X", returnval);
-	return returnval;
-}
-
 void HWSPI_macro(uint32_t macro)
 {
-	cdcprintf("HWSPI: macro(%08X)", macro);
+	switch(macro)
+	{
+		case 0:		cdcprintf("No macros available");
+				break;
+		default:	cdcprintf("Macro not defined");
+				modeConfig.error=1;
+	}
 }
 
 void HWSPI_setup(void)
@@ -184,8 +170,12 @@ void HWSPI_setup_exc(void)
 	// init BPSPIPORT
 	spi_init_master(BPSPIPORT, br, cpol, cpha, dff, lsbfirst);
 
+	// enable fullduplex
+	spi_set_full_duplex_mode(BPSPIPORT);
+
 	// we use software control of /cs
 	spi_enable_software_slave_management(BPSPIPORT);
+	spi_enable_ss_output(BPSPIPORT);
 
 	// cs=1 
 	if(csidle) spi_set_nss_high(BPSPIPORT);
@@ -205,6 +195,7 @@ void HWSPI_setup_exc(void)
 	modeConfig.clkpin=BPSPICLKPIN;
 
 }
+
 void HWSPI_cleanup(void)
 {
 	// disable SPI peripheral
@@ -217,7 +208,7 @@ void HWSPI_cleanup(void)
 	gpio_set_mode(BPSPICLKPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPICLKPIN);
 
 	// disable clock to save the planet warming up
-	rcc_periph_clock_enable(BPSPICLK);
+	rcc_periph_clock_disable(BPSPICLK);
 
 	// update modeConfig pins
 	modeConfig.misoport=0;
@@ -240,4 +231,22 @@ void HWSPI_settings(void)
 {
 	cdcprintf("HWSPI (br cpol cpha cs)=(%d %d %d %d)", (br>>3), (cpol>>1)+1, cpha+1, csidle+1);
 }
+
+void HWSPI_printSPIflags(void)
+{
+	uint32_t temp;
+
+	temp=SPI_SR(BPSPIPORT);
+
+	if(temp&SPI_SR_BSY) cdcprintf(" BSY");
+	if(temp&SPI_SR_OVR) cdcprintf(" OVR");
+	if(temp&SPI_SR_MODF) cdcprintf(" MODF");
+	if(temp&SPI_SR_CRCERR) cdcprintf(" CRCERR");
+	if(temp&SPI_SR_UDR) cdcprintf(" USR");
+	if(temp&SPI_SR_CHSIDE) cdcprintf(" CHSIDE");
+//	if(temp&SPI_SR_TXE) cdcprintf(" TXE");
+//	if(temp&SPI_SR_RXNE) cdcprintf(" RXNE");
+
+}
+
 
