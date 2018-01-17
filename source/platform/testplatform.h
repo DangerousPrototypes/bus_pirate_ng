@@ -3,7 +3,7 @@
 // development test platform
 
 // SPI hardware (HW-SPI)
-#define BPSPIPORT	SPI1
+#define BPSPI		SPI1
 #define BPSPICLK	RCC_SPI1
 #define BPSPIMISOPORT	GPIOA
 #define BPSPIMOSIPORT	GPIOA
