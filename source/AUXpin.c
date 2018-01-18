@@ -9,14 +9,16 @@
 #include "UI.h"
 #include "AUXpin.h"
 
-
 static uint32_t overflows;
 
+
+// init the AUXpin to input
 void initAUX(void)
 {
 	gpio_set_mode(BPAUXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BPAUXPIN);
 }
 
+// set or clear AUX pin
 void setAUX(uint8_t state)
 {
 	gpio_set_mode(BPAUXPORT, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPAUXPIN);
@@ -28,6 +30,7 @@ void setAUX(uint8_t state)
 
 }
 
+// returns the level on AUX pin
 uint8_t getAUX(void)
 {
 	gpio_set_mode(BPAUXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BPAUXPIN);
@@ -36,6 +39,8 @@ uint8_t getAUX(void)
 } 
 
 
+// output a PWM on the AUX pin (1 count=1/36000000s)
+// if period=0 PWM is shutdown
 void setPWM(uint32_t period, uint32_t oc)
 {
 	if(period!=0)
@@ -64,7 +69,7 @@ void setPWM(uint32_t period, uint32_t oc)
 
 }
 
-
+// frequency counter
 uint32_t getfreq(void)
 {
 	uint32_t counts;
@@ -90,15 +95,16 @@ uint32_t getfreq(void)
 
 	delayms(1000);								// we want to count just 1s
 
-	counts = timer_get_counter(BPFREQTIMER) + overflows*65536;
+	counts = timer_get_counter(BPFREQTIMER) + overflows*65536;		// counts is the frequency 
 
-	rcc_periph_clock_disable(BPFREQCLK);
+	rcc_periph_clock_disable(BPFREQCLK);					// turn peripheral off
 	timer_disable_counter(BPFREQTIMER);
 	nvic_disable_irq(BPFREQNVIC);
 
 	return counts;
 }
 
+// timer isr count the number of overflows
 void tim2_isr(void)
 {
 	if (timer_get_flag(TIM2, TIM_SR_CC1IF))					// did we overflow?

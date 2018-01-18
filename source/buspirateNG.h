@@ -7,7 +7,7 @@
 // USB shit :/
 
 // we dont have a USB VID/PID yet so please supply your own
-#define		USB_VID		0x
+#define		USB_VID		0x	
 #define		USB_PID		0x
 #define		USB_VENDOR	"dangerousprototypes.com"
 #define		USB_PRODUCT	"buspirateNG"

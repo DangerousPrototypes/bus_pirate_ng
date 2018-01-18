@@ -8,6 +8,9 @@
 #include "buspirateNG.h"
 #include "debug.h"
 
+// inits the debug system
+// outputs to the uart
+// 115200,n,8,1
 void debuginit(void)
 {
 	// enable clock
@@ -29,11 +32,13 @@ void debuginit(void)
 
 }
 
+// outputs single char
 void dputc(char c)
 {
 	usart_send_blocking(DEBUGUSART, c);
 }
 
+// outust a string
 void dputs(char *s)
 {
 	while(*s) dputc(*(s++));
@@ -42,6 +47,7 @@ void dputs(char *s)
 #define DEBUGBUFLEN	256
 static char  buf[DEBUGBUFLEN];
 
+// outputs a formatted string
 void dprintf(const char *fmt, ...)
 {
 	va_list args;

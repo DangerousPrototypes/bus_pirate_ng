@@ -5,7 +5,7 @@
 #include <libopencm3/stm32/adc.h>
 #include "ADC.h"
 
-
+//initializes and calibrates the ADC 
 void initADC(void)
 {
 	//enable adcclock
@@ -35,7 +35,7 @@ void initADC(void)
 	adc_calibrate(BPADC);
 }
 
-
+// get the raw value from channel chan
 uint16_t getADC(uint8_t chan)
 {
 	uint8_t channels[16];
@@ -55,6 +55,10 @@ uint16_t getADC(uint8_t chan)
 	return ADC_DR(BPADC);
 }
 
+
+// calculates the voltage
+// hi=0 no voltage divider 0 .. 3V3
+// hi=1 1/2 voltage divider 0 .. 6V6
 float voltage(uint8_t chan, uint8_t hi)
 {
 	float voltage;

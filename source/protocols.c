@@ -19,7 +19,7 @@
 
 
 // nulfuncs
-// these are the dummy functions when something aint used
+// these are the dummy functions when something aint used 
 
 void nullfunc1(void)
 {
@@ -49,7 +49,8 @@ void nullfunc4(uint32_t c)
 	modeConfig.error=1;
 }
 
-
+// all protocols and their interaction is handled here
+// buspirateNG.h has the conditional defines for protocols
 
 struct _protocol protocols[MAXPROTO]={
 

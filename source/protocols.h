@@ -1,5 +1,4 @@
 
-//#include "buspirateNG.h"
 
 enum
 {
@@ -47,7 +46,7 @@ typedef struct _protocol
 	uint32_t (*protocol_dats)(void);		// toglle dat (?)
 	void (*protocol_clk)(void);			// toggle clk (?)
 	uint32_t (*protocol_bitr)(void);		// read 1 bit (?)
-	uint32_t (*protocol_periodic)(void);		// service to regular poll whether a byte ahs arrived
+	uint32_t (*protocol_periodic)(void);		// service to regular poll whether a byte has arrived or something interesting has happened
 	void (*protocol_macro)(uint32_t);		// macro
 	void (*protocol_setup)(void);			// setup UI
 	void (*protocol_setup_exc)(void);		// real setup

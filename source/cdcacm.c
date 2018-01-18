@@ -166,6 +166,7 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 
 //void  usb_lp_can_rx0_isr(void)
 
+// polls the usb for new data and sends data back if available
 void cdcpoll(void)
 {
 	int i;
@@ -188,7 +189,7 @@ void cdcpoll(void)
 }
 
 
-
+// init all the buffers and start the usb bus
 void cdcinit(void)
 {
 	int i;

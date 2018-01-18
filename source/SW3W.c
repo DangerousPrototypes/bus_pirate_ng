@@ -264,8 +264,6 @@ void SW3W_macro(uint32_t macro)
 
 void SW3W_setup(void)
 {
-	cdcprintf("SW3W setup()");
-
 	// did the user leave us arguments?
 	// period
 	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);

@@ -27,6 +27,7 @@ void HiZsetup(void)
 {
 }
 
+// this is called duringmode changes; takes care pwm, vpu and psu is turned off, also AUX to input
 void HiZsetup_exc(void)
 {
 	// turn everything off

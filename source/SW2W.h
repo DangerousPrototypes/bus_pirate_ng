@@ -20,4 +20,7 @@ void SW2W_cleanup(void);
 void SW2W_pins(void);
 void SW2W_settings(void);
 
+void setSDAmode(uint8_t input);
 
+#define SW2W_INPUT	1
+#define SW2W_OUTPUT	0

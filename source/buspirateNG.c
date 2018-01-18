@@ -14,11 +14,12 @@
 uint32_t usbpolltime;				// usb poll timer
 volatile uint32_t systicks;
 
+// systick timer 
+// handles the USB polling
 void sys_tick_handler(void)
 {
 	usbpolltime++;
 	systicks++;
-
 
 	// check usb for new data
 	if (usbpolltime==5)
@@ -28,8 +29,7 @@ void sys_tick_handler(void)
 	}
 }
 
-
-
+// all the fun starts here
 int main(void)
 {
 

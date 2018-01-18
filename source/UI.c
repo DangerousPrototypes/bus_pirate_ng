@@ -141,6 +141,7 @@ uint32_t getint(void)
 	return number;
 }
 
+// initializes the variables
 void initUI(void)
 {
 	int i;
@@ -170,6 +171,10 @@ void initUI(void)
 	modeConfig.clkpin=0;
 }
 
+
+
+// one big loop eating all user input. executed/interpretted it when the user presses enter
+//
 void doUI(void)
 {
 	int go;
@@ -522,7 +527,8 @@ void doUI(void)
 	}
 }
 
-
+// display teh versioninfo about the buspirate
+// when not in HiZ mode it dumps info about the pins/voltags etc.
 void versioninfo(void)
 {
 	int i;
@@ -531,6 +537,7 @@ void versioninfo(void)
 	uint16_t ramsize=96;
 	uint32_t pwmperiod, pwmoc;
 
+	// sram and flash size goed hand in hand
 	if(flashsize<=16) ramsize=6;
 	else if(flashsize<=32) ramsize=10;
 	else if(flashsize<=128) ramsize=20;
@@ -585,6 +592,7 @@ void versioninfo(void)
 	
 }
 
+// show voltages/pinstates
 void showstates(void)
 {
 	uint8_t auxstate, csstate, misostate, clkstate, mosistate;
@@ -594,6 +602,8 @@ void showstates(void)
 	cdcprintf("GND\t+5v\t+3V3\tVpu\tADC\tAUX\t");
 	protocols[modeConfig.mode].protocol_pins();
 	cdcprintf("\r\n");
+
+	// TODO: read pindirection
 	cdcprintf("PWR\tPWR\tPWR\tPWR\t2.5V\t1\t1\t1\t0\t1\r\n");
 
 	// pinstates
@@ -629,6 +639,7 @@ void showstates(void)
 
 }
 
+// takes care of mode switchover
 void changemode(void)
 {
 	uint32_t mode;
@@ -673,6 +684,7 @@ void changemode(void)
 	protocols[modeConfig.mode].protocol_setup_exc();
 }
 
+// set display mode  (hex, bin, octa, dec) 
 void changedisplaymode(void)
 {
 	uint32_t displaymode;
@@ -713,7 +725,7 @@ void changedisplaymode(void)
 	modeConfig.displaymode=displaymode-1;
 }
 
-
+// displays the help
 void printhelp(void)
 {
 	cdcprintf(" General\t\t\t\t\tProtocol interaction\r\n");
@@ -741,6 +753,7 @@ void printhelp(void)
 	cdcprintf(" w/W\tPSU (off/ON)\t\t<x>/<x= >/<0>\tUsermacro x/assign x/list all\r\n");
 }
 
+// handles the userinput 
 void getuserinput(void)
 {
 	int go;
@@ -776,6 +789,8 @@ void getuserinput(void)
 	}
 }
 
+
+// keep the user asking the menu until it falls between minval and maxval, enter returns the default value
 uint32_t askint(const char *menu, uint32_t minval, uint32_t maxval, uint32_t defval)
 {
 	uint32_t temp;
@@ -812,6 +827,7 @@ uint32_t askint(const char *menu, uint32_t minval, uint32_t maxval, uint32_t def
 	return temp;
 }
 
+// get the repeat from the commandline (if any) XX:repeat
 uint32_t getrepeat(void)
 {
 	uint32_t tail, repeat;
@@ -830,6 +846,7 @@ uint32_t getrepeat(void)
 	return repeat;
 }
 
+// get the number of bits from the commandline (if any) XXX.numbit
 uint32_t getnumbits(void)
 {
 	uint32_t tail, numbits;
@@ -848,6 +865,7 @@ uint32_t getnumbits(void)
 	return numbits;
 }
 
+// represent d in the current display mode. If numbits=8 also display the ascii representation 
 void printnum(uint32_t d)
 {
 	uint32_t mask, i;
@@ -904,6 +922,8 @@ void printnum(uint32_t d)
 		else cdcprintf(" (\'%c\')", ((d>=0x20)&&(d<0x7E)?d:0x20));
 }
 
+// delays num ms
+// TODO: use a proper timer?
 void delayms(uint32_t num)
 {
 	num*=1000; 		// convert to us
@@ -914,6 +934,7 @@ void delayms(uint32_t num)
 	while(systicks!=num);	
 }
 
+// delay num us
 // minimum is 10us because of systick setup TODO: rewrite to a proper timer?
 void delayus(uint32_t num)
 {

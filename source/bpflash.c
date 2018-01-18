@@ -6,6 +6,7 @@
 #include "cdcacm.h"
 #include "bpflash.h"
 
+// reads an absolute address in flash
 uint32_t readflash(uint32_t addr)
 {
 
@@ -13,6 +14,7 @@ uint32_t readflash(uint32_t addr)
 
 }
 
+// writes to a absolute adress in flash
 uint32_t writeflash(uint32_t addr, uint32_t data)
 {
 	uint32_t flash_status;
@@ -31,6 +33,7 @@ uint32_t writeflash(uint32_t addr, uint32_t data)
 		return 0;
 }
 
+// erases a page in flash memory (1 page=1024bytes)
 uint32_t eraseflashpage(uint32_t addr)
 {
 	uint32_t flash_status;
@@ -49,6 +52,7 @@ uint32_t eraseflashpage(uint32_t addr)
 		return 0;
 }
 
+// show a hexdhump of the reserved space
 // TODO: come up with a better name ps=private store
 void displayps(void)
 {
@@ -69,7 +73,7 @@ void displayps(void)
 
 }
 
-// fill
+// fill the private space with data
 void fillps(void)
 {
 	int i;
