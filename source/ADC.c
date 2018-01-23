@@ -9,30 +9,30 @@
 void initADC(void)
 {
 	//enable adcclock
-	rcc_periph_clock_enable(BPADCCLK);
+	rcc_periph_clock_enable(BP_ADC_CLK);
 
 	// adc needs to be off whiel configuring
-	adc_power_off(ADC1);
+	adc_power_off(BP_ADC);
 
 	// setup for single shot
-	adc_disable_scan_mode(BPADC);
-	adc_set_single_conversion_mode(BPADC);
-	adc_disable_external_trigger_regular(BPADC);
+	adc_disable_scan_mode(BP_ADC);
+	adc_set_single_conversion_mode(BP_ADC);
+	adc_disable_external_trigger_regular(BP_ADC);
 
 	// right aligned results
-	adc_set_right_aligned(BPADC);
+	adc_set_right_aligned(BP_ADC);
 
 	//adc_enable_temperature_sensor();
 
 	// set conversion time (xxms)
-	adc_set_sample_time_on_all_channels(ADC1, ADC_SMPR_SMP_1DOT5CYC);
+	adc_set_sample_time_on_all_channels(BP_ADC, ADC_SMPR_SMP_1DOT5CYC);
 
 	// power on after onversion
-	adc_power_on(BPADC);
+	adc_power_on(BP_ADC);
 
 	// calibrate the adc
-	adc_reset_calibration(BPADC);
-	adc_calibrate(BPADC);
+	adc_reset_calibration(BP_ADC);
+	adc_calibrate(BP_ADC);
 }
 
 // get the raw value from channel chan
@@ -44,15 +44,15 @@ uint16_t getADC(uint8_t chan)
 	channels[0] = chan;
 
 	// set the sequence of 1
-	adc_set_regular_sequence(BPADC, 1, channels);
+	adc_set_regular_sequence(BP_ADC, 1, channels);
 
 	// start single conversion
-	adc_start_conversion_direct(BPADC);
+	adc_start_conversion_direct(BP_ADC);
 
 	// wait for result
-	while (! adc_eoc(BPADC));
+	while (! adc_eoc(BP_ADC));
 
-	return ADC_DR(BPADC);
+	return ADC_DR(BP_ADC);
 }
 
 

@@ -32,9 +32,9 @@ void HiZsetup_exc(void)
 {
 	// turn everything off
 	modeConfig.psu=0;
-	gpio_clear(BPPSUENPORT, BPPSUENPIN);
+	gpio_clear(BP_PSUEN_PORT, BP_PSUEN_PIN);
 	modeConfig.pullups=0;
-	gpio_clear(BPVPUENPORT, BPVPUENPIN);
+	gpio_clear(BP_VPUEN_PORT, BP_VPUEN_PIN);
 
 	// aux and pwm
 	(void)getAUX();

@@ -16,18 +16,18 @@ void SW2W_start(void)
 
 	setSDAmode(SW2W_OUTPUT);					// SDA output
 
-	gpio_set(BPSW2WSDAPORT, BPSW2WSDAPIN); 
-	gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN); 
+	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
+	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
 
 	delayus(period/2);
 
-	gpio_clear(BPSW2WSDAPORT, BPSW2WSDAPIN); 
-	gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN); 
+	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
+	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
 
 	delayus(period/2);
 
-	gpio_clear(BPSW2WSDAPORT, BPSW2WSDAPIN); 
-	gpio_clear(BPSW2WCLKPORT, BPSW2WCLKPIN); 
+	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
+	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
 }
 
 void SW2W_startr(void)
@@ -41,13 +41,13 @@ void SW2W_stop(void)
 
 	setSDAmode(SW2W_OUTPUT);					// SDA output
 
-	gpio_clear(BPSW2WSDAPORT, BPSW2WSDAPIN); 
-	gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN); 
+	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
+	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
 
 	delayus(period/2);
 
-	gpio_set(BPSW2WSDAPORT, BPSW2WSDAPIN); 
-	gpio_set(BPSW2WSDAPORT, BPSW2WSDAPIN); 
+	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
+	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
 
 	delayus(period/2);
 }
@@ -67,17 +67,17 @@ uint32_t SW2W_send(uint32_t d)
 	for(i=0; i<modeConfig.numbits; i++)
 	{
 		// level checking TODO: edge ?
-		if(d&mask) gpio_set(BPSW2WSDAPORT, BPSW2WSDAPIN);
-			else gpio_clear(BPSW2WSDAPORT, BPSW2WSDAPIN);
-		gpio_clear(BPSW2WCLKPORT, BPSW2WCLKPIN);
+		if(d&mask) gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
+			else gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
+		gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 
 		delayus(period/4);
 
-		gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN);
+		gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 
 		delayus(period/2);
 
-		gpio_clear(BPSW2WCLKPORT, BPSW2WCLKPIN);
+		gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 
 		delayus(period/4);
 
@@ -97,16 +97,16 @@ uint32_t SW2W_read(void)
 
 	for(i=0; i<modeConfig.numbits; i++)
 	{
-		gpio_clear(BPSW2WCLKPORT, BPSW2WCLKPIN);
+		gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 		delayus(period/4);
-		gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN);
+		gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 		delayus(period/4);
 
-		if(gpio_get(BPSW2WSDAPORT, BPSW2WSDAPIN)) returnval|=1;
+		if(gpio_get(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN)) returnval|=1;
 		returnval<<=1;
 
 		delayus(period/4);
-		gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN);
+		gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 		delayus(period/4);
 	}
 
@@ -116,34 +116,34 @@ void SW2W_clkh(void)
 {
 	cdcprintf("set CLK=1");
 
-	gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN);
+	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 }
 void SW2W_clkl(void)
 {
 	cdcprintf("set CLK=0");
 
-	gpio_clear(BPSW2WCLKPORT, BPSW2WCLKPIN);
+	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 }
 void SW2W_dath(void)
 {
 	cdcprintf("set SDA=1");
 
 	setSDAmode(SW2W_OUTPUT);					// SDA output
-	gpio_set(BPSW2WSDAPORT, BPSW2WSDAPIN);
+	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
 }
 void SW2W_datl(void)
 {
 	cdcprintf("set SDA=0");
 
 	setSDAmode(SW2W_OUTPUT);					// SDA output
-	gpio_clear(BPSW2WSDAPORT, BPSW2WSDAPIN);
+	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
 }
 uint32_t SW2W_dats(void)
 {
 	uint32_t dat;
 
 	setSDAmode(SW2W_INPUT);						// SDA input
-	dat=(gpio_get(BPSW2WSDAPORT, BPSW2WSDAPIN)?1:0);
+	dat=(gpio_get(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN)?1:0);
 
 	cdcprintf("SDA=%d", dat);
 
@@ -151,11 +151,11 @@ uint32_t SW2W_dats(void)
 }
 void SW2W_clk(void)
 {
-	gpio_clear(BPSW2WCLKPORT, BPSW2WCLKPIN);
+	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 	delayus(period/4);
-	gpio_set(BPSW2WCLKPORT, BPSW2WCLKPIN);
+	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 	delayus(period/2);
-	gpio_clear(BPSW2WCLKPORT, BPSW2WCLKPIN);
+	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
 	delayus(period/4);
 
 	cdcprintf("set CLK=0");
@@ -198,18 +198,18 @@ void SW2W_setup_exc(void)
 
 	if(hiz)
 	{
-		gpio_set_mode(BPSW2WSDAPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BPSW2WSDAPIN);
-		gpio_set_mode(BPSW2WCLKPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BPSW2WCLKPIN);
+		gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_SDA_PIN);
+		gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_CLK_PIN);
 	}
 	else
 	{
-		gpio_set_mode(BPSW2WSDAPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPSW2WSDAPIN);
-		gpio_set_mode(BPSW2WCLKPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPSW2WCLKPIN);
+		gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_SDA_PIN);
+		gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_CLK_PIN);
 	}
 
 	// update modeConfig pins
-	modeConfig.mosiport=BPSW2WSDAPORT;
-	modeConfig.clkport=BPSW2WCLKPORT;
+	modeConfig.mosiport=BP_SW2W_SDA_PORT;
+	modeConfig.clkport=BP_SW2W_CLK_PORT;
 
 }
 
@@ -218,8 +218,8 @@ void SW2W_cleanup(void)
 	cdcprintf("SW2W cleanup()");
 
 	// make all GPIO input
-	gpio_set_mode(BPSW2WSDAPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW2WSDAPIN);
-	gpio_set_mode(BPSW2WCLKPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW2WCLKPIN);
+	gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_SDA_PIN);
+	gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_CLK_PIN);
 
 	// update modeConfig pins
 	modeConfig.misoport=0;
@@ -246,18 +246,18 @@ void setSDAmode(uint8_t input)
 
 	if(input)
 	{
-		gpio_set_mode(BPSW2WSDAPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW2WSDAPIN);
+		gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_SDA_PIN);
 	}
 	else
 	{
 		// set SDA as output
 		if(hiz)
 		{
-			gpio_set_mode(BPSW2WSDAPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BPSW2WSDAPIN);
+			gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_SDA_PIN);
 		}
 		else
 		{
-			gpio_set_mode(BPSW2WSDAPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPSW2WSDAPIN);
+			gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_SDA_PIN);
 		}
 	}
 

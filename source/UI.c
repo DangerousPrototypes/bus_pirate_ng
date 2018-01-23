@@ -286,22 +286,24 @@ void doUI(void)
 						break;
 				case 'b':	temp=askint(VPUMENU, 1, 3, 1);
 						modeConfig.vpumode=temp-1;
+						gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);			// turn all psu off to avoid shorts
+						gpio_clear(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
 						switch(modeConfig.vpumode)
 						{
 							case 1:
-								gpio_clear(BPVPU50ENPORT, BPVPU50ENPIN);
-								gpio_set(BPVPU33ENPORT, BPVPU33ENPIN);
+								gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);
+								gpio_set(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
 							case 2:
-								gpio_clear(BPVPU33ENPORT, BPVPU33ENPIN);
-								gpio_set(BPVPU50ENPORT, BPVPU50ENPIN);
+								gpio_clear(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
+								gpio_set(BP_VPU50EN_PORT, BP_VPU50EN_PIN);
 							default:
-								gpio_clear(BPVPU50ENPORT, BPVPU50ENPIN);
-								gpio_clear(BPVPU33ENPORT, BPVPU33ENPIN);
+								gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);
+								gpio_clear(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
 						}
 						break;
 				case 'd':	if(modeConfig.mode!=HIZ)
 						{
-							cdcprintf("ADC=%0.2fV", voltage(BPADCCHAN, 1));
+							cdcprintf("ADC=%0.2fV", voltage(BP_ADC_CHAN, 1));
 						}
 						else
 						{
@@ -314,7 +316,7 @@ void doUI(void)
 							cdcprintf("Press any key to exit\r\n");
 							while(!cdcbyteready())
 							{
-								cdcprintf("ADC=%0.2fV\r", voltage(BPADCCHAN, 1));
+								cdcprintf("ADC=%0.2fV\r", voltage(BP_ADC_CHAN, 1));
 								delayms(250);
 							}
 							cdcgetc();
@@ -347,6 +349,8 @@ void doUI(void)
 				case 'h':
 				case '?':	printhelp();
 						break;
+				case 'H':	protocols[modeConfig.mode].protocol_help();
+						break;
 				case 'i':	versioninfo();
 						break;
 				case 'l':	modeConfig.bitorder=0;
@@ -359,16 +363,16 @@ void doUI(void)
 						break;
 				case 'o':	changedisplaymode();
 						break;
-				case 'p':	gpio_clear(BPVPUENPORT, BPVPUENPIN);	// always permitted 
+				case 'p':	gpio_clear(BP_VPUEN_PORT, BP_VPUEN_PIN);	// always permitted 
 						cdcprintf("pullups: disabled");
 						modeConfig.pullups=0;
 						break;
 				case 'P':	if(modeConfig.mode!=0)		// reset vpu mode to externale??
 						{
-							gpio_set(BPVPUENPORT, BPVPUENPIN);
+							gpio_set(BP_VPUEN_PORT, BP_VPUEN_PIN);
 							cdcprintf("pullups: enabled\r\n");
 							delayms(10);
-							cdcprintf("Vpu=%0.2fV (mode=%s)", voltage(BPVPUCHAN, 1), vpumodes[modeConfig.vpumode]);
+							cdcprintf("Vpu=%0.2fV (mode=%s)", voltage(BP_VPU_CHAN, 1), vpumodes[modeConfig.vpumode]);
 							modeConfig.pullups=1; 
 						}
 						else
@@ -388,21 +392,20 @@ void doUI(void)
 						break;
 				case 'v':	showstates();
 						break;
-				case 'w':	gpio_clear(BPPSUENPORT, BPPSUENPIN);	// always permitted to shut power off
+				case 'w':	gpio_clear(BP_PSUEN_PORT, BP_PSUEN_PIN);	// always permitted to shut power off
 						cdcprintf("PSU: disabled");
 						modeConfig.psu=0;
 						break;
 				case 'W':	if(modeConfig.mode!=0)
 						{
-							gpio_set(BPPSUENPORT, BPPSUENPIN); 
+							gpio_set(BP_PSUEN_PORT, BP_PSUEN_PIN); 
 							cdcprintf("PSU: enabled\r\n");
 							delayms(10);
-							cdcprintf("V33=%0.2fV, V50=%0.2fV", voltage(BP3V3CHAN, 0), voltage(BP5V0CHAN, 1)); 
-							if((voltage(BP3V3CHAN, 0)<3.1)||(voltage(BP5V0CHAN, 1)<4.8))
+							cdcprintf("V33=%0.2fV, V50=%0.2fV", voltage(BP_3V3_CHAN, 0), voltage(BP_5V0_CHAN, 1)); 
+							if((voltage(BP_3V3_CHAN, 0)<3.1)||(voltage(BP_5V0_CHAN, 1)<4.8))
 							{
-								cdcprintf("\r\nShort circuit!");
-								modeConfig.error=1;
-								gpio_clear(BPPSUENPORT, BPPSUENPIN);
+								cdcprintf("\r\nShort circuit!");								
+								gpio_clear(BP_PSUEN_PORT, BP_PSUEN_PIN);
 							}
 							else
 								modeConfig.psu=1;
@@ -572,18 +575,18 @@ void versioninfo(void)
 		cdcprintf("PWM: %s\r\n", states[modeConfig.pwm]);
 		if(modeConfig.pwm)
 		{
-			pwmperiod=TIM_ARR(BPPWMTIMER);
+			pwmperiod=TIM_ARR(BP_PWM_TIMER);
 #if(1)	// (BPPWMCHAN==TIM_OC1)	
-			pwmoc=TIM_CCR1(BPPWMTIMER);
+			pwmoc=TIM_CCR1(BP_PWM_TIMER);
 #endif
 #if(0)	// (BPPWMCHAN==TIM_OC2)	
-			pwmoc=TIM_CCR2(BPPWMTIMER);
+			pwmoc=TIM_CCR2(BP_PWM_TIMER);
 #endif
 #if(0)	// (BPPWMCHAN==TIM_OC3)	
-			pwmoc=TIM_CCR3(BPPWMTIMER);
+			pwmoc=TIM_CCR3(BP_PWM_TIMER);
 #endif
 #if(0)	// (BPPWMCHAN==TIM_OC4)	
-			pwmoc=TIM_CCR4(BPPWMTIMER);
+			pwmoc=TIM_CCR4(BP_PWM_TIMER);
 #endif
 			cdcprintf("PWM clock %d Hz, dutycycle %0.2f\r\n", (36000000/pwmperiod), (float)((pwmoc*1.0)/pwmperiod));
 		}
@@ -607,7 +610,7 @@ void showstates(void)
 	cdcprintf("PWR\tPWR\tPWR\tPWR\t2.5V\t1\t1\t1\t0\t1\r\n");
 
 	// pinstates
-	auxstate=(gpio_get(BPAUXPORT, BPAUXPIN)?1:0);
+	auxstate=(gpio_get(BP_AUX_PORT, BP_AUX_PIN)?1:0);
 	if(modeConfig.csport)
 		csstate=(gpio_get(modeConfig.csport, modeConfig.cspin)?1:0);
 	else
@@ -628,10 +631,10 @@ void showstates(void)
 		mosistate=2;
 
 	// adcs
-	v33=voltage(BP3V3CHAN, 0);
-	v50=voltage(BP5V0CHAN, 1);
-	vpu=voltage(BPVPUCHAN, 1);
-	adc=voltage(BPADCCHAN, 1);
+	v33=voltage(BP_3V3_CHAN, 0);
+	v50=voltage(BP_5V0_CHAN, 1);
+	vpu=voltage(BP_VPU_CHAN, 1);
+	adc=voltage(BP_ADC_CHAN, 1);
 
 	//TODO adc/pinstate shit
 	cdcprintf("GND\t%0.2fV\t%0.2fV\t%0.2fV\t%0.2fV\t%d\t%d\t%d\t%d\t%d\r\n", v50, v33, vpu, adc, auxstate, csstate, misostate, clkstate, mosistate);
@@ -730,7 +733,7 @@ void printhelp(void)
 {
 	cdcprintf(" General\t\t\t\t\tProtocol interaction\r\n");
 	cdcprintf(" ---------------------------------------------------------------------------\r\n");
-	cdcprintf(" ?\tThis help\t\t\t(0)\tList current macros\r\n");
+	cdcprintf(" \t\t\t\t\t\t(0)\tList current macros\r\n");
 	cdcprintf(" =X/|X\tConverts X/reverse X\t\t(x)\tMacro x\r\n");
 	cdcprintf(" ~\tSelftest\t\t\t[\tStart\r\n");
 	cdcprintf(" #\tReset the BP   \t\t\t]\tStop\r\n");
@@ -742,7 +745,7 @@ void printhelp(void)
 	cdcprintf(" d/D\tMeasure ADC (once/CONT.)\t0b110\tSend value\r\n");
 	cdcprintf(" f\tMeasure frequency\t\tr\tRead\r\n");
 	cdcprintf(" g/S\tGenerate PWM/Servo\t\t/\tCLK hi\r\n");
-	cdcprintf(" h\tCommandhistory\t\t\t\\\tCLK lo\r\n");
+	cdcprintf(" h/H/?\tHelp (general/PROTOCOL)\t\\\tCLK lo\r\n");
 	cdcprintf(" i\tVersioninfo/statusinfo\t\t^\tCLK tick\r\n");
 	cdcprintf(" l/L\tBitorder (msb/LSB)\t\t-\tDAT hi\r\n");
 	cdcprintf(" m\tChange mode\t\t\t_\tDAT lo\r\n");

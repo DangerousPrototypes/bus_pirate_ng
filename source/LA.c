@@ -9,7 +9,7 @@
 static uint32_t returnval;
 static uint8_t lamode;
 
-static uint8_t labuff[BPLABUFFSIZE];			// is this french?!
+static uint8_t labuff[BP_LA_BUFFSIZE];			// is this french?!
 
 
 static void displaybuff(void);
@@ -86,7 +86,7 @@ void LA_macro(uint32_t macro)
 	{
 		case 0:		cdcprintf("1. fill buffer with random data\r\n2. display buffer in ASCII art");
 				break;
-		case 1:		for(i=0; i<BPLABUFFSIZE; i++)
+		case 1:		for(i=0; i<BP_LA_BUFFSIZE; i++)
 				{
 					labuff[i]=i;
 				}
@@ -104,7 +104,7 @@ void LA_setup(void)
 }
 void LA_setup_exc(void)
 {
-	cdcprintf("Buffer size=%d", BPLABUFFSIZE);
+	cdcprintf("Buffer size=%d", BP_LA_BUFFSIZE);
 }
 void LA_cleanup(void)
 {

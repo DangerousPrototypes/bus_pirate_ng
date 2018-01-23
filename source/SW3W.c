@@ -19,9 +19,9 @@ void SW3W_start(void)
 	cdcprintf("set CS=%d", !csmode);
 
 	if(csmode)
-		gpio_clear(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_clear(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 	else
-		gpio_set(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_set(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 
 	modeConfig.wwr=0;
 }
@@ -31,9 +31,9 @@ void SW3W_startr(void)
 	cdcprintf("set CS=%d", !csmode);
 
 	if(csmode)
-		gpio_clear(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_clear(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 	else
-		gpio_set(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_set(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 
 	modeConfig.wwr=1;
 }
@@ -43,9 +43,9 @@ void SW3W_stop(void)
 	cdcprintf("set CS=%d", csmode);
 
 	if(csmode)
-		gpio_set(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_set(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 	else
-		gpio_clear(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_clear(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 
 	modeConfig.wwr=0;
 }
@@ -55,9 +55,9 @@ void SW3W_stopr(void)
 	cdcprintf("set CS=%d", csmode);
 
 	if(csmode)
-		gpio_set(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_set(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 	else
-		gpio_clear(BPSW3WCSPORT, BPSW3WCSPIN);
+		gpio_clear(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
 
 	modeConfig.wwr=0;
 }
@@ -73,9 +73,9 @@ uint32_t SW3W_send(uint32_t d)
 
 	// set clock to right idle level
 	if(cpol)
-		gpio_set(BPSW3WCLKPORT, BPSW3WCLKPIN);
+		gpio_set(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 	else
-		gpio_clear(BPSW3WCLKPORT, BPSW3WCLKPIN);
+		gpio_clear(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 
 	// let it settle?
 
@@ -83,21 +83,21 @@ uint32_t SW3W_send(uint32_t d)
 	{
 		if(cpha)							// CPHA=1 change CLK before MOSI
 		{
-			gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+			gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 
 			if(d&mask)						// write MSB first (UI.c takes care of endianess)
-				gpio_set(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+				gpio_set(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 			else
-				gpio_clear(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+				gpio_clear(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 
 			delayus(period/2);					// wait half period
 
-			gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+			gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 
 			returnval<<=1;
 			mask>>=1;
 
-			if(gpio_get(BPSW3WMISOPORT, BPSW3WMISOPIN))		// directly read the MISO
+			if(gpio_get(BP_SW3W_MISO_PORT, BP_SW3W_MISO_PIN))	// directly read the MISO
 			returnval|=0x00000001;
 
 			delayus(period/2);					// wait half period
@@ -105,23 +105,23 @@ uint32_t SW3W_send(uint32_t d)
 		else
 		{
 			if(d&mask)						// write MSB first (UI.c takes care of endianess)
-				gpio_set(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+				gpio_set(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 			else
-				gpio_clear(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+				gpio_clear(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 
 			delayus(period/2);					// wait half period
 
-			gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+			gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 
 			returnval<<=1;
 			mask>>=1;
 
-			if(gpio_get(BPSW3WMISOPORT, BPSW3WMISOPIN))		// directly read the MISO
+			if(gpio_get(BP_SW3W_MISO_PORT, BP_SW3W_MISO_PIN))	// directly read the MISO
 			returnval|=0x00000001;
 
 			delayus(period/2);					// wait half period
 
-			gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+			gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 		}
 	}
 
@@ -141,35 +141,35 @@ void SW3W_clkh(void)
 {
 	cdcprintf("set CLK=1");
 
-	gpio_set(BPSW3WCLKPORT, BPSW3WCLKPIN);
+	gpio_set(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 }
 
 void SW3W_clkl(void)
 {
 	cdcprintf("set CLK=0");
 
-	gpio_clear(BPSW3WCLKPORT, BPSW3WCLKPIN);
+	gpio_clear(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 }
 
 void SW3W_dath(void)
 {
 	cdcprintf("set MOSI=1");
 
-	gpio_set(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+	gpio_set(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 }
 
 void SW3W_datl(void)
 {
 	cdcprintf("set MOSI=0");
 
-	gpio_clear(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+	gpio_clear(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 }
 
 uint32_t SW3W_dats(void) 
 {
 	uint32_t returnval;
 
-	returnval=(gpio_get(BPSW3WMISOPORT, BPSW3WMISOPIN)?1:0);
+	returnval=(gpio_get(BP_SW3W_MISO_PORT, BP_SW3W_MISO_PIN)?1:0);
 
 	cdcprintf("MISO=%d", returnval);
 
@@ -181,18 +181,18 @@ void SW3W_clk(void)
 	cdcprintf("set CLK=%d", cpol);
 
 	if(cpol)
-		gpio_clear(BPSW3WCLKPORT, BPSW3WCLKPIN);
+		gpio_clear(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 	else
-		gpio_set(BPSW3WCLKPORT, BPSW3WCLKPIN);
+		gpio_set(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 
 	delayus(period/2);
 
 	cdcprintf("\r\nset CLK=%d", !cpol);
 
 	if(cpol)
-		gpio_set(BPSW3WCLKPORT, BPSW3WCLKPIN);
+		gpio_set(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 	else
-		gpio_clear(BPSW3WCLKPORT, BPSW3WCLKPIN);
+		gpio_clear(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
 
 	delayus(period/2);
 }
@@ -207,34 +207,34 @@ uint32_t SW3W_bitr(void)
 
 	if(cpha)							// CPHA=1 change CLK before MOSI
 	{
-		gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+		gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 
-		gpio_set(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+		gpio_set(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 
 		delayus(period/2);					// wait half period
 
-		gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+		gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 
-		if(gpio_get(BPSW3WMISOPORT, BPSW3WMISOPIN))		// directly read the MISO
+		if(gpio_get(BP_SW3W_MISO_PORT, BP_SW3W_MISO_PIN))	// directly read the MISO
 			returnval=1;
 
 		delayus(period/2);					// wait half period
 	}
 	else
 	{
-		gpio_set(BPSW3WMOSIPORT, BPSW3WMOSIPIN);
+		gpio_set(BP_SW3W_MOSI_PORT, BP_SW3W_MOSI_PIN);
 
 		delayus(period/2);					// wait half period
 
-		gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+		gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 
 
-		if(gpio_get(BPSW3WMISOPORT, BPSW3WMISOPIN))		// directly read the MISO
+		if(gpio_get(BP_SW3W_MISO_PORT, BP_SW3W_MISO_PIN))	// directly read the MISO
 		returnval=1;
 
 		delayus(period/2);					// wait half period
 
-		gpio_toggle(BPSW3WCLKPORT, BPSW3WCLKPIN);		// toggle is ok as the right polarity is set
+		gpio_toggle(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);		// toggle is ok as the right polarity is set
 	}
 
 	cdcprintf("RX: %d.1", returnval);
@@ -315,36 +315,36 @@ void SW3W_setup_exc(void)
 {
 	if(opendrain)
 	{
-		gpio_set_mode(BPSW3WMOSIPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BPSW3WMOSIPIN);
-		gpio_set_mode(BPSW3WCSPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BPSW3WCSPIN);
-		gpio_set_mode(BPSW3WCLKPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BPSW3WCLKPIN);
-		gpio_set_mode(BPSW3WMISOPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW3WMISOPIN);
+		gpio_set_mode(BP_SW3W_MOSI_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW3W_MOSI_PIN);
+		gpio_set_mode(BP_SW3W_CS_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW3W_CS_PIN);
+		gpio_set_mode(BP_SW3W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW3W_CLK_PIN);
+		gpio_set_mode(BP_SW3W_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW3W_MISO_PIN);
 	}
 	else
 	{
-		gpio_set_mode(BPSW3WMOSIPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPSW3WMOSIPIN);
-		gpio_set_mode(BPSW3WCSPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPSW3WCSPIN);
-		gpio_set_mode(BPSW3WCLKPORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BPSW3WCLKPIN);
-		gpio_set_mode(BPSW3WMISOPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW3WMISOPIN);
+		gpio_set_mode(BP_SW3W_MOSI_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW3W_MOSI_PIN);
+		gpio_set_mode(BP_SW3W_CS_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW3W_CS_PIN);
+		gpio_set_mode(BP_SW3W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW3W_CLK_PIN);
+		gpio_set_mode(BP_SW3W_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW3W_MISO_PIN);
 	}
 
 	// update modeConfig pins
-	modeConfig.misoport=BPSW3WMISOPORT;
-	modeConfig.mosiport=BPSW3WMOSIPORT;
-	modeConfig.csport=BPSW3WCSPORT;
-	modeConfig.clkport=BPSW3WCLKPORT;
-	modeConfig.misopin=BPSW3WMISOPIN;
-	modeConfig.mosipin=BPSW3WMOSIPIN;
-	modeConfig.cspin=BPSW3WCSPIN;
-	modeConfig.clkpin=BPSW3WCLKPIN;
+	modeConfig.misoport=BP_SW3W_MISO_PORT;
+	modeConfig.mosiport=BP_SW3W_MOSI_PORT;
+	modeConfig.csport=BP_SW3W_CS_PORT;
+	modeConfig.clkport=BP_SW3W_CLK_PORT;
+	modeConfig.misopin=BP_SW3W_MISO_PIN;
+	modeConfig.mosipin=BP_SW3W_MOSI_PIN;
+	modeConfig.cspin=BP_SW3W_CS_PIN;
+	modeConfig.clkpin=BP_SW3W_CLK_PIN;
 }
 void SW3W_cleanup(void)
 {
 	// make all GPIO input
-	gpio_set_mode(BPSW3WMOSIPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW3WMOSIPIN);
-	gpio_set_mode(BPSW3WMISOPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW3WMISOPIN);
-	gpio_set_mode(BPSW3WCLKPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW3WCLKPIN);
-	gpio_set_mode(BPSW3WCSPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSW3WCSPIN);
+	gpio_set_mode(BP_SW3W_MOSI_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW3W_MOSI_PIN);
+	gpio_set_mode(BP_SW3W_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW3W_MISO_PIN);
+	gpio_set_mode(BP_SW3W_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW3W_CLK_PIN);
+	gpio_set_mode(BP_SW3W_CS_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW3W_CS_PIN);
 
 	// update modeConfig pins
 	modeConfig.misoport=0;

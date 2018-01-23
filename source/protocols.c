@@ -49,6 +49,11 @@ void nullfunc4(uint32_t c)
 	modeConfig.error=1;
 }
 
+void nohelp(void)
+{
+	cdcprintf("No help available");
+}
+
 // all protocols and their interaction is handled here
 // buspirateNG.h has the conditional defines for protocols
 
@@ -75,6 +80,7 @@ struct _protocol protocols[MAXPROTO]={
 	HiZcleanup,				// cleanup for HiZ
 	HiZpins,				// display pin config
 	HiZsettings,				// display settings 
+	nohelp,					// display small help about the protocol
 	"HiZ",					// friendly name (promptname)
 },
 #ifdef BP_USE_DUMMY1
@@ -99,6 +105,7 @@ struct _protocol protocols[MAXPROTO]={
 	dummy1_cleanup,				// cleanup for HiZ
 	dummy1_pins,				// display pin config
 	dummy1_settings,			// display settings 
+	nohelp,					// display small help about the protocol
 	"DUMMY1",				// friendly name (promptname)
 },
 #endif
@@ -124,6 +131,7 @@ struct _protocol protocols[MAXPROTO]={
 	dummy2_cleanup,				// cleanup for HiZ
 	dummy2_pins,				// display pin config
 	dummy2_settings,			// display settings 
+	nohelp,					// display small help about the protocol
 	"DUMMY2",				// friendly name (promptname)
 },
 #endif
@@ -149,6 +157,7 @@ struct _protocol protocols[MAXPROTO]={
 	HWSPI_cleanup,				// cleanup for HiZ
 	HWSPI_pins,				// display pin config
 	HWSPI_settings,				// display settings 
+	nohelp,					// display small help about the protocol
 	"HW-SPI",				// friendly name (promptname)
 },
 #endif
@@ -174,6 +183,7 @@ struct _protocol protocols[MAXPROTO]={
 	HWUSART_cleanup,			// cleanup for HiZ
 	HWUSART_pins,				// display pin config
 	HWUSART_settings,			// display settings 
+	nohelp,					// display small help about the protocol
 	"HW-USART",				// friendly name (promptname)
 },
 #endif
@@ -199,6 +209,7 @@ struct _protocol protocols[MAXPROTO]={
 	HWI2C_cleanup,				// cleanup for HiZ
 	HWI2C_pins,				// display pin config
 	HWI2C_settings,				// display settings 
+	HWI2C_help,					// display small help about the protocol
 	"HW-I2C",				// friendly name (promptname)
 },
 #endif
@@ -224,6 +235,7 @@ struct _protocol protocols[MAXPROTO]={
 	LA_cleanup,				// cleanup for HiZ
 	LA_pins,				// display pin config
 	LA_settings,				// display settings 
+	nohelp,					// display small help about the protocol
 	"LA",					// friendly name (promptname)
 },
 #endif
@@ -249,6 +261,7 @@ struct _protocol protocols[MAXPROTO]={
 	SW2W_cleanup,				// cleanup for HiZ
 	SW2W_pins,				// display pin config
 	SW2W_settings,				// display settings 
+	nohelp,					// display small help about the protocol
 	"SW2W",					// friendly name (promptname)
 },
 #endif
@@ -274,6 +287,7 @@ struct _protocol protocols[MAXPROTO]={
 	SW3W_cleanup,				// cleanup for HiZ
 	SW3W_pins,				// display pin config
 	SW3W_settings,				// display settings 
+	nohelp,					// display small help about the protocol
 	"SW3W",				// friendly name (promptname)
 },
 #endif

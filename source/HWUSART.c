@@ -15,9 +15,9 @@ static uint32_t br, nbits, sbits, parity, block;
 uint32_t HWUSART_send(uint32_t d)
 {
 	if(block)
-		usart_send_blocking(BPUSART, d);
+		usart_send_blocking(BP_USART, d);
 	else
-		usart_send(BPUSART, d);
+		usart_send(BP_USART, d);
 
 	HWUSART_printerror();
 
@@ -28,9 +28,9 @@ uint32_t HWUSART_read(void)
 	uint32_t received;
 
 	if(block)
-		received=usart_recv_blocking(BPUSART);
+		received=usart_recv_blocking(BP_USART);
 	else
-		received=usart_recv(BPUSART);
+		received=usart_recv(BP_USART);
 
 	HWUSART_printerror();
 
@@ -129,30 +129,30 @@ void HWUSART_setup(void)
 void HWUSART_setup_exc(void)
 {
 	// enable clock
-	rcc_periph_clock_enable(BPUSARTCLK);
+	rcc_periph_clock_enable(BP_USART_CLK);
 
 	// set gpio
-	gpio_set_mode(BPUSARTTXPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BPUSARTTXPIN);
-	gpio_set_mode(BPUSARTRXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BPUSARTRXPIN);
+	gpio_set_mode(BP_USART_TX_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_USART_TX_PIN);
+	gpio_set_mode(BP_USART_RX_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_USART_RX_PIN);
 
 	// setup USART
-	usart_set_baudrate(BPUSART, br);
-	usart_set_databits(BPUSART, nbits);
-	usart_set_stopbits(BPUSART, sbits);
-	usart_set_parity(BPUSART, parity);
+	usart_set_baudrate(BP_USART, br);
+	usart_set_databits(BP_USART, nbits);
+	usart_set_stopbits(BP_USART, sbits);
+	usart_set_parity(BP_USART, parity);
 
 	// standard
-	usart_set_mode(BPUSART, USART_MODE_TX_RX);
-	usart_set_flow_control(BPUSART, USART_FLOWCONTROL_NONE);
+	usart_set_mode(BP_USART, USART_MODE_TX_RX);
+	usart_set_flow_control(BP_USART, USART_FLOWCONTROL_NONE);
 
 	// enable USART
-	usart_enable(BPUSART);
+	usart_enable(BP_USART);
 
 	// update modeConfig pins
-	modeConfig.misoport=BPUSARTRXPORT;
-	modeConfig.mosiport=BPUSARTTXPORT;
-	modeConfig.misopin=BPUSARTRXPIN;
-	modeConfig.mosipin=BPUSARTTXPIN;
+	modeConfig.misoport=BP_USART_RX_PORT;
+	modeConfig.mosiport=BP_USART_TX_PORT;
+	modeConfig.misopin=BP_USART_RX_PIN;
+	modeConfig.mosipin=BP_USART_TX_PIN;
 
 }
 
@@ -161,14 +161,14 @@ void HWUSART_setup_exc(void)
 void HWUSART_cleanup(void)
 {
 	//disable usart
-	usart_enable(BPUSART);
+	usart_enable(BP_USART);
 
 	//disable clock
-	rcc_periph_clock_disable(BPUSARTCLK);
+	rcc_periph_clock_disable(BP_USART_CLK);
 
 	// set pins to HiZ
-	gpio_set_mode(BPUSARTTXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPUSARTTXPIN);
-	gpio_set_mode(BPUSARTRXPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPUSARTRXPIN);
+	gpio_set_mode(BP_USART_TX_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_USART_TX_PIN);
+	gpio_set_mode(BP_USART_RX_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_USART_RX_PIN);
 
 	// update modeConfig pins
 	modeConfig.misoport=0;
@@ -201,7 +201,7 @@ void HWUSART_printerror(void)
 {
 	uint32_t error;
 
-	error=USART_SR(BPUSART)&USARTERRORS;	// not all are errors
+	error=USART_SR(BP_USART)&USARTERRORS;	// not all are errors
 
 	if(error)
 	{
@@ -226,7 +226,7 @@ void HWUSART_printerror(void)
 			cdcprintf("LBD ");
 		if(error&USART_SR_CTS)		// CTS set
 			cdcprintf("CTS ");
-		USART_SR(BPUSART)=error;	// clear error
+		USART_SR(BP_USART)=error;	// clear error(s)
 
 	}
 }

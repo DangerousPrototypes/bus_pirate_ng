@@ -53,6 +53,7 @@ typedef struct _protocol
 	void (*protocol_cleanup)(void);			// cleanup for HiZ
 	void (*protocol_pins)(void);			// display pin config
 	void (*protocol_settings)(void);		// display settings 
+	void (*protocol_help)(void);			// display protocol specific help
 	char protocol_name[10];				// friendly name (promptname)
 } protocol;
 
@@ -63,4 +64,5 @@ void nullfunc1(void);
 uint32_t nullfunc2(uint32_t c);
 uint32_t nullfunc3(void);
 void nullfunc4(uint32_t c);
+void nohelp(void);
 

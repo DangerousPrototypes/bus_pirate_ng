@@ -15,8 +15,8 @@ void HWSPI_start(void)
 {
 	cdcprintf("set CS=%d", !csidle);
 
-	if(csidle) spi_set_nss_low(BPSPI);
-		else spi_set_nss_high(BPSPI);
+	if(csidle) spi_set_nss_low(BP_SPI);
+		else spi_set_nss_high(BP_SPI);
 
 	modeConfig.wwr=0;
 }
@@ -25,8 +25,8 @@ void HWSPI_startr(void)
 {
 	cdcprintf("set CS=%d", !csidle);
 
-	if(csidle) spi_set_nss_low(BPSPI);
-		else spi_set_nss_high(BPSPI);
+	if(csidle) spi_set_nss_low(BP_SPI);
+		else spi_set_nss_high(BP_SPI);
 
 	modeConfig.wwr=1;
 }
@@ -35,8 +35,8 @@ void HWSPI_stop(void)
 {
 	cdcprintf("set CS=%d", csidle);
 
-	if(csidle) spi_set_nss_high(BPSPI);
-		else spi_set_nss_low(BPSPI);
+	if(csidle) spi_set_nss_high(BP_SPI);
+		else spi_set_nss_low(BP_SPI);
 
 	modeConfig.wwr=0;
 
@@ -46,8 +46,8 @@ void HWSPI_stopr(void)
 {
 	cdcprintf("set CS=%d", csidle);
 
-	if(csidle) spi_set_nss_high(BPSPI);
-		else spi_set_nss_low(BPSPI);
+	if(csidle) spi_set_nss_high(BP_SPI);
+		else spi_set_nss_low(BP_SPI);
 
 	modeConfig.wwr=0;
 }
@@ -59,10 +59,10 @@ uint32_t HWSPI_send(uint32_t d)
 	//TODO: lsb ??
 	if((modeConfig.numbits==8)||(modeConfig.numbits==16))
 	{
-		if(modeConfig.numbits==8) spi_set_dff_8bit(BPSPI);			// is there a less overhead way of doing this?
-		if(modeConfig.numbits==16) spi_set_dff_16bit(BPSPI);
+		if(modeConfig.numbits==8) spi_set_dff_8bit(BP_SPI);			// is there a less overhead way of doing this?
+		if(modeConfig.numbits==16) spi_set_dff_16bit(BP_SPI);
 	
-		returnval=spi_xfer(BPSPI, (uint16_t)d);
+		returnval=spi_xfer(BP_SPI, (uint16_t)d);
 	}
 	else
 	{
@@ -81,10 +81,10 @@ uint32_t HWSPI_read(void)
 	//TODO: check lsb??
 	if((modeConfig.numbits==8)||(modeConfig.numbits==16))
 	{
-		if(modeConfig.numbits==8) spi_set_dff_8bit(BPSPI);			// is there a less overhead way of doing this?
-		if(modeConfig.numbits==16) spi_set_dff_16bit(BPSPI);
+		if(modeConfig.numbits==8) spi_set_dff_8bit(BP_SPI);			// is there a less overhead way of doing this?
+		if(modeConfig.numbits==16) spi_set_dff_16bit(BP_SPI);
 
-		returnval = spi_xfer(BPSPI, 0xFF);					// is 0xFF ok?
+		returnval = spi_xfer(BP_SPI, 0xFF);					// is 0xFF ok?
 	}
 	else
 	{
@@ -156,59 +156,59 @@ void HWSPI_setup(void)
 void HWSPI_setup_exc(void)
 {
 	// start the clock
-	rcc_periph_clock_enable(BPSPICLK);
+	rcc_periph_clock_enable(BP_SPI_CLK);
 
 	// setup gpio asalternate function
-	gpio_set_mode(BPSPIMOSIPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BPSPIMOSIPIN);
-	gpio_set_mode(BPSPICSPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BPSPICSPIN);
-	gpio_set_mode(BPSPICLKPORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BPSPICLKPIN);
-	gpio_set_mode(BPSPIMISOPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPIMISOPIN);
+	gpio_set_mode(BP_SPI_MOSI_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_MOSI_PIN);
+	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CS_PIN);
+	gpio_set_mode(BP_SPI_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CLK_PIN);
+	gpio_set_mode(BP_SPI_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_MISO_PIN);
 
 	// reset all registers
-	spi_reset(BPSPI);
+	spi_reset(BP_SPI);
 
 	// init BPSPI
-	spi_init_master(BPSPI, br, cpol, cpha, dff, lsbfirst);
+	spi_init_master(BP_SPI, br, cpol, cpha, dff, lsbfirst);
 
 	// enable fullduplex
-	spi_set_full_duplex_mode(BPSPI);
+	spi_set_full_duplex_mode(BP_SPI);
 
 	// we use software control of /cs
-	spi_enable_software_slave_management(BPSPI);
-	spi_enable_ss_output(BPSPI);
+	spi_enable_software_slave_management(BP_SPI);
+	spi_enable_ss_output(BP_SPI);
 
 	// cs=1 
-	if(csidle) spi_set_nss_high(BPSPI);
-		else spi_set_nss_low(BPSPI);
+	if(csidle) spi_set_nss_high(BP_SPI);
+		else spi_set_nss_low(BP_SPI);
 	
 	// unleash the beast
-	spi_enable(BPSPI);
+	spi_enable(BP_SPI);
 
 	// update modeConfig pins
-	modeConfig.misoport=BPSPIMISOPORT;
-	modeConfig.mosiport=BPSPIMOSIPORT;
-	modeConfig.csport=BPSPICSPORT;
-	modeConfig.clkport=BPSPICLKPORT;
-	modeConfig.misopin=BPSPIMISOPIN;
-	modeConfig.mosipin=BPSPIMOSIPIN;
-	modeConfig.cspin=BPSPICSPIN;
-	modeConfig.clkpin=BPSPICLKPIN;
+	modeConfig.misoport=BP_SPI_MISO_PORT;
+	modeConfig.mosiport=BP_SPI_MOSI_PORT;
+	modeConfig.csport=BP_SPI_CS_PORT;
+	modeConfig.clkport=BP_SPI_CLK_PORT;
+	modeConfig.misopin=BP_SPI_MISO_PIN;
+	modeConfig.mosipin=BP_SPI_MOSI_PIN;
+	modeConfig.cspin=BP_SPI_CS_PIN;
+	modeConfig.clkpin=BP_SPI_CLK_PIN;
 
 }
 
 void HWSPI_cleanup(void)
 {
 	// disable SPI peripheral
-	spi_disable(BPSPI);		// spi_clean_disable??
+	spi_disable(BP_SPI);		// spi_clean_disable??
 
 	// set all used pins to input
-	gpio_set_mode(BPSPIMISOPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPIMISOPIN);
-	gpio_set_mode(BPSPIMOSIPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPIMOSIPIN);
-	gpio_set_mode(BPSPICSPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPICSPIN);
-	gpio_set_mode(BPSPICLKPORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BPSPICLKPIN);
+	gpio_set_mode(BP_SPI_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_MISO_PIN);
+	gpio_set_mode(BP_SPI_MOSI_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_MOSI_PIN);
+	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_CS_PIN);
+	gpio_set_mode(BP_SPI_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_CLK_PIN);
 
 	// disable clock to save the planet warming up
-	rcc_periph_clock_disable(BPSPICLK);
+	rcc_periph_clock_disable(BP_SPI_CLK);
 
 	// update modeConfig pins
 	modeConfig.misoport=0;
@@ -236,7 +236,7 @@ void HWSPI_printSPIflags(void)
 {
 	uint32_t temp;
 
-	temp=SPI_SR(BPSPI);
+	temp=SPI_SR(BP_SPI);
 
 	if(temp&SPI_SR_BSY) cdcprintf(" BSY");
 	if(temp&SPI_SR_OVR) cdcprintf(" OVR");
