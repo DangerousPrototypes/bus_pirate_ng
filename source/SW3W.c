@@ -304,8 +304,8 @@ void SW3W_setup(void)
 	if(modeConfig.error)			// go interactive 
 	{
 		period=(askint(SW3WPERIODMENU, 10, 1000, 1000));
-		cpha=(askint(SW3WCPHAMENU, 1, 2, 1)-1);
-		cpol=(askint(SW3WCPOLMENU, 1, 2, 1)-1);
+		cpha=(askint(SW3WCPHAMENU, 1, 2, 2)-1);
+		cpol=(askint(SW3WCPOLMENU, 1, 2, 2)-1);
 		csmode=(askint(SW3WCSMENU, 1, 2, 2)-1);
 		opendrain=(askint(SW3WODMENU, 1, 2, 1)-1);
 	}
@@ -368,6 +368,47 @@ void SW3W_settings(void)
 	cdcprintf("SW3W (holdtime cpol cpha csmode od)=(%d, %d, %d, %d, %d)", period, cpol+1, cpha+1, csmode+1, opendrain+1);
 }
 
+void SW3W_help(void)
+{
+	cdcprintf("Peer to peer 3 or 4 wire full duplex protocol. Very\r\n");
+	cdcprintf("high clockrates upto 20MHz are possible.\r\n");
+	cdcprintf("\r\n");
+	cdcprintf("More info: https://en.wikipedia.org/wiki/Serial_Peripheral_Interface_Bus\r\n");
+	cdcprintf("\r\n");
 
+
+	cdcprintf("BPCMD\t {,] |                 DATA (1..32bit)               | },]\r\n");
+	cdcprintf("CMD\tSTART| D7  | D6  | D5  | D4  | D3  | D2  | D1  | D0  | STOP\r\n");
+
+	if(cpha)
+	{	
+		cdcprintf("MISO\t-----|{###}|{###}|{###}|{###}|{###}|{###}|{###}|{###}|------\r\n");
+		cdcprintf("MOSI\t-----|{###}|{###}|{###}|{###}|{###}|{###}|{###}|{###}|------\r\n");
+	}
+	else
+	{
+		cdcprintf("MISO\t---{#|##}{#|##}{#|##}{#|##}{#|##}{#|##}{#|##}{#|##}--|------\r\n");
+		cdcprintf("MOSI\t---{#|##}{#|##}{#|##}{#|##}{#|##}{#|##}{#|##}{#|##}--|------\r\n");
+	}
+
+	if(cpol)
+		cdcprintf("CLK     \"\"\"\"\"|\"\"__\"|\"\"__\"|\"\"__\"|\"\"__\"|\"\"__\"|\"\"__\"|\"\"__\"|\"\"__\"|\"\"\"\"\"\"\r\n");
+	else
+		cdcprintf("CLK\t_____|__\"\"_|__\"\"_|__\"\"_|__\"\"_|__\"\"_|__\"\"_|__\"\"_|__\"\"_|______\r\n");
+
+	if(csmode)
+		cdcprintf("CS\t\"\"___|_____|_____|_____|_____|_____|_____|_____|_____|___\"\"\"\r\n");
+	else
+		cdcprintf("CS\t__\"\"\"|\"\"\"\"\"|\"\"\"\"\"|\"\"\"\"\"|\"\"\"\"\"|\"\"\"\"\"|\"\"\"\"\"|\"\"\"\"\"|\"\"\"\"\"|\"\"\"___\r\n");
+
+	cdcprintf("\r\nCurrent mode is CPHA=%d and CPOL=%d\r\n",cpha, cpol);
+	cdcprintf("\r\n");
+	cdcprintf("Connection:\r\n");
+	cdcprintf("\tMOSI \t------------------ MOSI\r\n");
+	cdcprintf("\tMISO \t------------------ MISO\r\n");
+	cdcprintf("{BP}\tCLK\t------------------ CLK\t{DUT}\r\n");
+	cdcprintf("\tCS\t------------------ CS\r\n");
+	cdcprintf("\tGND\t------------------ GND\r\n");
+}
 
 

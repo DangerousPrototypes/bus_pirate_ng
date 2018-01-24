@@ -232,8 +232,6 @@ void HWI2C_printI2Cflags(void)
 
 void HWI2C_help(void)
 {
-	cdcprintf("I2C\r\n");
-	cdcprintf("\r\n");
 	cdcprintf("Muli-Master-multi-slave 2 wire protocol using a CLOCK and an bidirectional DATA\r\n");
 	cdcprintf("line in opendrain configuration. Standard clock frequencies are 100KHz, 400KHz\r\n");
 	cdcprintf("and 1MHz.\r\n");

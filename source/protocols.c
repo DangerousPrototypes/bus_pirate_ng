@@ -157,7 +157,7 @@ struct _protocol protocols[MAXPROTO]={
 	HWSPI_cleanup,				// cleanup for HiZ
 	HWSPI_pins,				// display pin config
 	HWSPI_settings,				// display settings 
-	nohelp,					// display small help about the protocol
+	HWSPI_help,				// display small help about the protocol
 	"HW-SPI",				// friendly name (promptname)
 },
 #endif
@@ -183,7 +183,7 @@ struct _protocol protocols[MAXPROTO]={
 	HWUSART_cleanup,			// cleanup for HiZ
 	HWUSART_pins,				// display pin config
 	HWUSART_settings,			// display settings 
-	nohelp,					// display small help about the protocol
+	HWUSART_help,				// display small help about the protocol
 	"HW-USART",				// friendly name (promptname)
 },
 #endif
@@ -287,7 +287,7 @@ struct _protocol protocols[MAXPROTO]={
 	SW3W_cleanup,				// cleanup for HiZ
 	SW3W_pins,				// display pin config
 	SW3W_settings,				// display settings 
-	nohelp,					// display small help about the protocol
+	SW3W_help,					// display small help about the protocol
 	"SW3W",				// friendly name (promptname)
 },
 #endif

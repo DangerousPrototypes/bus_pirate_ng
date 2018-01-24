@@ -19,7 +19,7 @@ void SW3W_setup_exc(void);
 void SW3W_cleanup(void);
 void SW3W_pins(void);
 void SW3W_settings(void);
-
+void SW3W_help(void);
 
 #define SW3WPERIODMENU	"\r\nPeriodd in us (>20)\r\nperiod> "
 #define SW3WCSMENU	"\r\nCS mode\r\n 1. CS\r\n 2. !CS*\r\ncs> "

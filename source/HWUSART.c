@@ -110,11 +110,11 @@ void HWUSART_setup(void)
 
 		switch (parity)
 		{
-			case 0:	parity=USART_PARITY_NONE;
+			case 1:	parity=USART_PARITY_NONE;
 				break;
-			case 1:	parity=USART_PARITY_EVEN;
+			case 2:	parity=USART_PARITY_EVEN;
 				break;
-			case 2:	parity=USART_PARITY_ODD;
+			case 3:	parity=USART_PARITY_ODD;
 				break;
 		}
 		nbits=(askint(UARTNUMBITSMENU, 8, 9, 8));
@@ -231,6 +231,33 @@ void HWUSART_printerror(void)
 	}
 }
 
+void HWUSART_help(void)
+{
+	cdcprintf("Peer to peer asynchronous protocol.\r\n");
+	cdcprintf("\r\n");
+
+	if(parity==USART_PARITY_NONE)
+	{
+		cdcprintf("BPCMD\t     |                      DATA(8 bits)               |\r\n");
+		cdcprintf("\tIDLE |STRT| D7 | D6 | D5 | D4 | D3 | D2 | D1 | D0 |STOP|IDLE\r\n");
+		cdcprintf("TXD\t\"\"\"\"\"|____|{##}|{##}|{##}|{##}|{##}|{##}|{##}|{##}|\"\"\"\"|\"\"\"\"\"\r\n");
+		cdcprintf("RXD\t\"\"\"\"\"|____|{##}|{##}|{##}|{##}|{##}|{##}|{##}|{##}|\"\"\"\"|\"\"\"\"\"\r\n");
+	}
+	else
+	{
+		cdcprintf("BPCMD\t     |                      DATA(8/9 bits)                  |\r\n");
+		cdcprintf("\tIDLE |STRT| D7 | D6 | D5 | D4 | D3 | D2 | D1 | D0 |PRTY|STOP|IDLE\r\n");
+		cdcprintf("TXD\t\"\"\"\"\"|____|{##}|{##}|{##}|{##}|{##}|{##}|{##}|{##}|{##}|\"\"\"\"|\"\"\"\"\"\r\n");
+		cdcprintf("RXD\t\"\"\"\"\"|____|{##}|{##}|{##}|{##}|{##}|{##}|{##}|{##}|{##}|\"\"\"\"|\"\"\"\"\"\r\n");
+	}
+
+	cdcprintf("\t              ^sample moment\r\n");
+	cdcprintf("\r\n");
+	cdcprintf("Connections:\r\n");
+	cdcprintf("\tTXD\t------------------ RXD\r\n");
+	cdcprintf("{BP}\tRXD\t------------------ TXD\t{DUT}\r\n");
+	cdcprintf("\tGND\t------------------ GND\r\n");
+}
 
 
 
@@ -238,5 +265,4 @@ void HWUSART_printerror(void)
 
 
 
-
-
+	

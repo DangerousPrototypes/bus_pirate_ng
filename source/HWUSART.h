@@ -8,7 +8,7 @@ void HWUSART_cleanup(void);
 void HWUSART_pins(void);
 void HWUSART_settings(void);
 void HWUSART_printerror(void);
-
+void HWUSART_help(void);
 
 #define UARTSPEEDMENU		"\r\nUART Speed\r\n 1... baudrate\r\nbr> "
 #define UARTPARITYMENU 		"\r\nParity\r\n 1. none*\r\n 2. even\r\n 3. odd\r\nparity> "

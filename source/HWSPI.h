@@ -12,6 +12,7 @@ void HWSPI_cleanup(void);
 void HWSPI_pins(void);
 void HWSPI_settings(void);
 void HWSPI_printSPIflags(void);
+void HWSPI_help(void);
 
 // menu's
 
