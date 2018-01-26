@@ -189,10 +189,14 @@ void doUI(void)
 	{
 		getuserinput();
 
-		go=1;
+
+		if(protocols[modeConfig.mode].protocol_periodic())
+			go=2;
+		else
+			go=1;
 
 		cdcprintf("\r\n");
-		while((go)&&(cmdtail!=cmdhead))
+		while((go==1)&&(cmdtail!=cmdhead))
 		{
 			c=cmdbuff[cmdtail];
 			switch (c)
@@ -525,8 +529,17 @@ void doUI(void)
 				modeConfig.error=0;
 			}
 		}
-		go=0;
 		cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
+		if(go==2)
+		{
+			temp=0;
+			while(((cmdtail+temp)&(CMDBUFFSIZE-1))!=cmdhead)
+			{
+				cdcputc(cmdbuff[((cmdtail+temp)&(CMDBUFFSIZE-1))]);
+				temp++;
+			}
+		}
+		go=0;
 	}
 }
 
@@ -595,10 +608,60 @@ void versioninfo(void)
 	
 }
 
+const char pinstates[][4] = {
+"0\0",
+"1\0",
+"N/A\0"
+};
+
+const char pinmodes[][5] ={
+"ANA.\0",		// analogue
+"I-FL\0",		// input float
+"I-UD\0",		// input pullup/down
+"???\0",		// illegal
+"O-PP\0",		// output pushpull
+"O-OD\0",		// output opendrain
+"O PP\0",		// output pushpull peripheral
+"O OD\0",		// output opendrain peripheral
+"----\0"		// pin is not used 	
+};
+
+
+uint8_t getpinmode(uint32_t port, uint16_t pin)
+{
+	uint32_t crl, crh;
+	uint8_t pinmode, crpin, i;
+
+	crl = GPIO_CRL(port);
+	crh = GPIO_CRH(port);
+	crpin=0;
+
+	for(i=0; i<16; i++)
+	{
+		if((pin>>i)&0x0001)
+		{
+			crpin=(i<8?(crl>>(i*4)):(crh>>((i-8)*4)));
+			crpin&=0x000f;
+		}
+	}
+
+	pinmode=crpin>>2;
+
+	if(crpin&0x03)		// >1 is output
+	{
+		pinmode+=4;
+	}
+
+	return pinmode;
+}
+
+
+
 // show voltages/pinstates
 void showstates(void)
 {
 	uint8_t auxstate, csstate, misostate, clkstate, mosistate;
+	uint8_t auxmode, csmode, misomode, clkmode, mosimode;
 	float v50, v33, vpu, adc;
 
 	cdcprintf("1.GND\t2.+5v\t3.+3V3\t4.Vpu\t5.ADC\t6.AUX\t7.CS\t8.MISO\t9.CLK\t10.MOSI\r\n");
@@ -606,8 +669,28 @@ void showstates(void)
 	protocols[modeConfig.mode].protocol_pins();
 	cdcprintf("\r\n");
 
-	// TODO: read pindirection
-	cdcprintf("PWR\tPWR\tPWR\tPWR\t2.5V\t1\t1\t1\t0\t1\r\n");
+	// read pindirection
+	auxmode=getpinmode(BP_AUX_PORT, BP_AUX_PIN);
+	if(modeConfig.csport)
+		csmode=getpinmode(modeConfig.csport, modeConfig.cspin);
+	else
+		csmode=9;
+
+	if(modeConfig.misoport)
+		misomode=getpinmode(modeConfig.misoport, modeConfig.misopin);
+	else
+		misomode=9;
+
+	if(modeConfig.clkport)
+		clkmode=getpinmode(modeConfig.clkport, modeConfig.clkpin);
+	else
+		clkmode=9;
+	if(modeConfig.mosiport)
+		mosimode=getpinmode(modeConfig.mosiport, modeConfig.mosipin);
+	else
+		mosimode=9;
+
+	cdcprintf("PWR\tPWR\tPWR\tPWR\tAN\t%s\t%s\t%s\t%s\t%s\r\n", pinmodes[auxmode], pinmodes[csmode], pinmodes[misomode], pinmodes[clkmode], pinmodes[mosimode]);
 
 	// pinstates
 	auxstate=(gpio_get(BP_AUX_PORT, BP_AUX_PIN)?1:0);
@@ -636,8 +719,8 @@ void showstates(void)
 	vpu=voltage(BP_VPU_CHAN, 1);
 	adc=voltage(BP_ADC_CHAN, 1);
 
-	//TODO adc/pinstate shit
-	cdcprintf("GND\t%0.2fV\t%0.2fV\t%0.2fV\t%0.2fV\t%d\t%d\t%d\t%d\t%d\r\n", v50, v33, vpu, adc, auxstate, csstate, misostate, clkstate, mosistate);
+	// show state of pin
+	cdcprintf("GND\t%0.2fV\t%0.2fV\t%0.2fV\t%0.2fV\t%s\t%s\t%s\t%s\t%s\r\n", v50, v33, vpu, adc, pinstates[auxstate], pinstates[csstate], pinstates[misostate], pinstates[clkstate], pinstates[mosistate]);
 
 
 }
@@ -789,6 +872,7 @@ void getuserinput(void)
 					}
 					break;	
 		}
+
 	}
 }
 

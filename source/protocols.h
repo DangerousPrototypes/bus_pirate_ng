@@ -65,4 +65,5 @@ uint32_t nullfunc2(uint32_t c);
 uint32_t nullfunc3(void);
 void nullfunc4(uint32_t c);
 void nohelp(void);
+uint32_t noperiodic(void);
 

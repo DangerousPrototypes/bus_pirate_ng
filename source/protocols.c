@@ -54,6 +54,11 @@ void nohelp(void)
 	cdcprintf("No help available");
 }
 
+uint32_t noperiodic(void)
+{
+	return 0;
+}
+
 // all protocols and their interaction is handled here
 // buspirateNG.h has the conditional defines for protocols
 
@@ -73,7 +78,7 @@ struct _protocol protocols[MAXPROTO]={
 	nullfunc3,				// toggle dat (?)
 	nullfunc1,				// toggle clk (?)
 	nullfunc3,				// read 1 bit (?)
-	nullfunc3,				// service to regular poll whether a byte ahs arrived
+	noperiodic,				// service to regular poll whether a byte ahs arrived
 	nullfunc4,				// macro
 	HiZsetup,				// setup UI
 	HiZsetup_exc,				// real setup
@@ -150,7 +155,7 @@ struct _protocol protocols[MAXPROTO]={
 	nullfunc3,				// toggle dat (?)
 	nullfunc1,				// toggle clk (?)
 	nullfunc3,				// read 1 bit (?)
-	nullfunc3,				// service to regular poll whether a byte ahs arrived
+	noperiodic,				// service to regular poll whether a byte ahs arrived
 	HWSPI_macro,				// macro
 	HWSPI_setup,				// setup UI
 	HWSPI_setup_exc,			// real setup
@@ -176,7 +181,7 @@ struct _protocol protocols[MAXPROTO]={
 	nullfunc3,				// toggle dat (?)
 	nullfunc1,				// toggle clk (?)
 	nullfunc3,				// read 1 bit (?)
-	nullfunc3,				// service to regular poll whether a byte ahs arrived
+	noperiodic,				// service to regular poll whether a byte ahs arrived
 	HWUSART_macro,				// macro
 	HWUSART_setup,				// setup UI
 	HWUSART_setup_exc,			// real setup
@@ -202,7 +207,7 @@ struct _protocol protocols[MAXPROTO]={
 	nullfunc3,				// toggle dat (?)
 	nullfunc1,				// toggle clk (?)
 	nullfunc3,				// read 1 bit (?)
-	nullfunc3,				// service to regular poll whether a byte ahs arrived
+	noperiodic,				// service to regular poll whether a byte ahs arrived
 	HWI2C_macro,				// macro
 	HWI2C_setup,				// setup UI
 	HWI2C_setup_exc,			// real setup
@@ -254,7 +259,7 @@ struct _protocol protocols[MAXPROTO]={
 	SW2W_dats,				// toggle dat (?)
 	SW2W_clk,				// toggle clk (?)
 	SW2W_bitr,				// read 1 bit (?)
-	SW2W_period,				// service to regular poll whether a byte ahs arrived
+	noperiodic,				// service to regular poll whether a byte ahs arrived
 	SW2W_macro,				// macro
 	SW2W_setup,				// setup UI
 	SW2W_setup_exc,				// real setup
@@ -280,7 +285,7 @@ struct _protocol protocols[MAXPROTO]={
 	SW3W_dats,				// toggle dat (?)
 	SW3W_clk,				// toggle clk (?)
 	SW3W_bitr,				// read 1 bit (?)
-	SW3W_period,				// service to regular poll whether a byte ahs arrived
+	noperiodic,				// service to regular poll whether a byte ahs arrived
 	SW3W_macro,				// macro
 	SW3W_setup,				// setup UI
 	SW3W_setup_exc,				// real setup

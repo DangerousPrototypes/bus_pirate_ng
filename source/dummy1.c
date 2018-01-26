@@ -67,8 +67,14 @@ uint32_t dummy1_bitr(void)
 }
 uint32_t dummy1_period(void)
 {
-	cdcprintf("-DUMMY1- period()=%08X", returnval);
-	return returnval;
+	if(returnval)
+	{
+		cdcprintf("\r\n\x07");
+		cdcprintf("Pending something");
+		returnval=0;
+		return 1;
+	}
+	return 0;
 }
 void dummy1_macro(uint32_t macro)
 {
