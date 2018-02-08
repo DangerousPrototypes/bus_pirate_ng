@@ -1,6 +1,7 @@
 
 
 // development test platform
+#define BP_PLATFORM		"Sjaak testrig"
 
 // SPI hardware (HW-SPI)
 #define BP_SPI			SPI1
@@ -18,10 +19,12 @@
 #define BP_AUX_PORT		GPIOC
 #define BP_AUX_PIN		GPIO13
 
+#define BP_PWM_CLOCK		RCC_TIM1
 #define BP_PWM_PORT		GPIOA
 #define BP_PWM_PIN		GPIO8
 #define BP_PWM_TIMER		TIM1
 #define BP_PWM_CHAN		TIM_OC1
+#define BP_PWN_CHANCHAN		1
 
 #define BP_FREQ_PORT		GPIOA
 #define BP_FREQ_PIN		GPIO0
@@ -34,9 +37,21 @@
 #define BP_ADC			ADC1
 #define BP_ADC_CLK		RCC_ADC1
 #define BP_ADC_CHAN		0		//pa0
+#define BP_ADC_PORT		GPIOA
+#define BP_ADC_PIN		GPIO0
 #define BP_3V3_CHAN		0
+#define BP_3V3_PORT		GPIOA
+#define BP_3V3_PIN		GPIO0
 #define BP_5V0_CHAN		0
+#define BP_5V0_PORT		GPIOA
+#define BP_5V0_PIN		GPIO0
 #define BP_VPU_CHAN		0
+#define BP_VPU_PORT		GPIOA
+#define BP_VPU_PIN		GPIO0
+#define BP_VSUP_CHAN		0		// TODO
+#define BP_VSUP_PORT		GPIOA		// TODO
+#define BP_VSUP_PIN		GPIO0		// TODO
+
 
 // debug USART
 #define BP_DEBUG_TX_PORT	GPIOA
@@ -89,6 +104,15 @@
 #define BP_VPU50EN_PORT		GPIOC
 #define BP_VPU50EN_PIN		GPIO13
 
+// LED
+#define BP_USB_LED_PORT		GPIOC
+#define BP_USB_LED_PIN		GPIO13
+#define BP_MODE_LED_PORT	GPIOC
+#define BP_MODE_LED_PIN		GPIO13
 
+// USB PULLUP
+//#define BP_CONTROLS_PU	
+#define BP_USB_PULLUP_PORT	GPIOC
+#define BP_USB_PULLUP_PIN	GPIO10
 
 

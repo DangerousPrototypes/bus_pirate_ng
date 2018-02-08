@@ -46,7 +46,7 @@ void setPWM(uint32_t period, uint32_t oc)
 {
 	if(period!=0)
 	{
-		rcc_periph_clock_enable(RCC_TIM1);									// enable clock
+		rcc_periph_clock_enable(BP_PWM_CLOCK);									// enable clock
 		gpio_set_mode(BP_PWM_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL , BP_PWM_PIN);	//output pushpull
 		timer_reset(BP_PWM_TIMER);										// reset peripheral
 		timer_set_mode(BP_PWM_TIMER, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1, TIM_CR1_DIR_UP);			// count up

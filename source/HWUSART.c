@@ -179,7 +179,7 @@ void HWUSART_cleanup(void)
 }
 void HWUSART_pins(void)
 {
-	cdcprintf("-\tRXD\t-\tTXD");
+	cdcprintf("-\t-\tRXD\tTXD");
 }
 void HWUSART_settings(void)
 {

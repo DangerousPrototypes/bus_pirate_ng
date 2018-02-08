@@ -7,8 +7,8 @@
 // USB shit :/
 
 // we dont have a USB VID/PID yet so please supply your own
-#define		USB_VID		0x
-#define		USB_PID		0x
+#define		USB_VID		0x1209
+#define		USB_PID		0x7331
 #define		USB_VENDOR	"dangerousprototypes.com"
 #define		USB_PRODUCT	"buspirateNG"
 #define		USB_SERIAL	"00000000"
@@ -28,7 +28,9 @@
 extern volatile uint32_t systicks;
 
 // include platform
-#include	"platform/testplatform.h"			// hw is not made yet
+// TODO we need some makefile tricks foor this
+//#include	"platform/testplatform.h"			// hw is not made yet
+#include	"platform/beta1.h"				// BPNG v1.0 dec 2017
 
 
 

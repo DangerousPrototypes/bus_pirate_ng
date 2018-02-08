@@ -328,6 +328,17 @@ void SW3W_setup_exc(void)
 		gpio_set_mode(BP_SW3W_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW3W_MISO_PIN);
 	}
 
+	// set the right levels
+	if(cpol)
+		gpio_set(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
+	else
+		gpio_clear(BP_SW3W_CLK_PORT, BP_SW3W_CLK_PIN);
+
+	if(csmode)
+		gpio_clear(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
+	else
+		gpio_set(BP_SW3W_CS_PORT, BP_SW3W_CS_PIN);
+
 	// update modeConfig pins
 	modeConfig.misoport=BP_SW3W_MISO_PORT;
 	modeConfig.mosiport=BP_SW3W_MOSI_PORT;

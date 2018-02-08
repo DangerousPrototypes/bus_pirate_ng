@@ -172,11 +172,14 @@ void cdcpoll(void)
 	int i;
 	uint8_t buf[64];
 
+
 	if(my_usbd_dev!=NULL) usbd_poll(my_usbd_dev);
 
 	//move to somewhere else??
-	if(txtail!=txhead)				// we have data to send?
+	if(txtail!=txhead)							// we have data to send?
 	{
+		gpio_set(BP_USB_LED_PORT, BP_USB_LED_PIN);			// flash led during TX
+
 		i=0;
 		while((txtail!=txhead)&&(i<63))
 		{
@@ -185,6 +188,8 @@ void cdcpoll(void)
 		}
 		buf[i++]=0;
 		while((usbd_ep_write_packet(my_usbd_dev, 0x82, buf, i)==0));	// try resending until it is succeeded
+
+		gpio_clear(BP_USB_LED_PORT, BP_USB_LED_PIN);
 	}
 }
 

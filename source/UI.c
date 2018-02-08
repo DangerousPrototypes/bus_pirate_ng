@@ -405,8 +405,8 @@ void doUI(void)
 							gpio_set(BP_PSUEN_PORT, BP_PSUEN_PIN); 
 							cdcprintf("PSU: enabled\r\n");
 							delayms(10);
-							cdcprintf("V33=%0.2fV, V50=%0.2fV", voltage(BP_3V3_CHAN, 0), voltage(BP_5V0_CHAN, 1)); 
-							if((voltage(BP_3V3_CHAN, 0)<3.1)||(voltage(BP_5V0_CHAN, 1)<4.8))
+							cdcprintf("V33=%0.2fV, V50=%0.2fV", voltage(BP_3V3_CHAN, 1), voltage(BP_5V0_CHAN, 1)); 
+							if((voltage(BP_3V3_CHAN, 1)<3.0)||(voltage(BP_5V0_CHAN, 1)<4.5))
 							{
 								cdcprintf("\r\nShort circuit!");								
 								gpio_clear(BP_PSUEN_PORT, BP_PSUEN_PIN);
@@ -560,7 +560,7 @@ void versioninfo(void)
 	else if(flashsize<=512) ramsize=64;
 	else ramsize=96;
 
-	cdcprintf("Buspirate NextGen (ARM)\r\n");
+	cdcprintf("Buspirate NextGen (ARM) HW:%s\r\n", BP_PLATFORM);
 	cdcprintf("Firmware %s, bootloader N/A\r\n", FWVER);
 	cdcprintf("STM32 with %dK FLASH, %dK SRAM ", flashsize, ramsize);
 	cdcprintf("s/n: %08X%08X%08X\r\n", id[0], id[1], id[2]);
@@ -589,16 +589,18 @@ void versioninfo(void)
 		if(modeConfig.pwm)
 		{
 			pwmperiod=TIM_ARR(BP_PWM_TIMER);
-#if(1)	// (BPPWMCHAN==TIM_OC1)	
+
+// TODO is there a better way to do this?
+#if(BP_PWM_CHANCHAN==1)	
 			pwmoc=TIM_CCR1(BP_PWM_TIMER);
 #endif
-#if(0)	// (BPPWMCHAN==TIM_OC2)	
+#if(BP_PWM_CHANCHAN==2)	
 			pwmoc=TIM_CCR2(BP_PWM_TIMER);
 #endif
-#if(0)	// (BPPWMCHAN==TIM_OC3)	
+#if(BP_PWM_CHANCHAN==3)	
 			pwmoc=TIM_CCR3(BP_PWM_TIMER);
 #endif
-#if(0)	// (BPPWMCHAN==TIM_OC4)	
+#if(BP_PWM_CHANCHAN==4)	
 			pwmoc=TIM_CCR4(BP_PWM_TIMER);
 #endif
 			cdcprintf("PWM clock %d Hz, dutycycle %0.2f\r\n", (36000000/pwmperiod), (float)((pwmoc*1.0)/pwmperiod));
@@ -714,7 +716,7 @@ void showstates(void)
 		mosistate=2;
 
 	// adcs
-	v33=voltage(BP_3V3_CHAN, 0);
+	v33=voltage(BP_3V3_CHAN, 1);
 	v50=voltage(BP_5V0_CHAN, 1);
 	vpu=voltage(BP_VPU_CHAN, 1);
 	adc=voltage(BP_ADC_CHAN, 1);
@@ -768,6 +770,10 @@ void changemode(void)
 	modeConfig.mode=mode-1;
 	protocols[modeConfig.mode].protocol_setup();		// setup the new mode
 	protocols[modeConfig.mode].protocol_setup_exc();
+
+	if(modeConfig.mode==0) 	gpio_clear(BP_MODE_LED_PORT, BP_MODE_LED_PIN);
+		else 	gpio_set(BP_MODE_LED_PORT, BP_MODE_LED_PIN);
+
 }
 
 // set display mode  (hex, bin, octa, dec) 

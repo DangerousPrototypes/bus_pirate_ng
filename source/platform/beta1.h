@@ -1,0 +1,118 @@
+
+
+// development test platform
+#define BP_PLATFORM		"BPNG v1.0 dec 2017"
+
+// SPI hardware (HW-SPI)
+#define BP_SPI			SPI2
+#define BP_SPI_CLK		RCC_SPI2
+#define BP_SPI_MISO_PORT	GPIOB
+#define BP_SPI_MOSI_PORT	GPIOB
+#define BP_SPI_CS_PORT		GPIOB
+#define BP_SPI_CLK_PORT		GPIOB
+#define BP_SPI_MISO_PIN		GPIO14
+#define BP_SPI_MOSI_PIN		GPIO15
+#define BP_SPI_CS_PIN		GPIO12
+#define BP_SPI_CLK_PIN		GPIO13
+
+// AUX/PWM/freq counter
+#define BP_AUX_PORT		GPIOB
+#define BP_AUX_PIN		GPIO0
+
+#define BP_PWM_CLOCK		RCC_TIM3
+#define BP_PWM_PORT		GPIOB
+#define BP_PWM_PIN		GPIO0
+#define BP_PWM_TIMER		TIM3
+#define BP_PWM_CHAN		TIM_OC3
+#define BP_PWM_CHANCHAN		3
+
+#define BP_FREQ_PORT		GPIOA		// TODO
+#define BP_FREQ_PIN		GPIO0		// TODO
+#define BP_FREQ_TIMER		TIM2		// TODO
+#define BP_FREQ_CLK		RCC_TIM2	// TODO
+#define BP_FREQ_NVIC		NVIC_TIM2_IRQ	// TODO
+
+// ADC's
+#define BP_ADC			ADC1
+#define BP_ADC_CLK		RCC_ADC1
+#define BP_ADC_CHAN		9
+#define BP_ADC_PORT		GPIOA
+#define BP_ADC_PIN		GPIO5
+#define BP_3V3_CHAN		11
+#define BP_3V3_PORT		GPIOC
+#define BP_3V3_PIN		GPIO1
+#define BP_5V0_CHAN		12
+#define BP_5V0_PORT		GPIOC
+#define BP_5V0_PIN		GPIO2
+#define BP_VPU_CHAN		13
+#define BP_VPU_PORT		GPIOC
+#define BP_VPU_PIN		GPIO3
+#define BP_VSUP_CHAN		10		// TODO
+#define BP_VSUP_PORT		GPIOC		// TODO
+#define BP_VSUP_PIN		GPIO1		// TODO
+
+// debug USART
+#define BP_DEBUG_TX_PORT	GPIOA
+#define BP_DEBUG_TX_PIN		GPIO2
+#define BP_DEBUG_USART		USART2
+#define BP_DEBUG_USART_CLK	RCC_USART2
+
+// regular USART (HW-USART)
+#define BP_USART_TX_PORT	GPIOB
+#define BP_USART_RX_PORT	GPIOB
+#define BP_USART_TX_PIN		GPIO10
+#define BP_USART_RX_PIN		GPIO11
+#define BP_USART_CLK		RCC_USART3
+#define BP_USART		USART3
+
+// hw-i2c
+#define BP_I2C			I2C2
+#define BP_I2C_CLK		RCC_I2C2
+#define BP_I2C_SDA_PORT		GPIOB
+#define BP_I2C_CLK_PORT		GPIOB
+#define BP_I2C_SDA_PIN		GPIO11
+#define BP_I2C_CLK_PIN		GPIO10
+
+// logic analyzer
+#define BP_LA_BUFFSIZE		2048
+
+// SW 3wire (SW3W)
+#define BP_SW3W_MISO_PORT	GPIOB
+#define BP_SW3W_MOSI_PORT	GPIOB
+#define BP_SW3W_CS_PORT		GPIOB
+#define BP_SW3W_CLK_PORT	GPIOB
+#define BP_SW3W_MISO_PIN	GPIO14
+#define BP_SW3W_MOSI_PIN	GPIO15
+#define BP_SW3W_CS_PIN		GPIO12
+#define BP_SW3W_CLK_PIN		GPIO13
+
+// SW 2WIRE (SW2W)
+#define BP_SW2W_SDA_PORT	GPIOB
+#define BP_SW2W_CLK_PORT	GPIOB
+#define BP_SW2W_SDA_PIN		GPIO11
+#define BP_SW2W_CLK_PIN		GPIO10
+
+// voltage regulators and pullupvoltages
+#define BP_PSUEN_PORT		GPIOB
+#define BP_PSUEN_PIN		GPIO9
+#define BP_VPUEN_PORT		GPIOC
+#define BP_VPUEN_PIN		GPIO6
+#define BP_VPU33EN_PORT		GPIOC
+#define BP_VPU33EN_PIN		GPIO14
+#define BP_VPU50EN_PORT		GPIOC
+#define BP_VPU50EN_PIN		GPIO15
+
+// LED
+#define BP_USB_LED_PORT		GPIOC	//TODO
+#define BP_USB_LED_PIN		GPIO9	//TODO
+#define BP_MODE_LED_PORT	GPIOC	//TODO
+#define BP_MODE_LED_PIN		GPIO8	//TODO
+
+// USB PULLUP
+#define BP_CONTROLS_PU	
+#define BP_USB_PULLUP_PORT	GPIOC
+#define BP_USB_PULLUP_PIN	GPIO10
+
+
+
+
