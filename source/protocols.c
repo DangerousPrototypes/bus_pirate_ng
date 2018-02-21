@@ -221,19 +221,19 @@ struct _protocol protocols[MAXPROTO]={
 #ifdef BP_USE_LA
 {
 	LA_start,				// start
-	LA_startr,				// start with read
-	LA_stop,				// stop
-	LA_stopr,				// stop with read
+	nullfunc1,				// start with read
+	nullfunc1,				// stop
+	nullfunc1,				// stop with read
 	LA_send,				// send(/read) max 32 bit
 	LA_read,				// read max 32 bit
-	LA_clkh,				// set clk high
-	LA_clkl,				// set clk low
-	LA_dath,				// set dat hi
-	LA_datl,				// set dat lo
-	LA_dats,				// toggle dat (?)
-	LA_clk,					// toggle clk (?)
-	LA_bitr,				// read 1 bit (?)
-	LA_period,				// service to regular poll whether a byte ahs arrived
+	nullfunc1,				// set clk high
+	nullfunc1,				// set clk low
+	nullfunc1,				// set dat hi
+	nullfunc1,				// set dat lo
+	nullfunc3,				// toggle dat (?)
+	nullfunc1,				// toggle clk (?)
+	nullfunc3,				// read 1 bit (?)
+	noperiodic,				// service to regular poll whether a byte ahs arrived
 	LA_macro,				// macro
 	LA_setup,				// setup UI
 	LA_setup_exc,				// real setup
