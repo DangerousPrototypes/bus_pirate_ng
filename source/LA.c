@@ -93,21 +93,16 @@ void LA_start(void)
 	timer_enable_counter(BP_LA_TIMER);									// enable the timer
 
 	// go!
-//	gpio_clear(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);
+	gpio_clear(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);
 	stop=0;
 
 	i=0;
-setup_spix4w();	
 	while(!stop)
 	{
 		cdcprintf("\r%c Waiting for trigger %c", spinner[i],	 spinner[i]);
 		i++;
 		i&=0x03;
 		delayms(100);
-
-gpio_clear(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
-delayms(100);
-gpio_set(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
 
 		if(cdcbyteready()) stop=11;		//user interrupt
 	}
@@ -309,7 +304,7 @@ void displaybuff(void)
 void setup_spix1rw(void)
 {
 	// channnels/SPI
-	gpio_set_mode(BP_LA_CHAN1_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_CHAN1_PIN);	// MOSI  TODO is 2MHz enough?
+	gpio_set_mode(BP_LA_CHAN1_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_CHAN1_PIN);	// MOSI
 	gpio_set_mode(BP_LA_CHAN2_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN2_PIN);		// MISO
 	gpio_set_mode(BP_LA_CHAN3_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN3_PIN);
 	gpio_set_mode(BP_LA_CHAN4_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN4_PIN);
