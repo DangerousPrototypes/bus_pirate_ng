@@ -52,6 +52,8 @@ void delayms(uint32_t num);
 void delayus(uint32_t num);
 uint32_t orderbits(uint32_t d);
 uint8_t getpinmode(uint32_t port, uint16_t pin);
+void jumptobootloader(void);
+void reset(void);
 
 // macro
 #define SKIPCURCHAR	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);

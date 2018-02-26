@@ -2,6 +2,11 @@
 #include <stdint.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/timer.h>
+#include <libopencm3/stm32/pwr.h>
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/f1/bkp.h>
+#include <libopencm3/cm3/scb.h>
+
 #include "debug.h"
 #include "cdcacm.h"
 #include "buspirateNG.h"
@@ -480,9 +485,9 @@ void doUI(void)
 							cdcprintf("missing terminating \"");
 				case ' ':	break;
 				case ',':	break;	// reuse this command??
-				case '$':	displayps();
+				case '$':	jumptobootloader();
 						break;
-				case '#':	fillps();
+				case '#':	reset();
 						break;
 				case '=':	cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
 						temp=getint();
@@ -1064,9 +1069,27 @@ uint32_t orderbits(uint32_t d)
 	}
 }
 
+#define BOOT_MAGIC_VALUE	0xB007
 
+void jumptobootloader(void)
+{
+	rcc_periph_clock_enable(RCC_PWR);
+	rcc_periph_clock_enable(RCC_BKP);
+	pwr_disable_backup_domain_write_protect();
+	BKP_DR1=BOOT_MAGIC_VALUE;
+	pwr_enable_backup_domain_write_protect();
+	rcc_periph_clock_disable(RCC_PWR);
+	rcc_periph_clock_enable(RCC_BKP);
 
+	SCB_AIRCR=0x0004|(0x5Fa<<16);
+	while(1);
+}
 
+void reset(void)
+{
+	SCB_AIRCR=0x0004|(0x5Fa<<16);
+	while(1);
+}
 
 
 
