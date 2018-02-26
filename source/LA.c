@@ -31,6 +31,9 @@ static uint8_t labuff[BP_LA_BUFFSIZE];			// is this french?!
 static void displaybuff(void);
 static uint8_t spixferx1(uint8_t d);
 static uint8_t spixferx4(uint8_t d);
+static void spiWx4(uint8_t d);
+static uint8_t spiRx4(void);
+static void bytetest(void);
 static void getbuff(void);
 static void setup_spix1rw(void);
 static void setup_spix4w(void);
@@ -167,6 +170,8 @@ void LA_macro(uint32_t macro)
 				break;
 		case 3:		getbuff();
 				break;
+		case 4: bytetest();
+				break;
 		default:	modeConfig.error=1;
 				cdcprintf("no such macro");
 				break;
@@ -181,7 +186,7 @@ void LA_setup_exc(void)
 	int i;
 
 	// setup GPIOs
-	gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); 	// 373 latch
+	gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); 	// 573 latch
 	gpio_set_mode(BP_LA_SRAM_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CS_PIN);	// CS
 	gpio_set(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);
 
@@ -304,11 +309,98 @@ void displaybuff(void)
 void setup_spix1rw(void)
 {
 	// channnels/SPI
-	gpio_set_mode(BP_LA_CHAN1_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_CHAN1_PIN);	// MOSI
-	gpio_set_mode(BP_LA_CHAN2_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN2_PIN);		// MISO
+	gpio_set_mode(BP_SRAM1_MOSI_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SRAM1_MOSI_PIN);	// MOSI
+	gpio_set_mode(BP_SRAM1_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_SRAM1_MISO_PIN);		// MISO
 	gpio_set_mode(BP_LA_CHAN3_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN3_PIN);
 	gpio_set_mode(BP_LA_CHAN4_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN4_PIN);
 	gpio_set_mode(BP_LA_SRAM_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CLK_PIN); // CLK
+	
+	// setup GPIOs
+	gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); 	// 573 latch
+	gpio_set_mode(BP_LA_SRAM_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CS_PIN);	// CS
+
+	gpio_set(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN); //latch high
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+}
+
+void bytetest(void){
+	
+	setup_spix1rw();
+delayms(1);
+	//force to sequencial mode just in case
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spixferx1(0x05);//write
+	spixferx1(0x40);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
+delayms(1);
+	//test save a few bytes to the SRAM
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spixferx1(0x02);//write
+	spixferx1(0);
+	spixferx1(0);
+	spixferx1(0);
+	spixferx1(0X00);
+	spixferx1(0X55);
+	spixferx1(0X00);
+	spixferx1(0X55);
+	spixferx1(0X00);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
+delayms(1);	
+	
+	//test read few bytes to the SRAM
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spixferx1(0x03);//read
+	spixferx1(0);
+	spixferx1(0);
+	spixferx1(0);
+	cdcprintf("%d\t",spixferx1(0xff));
+	cdcprintf("%d\t",spixferx1(0xff));
+	cdcprintf("%d\t",spixferx1(0xff));
+	cdcprintf("%d\t",spixferx1(0xff));
+	cdcprintf("%d\t",spixferx1(0xff));
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
+	
+	//quad mode
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spixferx1(CMDQUADMODE);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+	
+	//write some bytes
+	setup_spix4w(); //write
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spiWx4(0x02); //write command
+	spiWx4(0);
+	spiWx4(0);
+	spiWx4(0); //3 byte address
+	spiWx4(0x00);
+	spiWx4(0x55);
+	spiWx4(0x00);
+	spiWx4(0x55);
+	spiWx4(0x00);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+	
+	//read some bytes
+	setup_spix4w(); //write
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spiWx4(0x03); //read command
+	spiWx4(0);
+	spiWx4(0);
+	spiWx4(0); //3 byte address
+	setup_spix4r(); //read
+	spiRx4(); //dummy byte
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
+
 }
 
 
@@ -339,22 +431,88 @@ static uint8_t spixferx1(uint8_t d)
 
 	gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
 	mask=0x80;
+	received=0x00;
 
 	for(i=0; i<8; i++)
 	{
-		if(d&mask) gpio_set(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
-			else gpio_clear(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
-
+		if(d&mask) gpio_set(BP_SRAM1_MOSI_PORT, BP_SRAM1_MOSI_PIN);
+			else gpio_clear(BP_SRAM1_MOSI_PORT, BP_SRAM1_MOSI_PIN);
+			
 		delayms(1);
-		received|=(gpio_get(BP_LA_CHAN2_PORT, BP_LA_CHAN2_PIN)?1:0);
 		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+		delayms(1);
+		received<<=1; //move the rx byte up one bit before next read
+		received|=(gpio_get(BP_SRAM1_MISO_PORT, BP_SRAM1_MISO_PIN)?1:0);
 		delayms(1);
 		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
 		mask>>=1;
-		received<<=1;
+
 	}
 
 	return received;
+}
+
+static uint8_t spiRx4(void)
+{
+	int i;
+	uint8_t received;
+
+	gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+	received=0;
+
+	for(i=0; i<2; i++)
+	{
+		delayms(1);
+		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK HIGH
+		delayms(1);
+		
+		//READ
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN4_PORT, BP_LA_CHAN4_PIN)?1:0);
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN3_PORT, BP_LA_CHAN3_PIN)?1:0);
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN2_PORT, BP_LA_CHAN2_PIN)?1:0);
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN)?1:0);
+
+		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK LOW
+	}
+
+	return received;
+}
+
+static void spiWx4(uint8_t d)
+{
+	int i;
+	uint8_t mask;
+
+	gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+	mask=0x80;
+
+	for(i=0; i<2; i++)
+	{
+		if(d&mask) gpio_set(BP_LA_CHAN4_PORT, BP_LA_CHAN4_PIN);
+			else gpio_clear(BP_LA_CHAN4_PORT, BP_LA_CHAN4_PIN);
+		mask>>=1;
+		if(d&mask) gpio_set(BP_LA_CHAN3_PORT, BP_LA_CHAN3_PIN);
+			else gpio_clear(BP_LA_CHAN3_PORT, BP_LA_CHAN3_PIN);
+		mask>>=1;
+		if(d&mask) gpio_set(BP_LA_CHAN2_PORT, BP_LA_CHAN2_PIN);
+			else gpio_clear(BP_LA_CHAN2_PORT, BP_LA_CHAN2_PIN);
+		mask>>=1;
+		if(d&mask) gpio_set(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
+			else gpio_clear(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
+		mask>>=1;
+
+		delayms(1);
+		
+		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK HIGH
+		delayms(1);
+		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK LOW
+	}
+
+	return;
 }
 
 static uint8_t spixferx4(uint8_t d)
@@ -382,6 +540,9 @@ static uint8_t spixferx4(uint8_t d)
 		mask>>=1;
 
 		delayms(1);
+		//CLOCK HIGH
+		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+		//READ
 		received|=(gpio_get(BP_LA_CHAN4_PORT, BP_LA_CHAN4_PIN)?1:0);
 		received<<=1;
 		received|=(gpio_get(BP_LA_CHAN3_PORT, BP_LA_CHAN3_PIN)?1:0);
@@ -390,8 +551,8 @@ static uint8_t spixferx4(uint8_t d)
 		received<<=1;
 		received|=(gpio_get(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN)?1:0);
 		received<<=1;
-		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
-
+		
+		//gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //NOT HERE?
 		delayms(1);
 		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
 	}
