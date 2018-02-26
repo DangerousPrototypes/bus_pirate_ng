@@ -31,6 +31,8 @@ static uint8_t labuff[BP_LA_BUFFSIZE];			// is this french?!
 static void displaybuff(void);
 static uint8_t spixferx1(uint8_t d);
 static uint8_t spixferx4(uint8_t d);
+static void spiWx4(uint8_t d);
+static uint8_t spiRx4(void);
 static void bytetest(void);
 static void getbuff(void);
 static void setup_spix1rw(void);
@@ -347,10 +349,10 @@ delayms(1);
 	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
 delayms(1);	
 	
-	//test save a few bytes to the SRAM
+	//test read few bytes to the SRAM
 	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
 	delayms(1);
-	spixferx1(0x03);//write
+	spixferx1(0x03);//read
 	spixferx1(0);
 	spixferx1(0);
 	spixferx1(0);
@@ -362,13 +364,42 @@ delayms(1);
 	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
 	
 	//quad mode
-	//gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
-	//spixferx1(CMDQUADMODE);
-	//gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spixferx1(CMDQUADMODE);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
 	
 	//write some bytes
+	setup_spix4w(); //write
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spiWx4(0x02); //write command
+	spiWx4(0);
+	spiWx4(0);
+	spiWx4(0); //3 byte address
+	spiWx4(0x00);
+	spiWx4(0x55);
+	spiWx4(0x00);
+	spiWx4(0x55);
+	spiWx4(0x00);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
 	
 	//read some bytes
+	setup_spix4w(); //write
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spiWx4(0x03); //read command
+	spiWx4(0);
+	spiWx4(0);
+	spiWx4(0); //3 byte address
+	setup_spix4r(); //read
+	spiRx4(); //dummy byte
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	cdcprintf("%d\t",spiRx4());
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
 
 }
 
@@ -400,6 +431,7 @@ static uint8_t spixferx1(uint8_t d)
 
 	gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
 	mask=0x80;
+	received=0x00;
 
 	for(i=0; i<8; i++)
 	{
@@ -409,14 +441,78 @@ static uint8_t spixferx1(uint8_t d)
 		delayms(1);
 		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
 		delayms(1);
+		received<<=1; //move the rx byte up one bit before next read
 		received|=(gpio_get(BP_SRAM1_MISO_PORT, BP_SRAM1_MISO_PIN)?1:0);
 		delayms(1);
 		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
 		mask>>=1;
-		received<<=1;
+
 	}
 
 	return received;
+}
+
+static uint8_t spiRx4(void)
+{
+	int i;
+	uint8_t received;
+
+	gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+	received=0;
+
+	for(i=0; i<2; i++)
+	{
+		delayms(1);
+		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK HIGH
+		delayms(1);
+		
+		//READ
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN4_PORT, BP_LA_CHAN4_PIN)?1:0);
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN3_PORT, BP_LA_CHAN3_PIN)?1:0);
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN2_PORT, BP_LA_CHAN2_PIN)?1:0);
+		received<<=1;
+		received|=(gpio_get(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN)?1:0);
+
+		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK LOW
+	}
+
+	return received;
+}
+
+static void spiWx4(uint8_t d)
+{
+	int i;
+	uint8_t mask;
+
+	gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+	mask=0x80;
+
+	for(i=0; i<2; i++)
+	{
+		if(d&mask) gpio_set(BP_LA_CHAN4_PORT, BP_LA_CHAN4_PIN);
+			else gpio_clear(BP_LA_CHAN4_PORT, BP_LA_CHAN4_PIN);
+		mask>>=1;
+		if(d&mask) gpio_set(BP_LA_CHAN3_PORT, BP_LA_CHAN3_PIN);
+			else gpio_clear(BP_LA_CHAN3_PORT, BP_LA_CHAN3_PIN);
+		mask>>=1;
+		if(d&mask) gpio_set(BP_LA_CHAN2_PORT, BP_LA_CHAN2_PIN);
+			else gpio_clear(BP_LA_CHAN2_PORT, BP_LA_CHAN2_PIN);
+		mask>>=1;
+		if(d&mask) gpio_set(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
+			else gpio_clear(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
+		mask>>=1;
+
+		delayms(1);
+		
+		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK HIGH
+		delayms(1);
+		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK LOW
+	}
+
+	return;
 }
 
 static uint8_t spixferx4(uint8_t d)
