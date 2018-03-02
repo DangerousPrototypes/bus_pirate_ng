@@ -15,6 +15,7 @@
 #define CMDWRITE	0x02
 #define CMDQUADMODE	0x38
 #define CMDRESETSPI	0xFF
+#define CMDWRITERREG	0x05
 
 
 static volatile uint8_t stop;
@@ -22,7 +23,7 @@ static volatile uint32_t counts;
 static uint32_t returnval;
 static uint8_t lamode;
 static uint16_t period;
-static uint32_t samples;
+static uint32_t samples, extrasamples;
 static uint8_t triggers[8];
 
 static uint8_t labuff[BP_LA_BUFFSIZE];			// is this french?!
@@ -51,39 +52,50 @@ char triggermodes[][4]={
 void LA_start(void)
 {
 	int i;
+	uint8_t cause;
+	uint32_t countto, count;
 
 	// send command to write sram at addr 0x0
-	setup_spix4w();
+	setup_spix4w(); //write
 	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
-	spixferx4(CMDWRITE);
-	spixferx4(0x00);
-	spixferx4(0x00);
-	spixferx4(0x00);
+	delayms(1);
+	spiWx4(CMDWRITE); //write command
+	spiWx4(0);
+	spiWx4(0);
+	spiWx4(0); //3 byte address
 
 	// turn spi bus around
 	setup_spix4r();
 
 	// setup triggers
-	exti_enable_request(EXTI0);
-	exti_enable_request(EXTI1);
-	exti_enable_request(EXTI2);
-	exti_enable_request(EXTI3);
-	exti_enable_request(EXTI4);
-	exti_enable_request(EXTI5);
-	exti_enable_request(EXTI6);
-	exti_enable_request(EXTI7);
-
+	for(i=0; i<8; i++)
+	{
+		switch(triggers[i])
+		{
+			case 0:		exti_set_trigger((1<<i), EXTI_TRIGGER_RISING);
+					exti_enable_request((1<<i));
+					break;
+			case 1:		exti_set_trigger((1<<i), EXTI_TRIGGER_FALLING);
+					exti_enable_request((1<<i));
+					break;
+			case 2:		exti_set_trigger((1<<i), EXTI_TRIGGER_BOTH);
+					exti_enable_request((1<<i));
+					break;
+			default:	exti_disable_request((1<<i));
+					break;
+		}
+	}
 
 	// show the current settings
 	cdcprintf("Sampling clock=%dHz, #samples: %dK\r\n", (36000000/period), samples/1024);
-	cdcprintf("CHAN1 trigger: %s\r\n", triggermodes[triggers[0]]);
-	cdcprintf("CHAN2 trigger: %s\r\n", triggermodes[triggers[1]]);
-	cdcprintf("CHAN3 trigger: %s\r\n", triggermodes[triggers[2]]);
-	cdcprintf("CHAN4 trigger: %s\r\n", triggermodes[triggers[3]]);
-	cdcprintf("CHAN5 trigger: %s\r\n", triggermodes[triggers[4]]);
-	cdcprintf("CHAN6 trigger: %s\r\n", triggermodes[triggers[5]]);
-	cdcprintf("CHAN7 trigger: %s\r\n", triggermodes[triggers[6]]);
-	cdcprintf("CHAN8 trigger: %s\r\n", triggermodes[triggers[7]]);
+	cdcprintf(" CHAN1 trigger: %s\r\n", triggermodes[triggers[0]]);
+	cdcprintf(" CHAN2 trigger: %s\r\n", triggermodes[triggers[1]]);
+	cdcprintf(" CHAN3 trigger: %s\r\n", triggermodes[triggers[2]]);
+	cdcprintf(" CHAN4 trigger: %s\r\n", triggermodes[triggers[3]]);
+	cdcprintf(" CHAN5 trigger: %s\r\n", triggermodes[triggers[4]]);
+	cdcprintf(" CHAN6 trigger: %s\r\n", triggermodes[triggers[5]]);
+	cdcprintf(" CHAN7 trigger: %s\r\n", triggermodes[triggers[6]]);
+	cdcprintf(" CHAN8 trigger: %s\r\n", triggermodes[triggers[7]]);
 	cdcprintf("\r\npress any key to exit\r\n\r\n");
 
 	// timer controls clock line
@@ -102,12 +114,28 @@ void LA_start(void)
 	i=0;
 	while(!stop)
 	{
-		cdcprintf("\r%c Waiting for trigger %c", spinner[i],	 spinner[i]);
+		cdcprintf("\r%c Waiting for trigger %c", spinner[i], spinner[i]);
 		i++;
 		i&=0x03;
 		delayms(100);
 
-		if(cdcbyteready()) stop=11;		//user interrupt
+		if(cdcbyteready())
+		{
+			stop=11;		//user interrupt
+			cdcgetc();
+		}
+			
+	}
+
+	// store the 'cause'
+	cause=stop;
+	count=counts;
+
+	// get extra samples after the trigger unless trigger by overrun/user
+	if((cause!=10)&&(cause!=11))
+	{
+		countto=counts+extrasamples;
+		while(counts!=countto);
 	}
 
 	// disable clk
@@ -129,13 +157,13 @@ void LA_start(void)
 	exti_disable_request(EXTI6);
 	exti_disable_request(EXTI7);
 
-	if(stop<10)
-		cdcprintf("\r\nCapture stopped on trigger chan %d after %d samples", stop, counts);
-	else if(stop==10)
-		cdcprintf("\r\nCapture stopped max. samples (%d)", counts);
-	else if(stop==11)
-		cdcprintf("\r\nCapture interrupted by user at %d samples", counts);
-	else cdcprintf("\r\nCapture stopped for unknown reasons at %d samples", counts);
+	if(cause<10)
+		cdcprintf("\r\nCapture stopped on trigger chan %d after %d samples, sampled total %d samples", stop, count, counts);
+	else if(cause==10)
+		cdcprintf("\r\nCapture stopped max. samples (%d)", count);
+	else if(cause==11)
+		cdcprintf("\r\nCapture interrupted by user at %d samples", count);
+	else cdcprintf("\r\nCapture stopped for unknown reasons at %d samples", count);
 }
 
 uint32_t LA_send(uint32_t d)
@@ -159,18 +187,26 @@ void LA_macro(uint32_t macro)
 
 	switch(macro)
 	{
-		case 0:		cdcprintf("1. fill buffer with random data\r\n2. display buffer in ASCII art");
+		case 0:		cdcprintf("1..8. Setup trigger on chan 1..8\r\n9. set period\r\n10. set samples\r\n11. show buffer\r\n12. transfer buffer");
 				break;
-		case 1:		for(i=0; i<BP_LA_BUFFSIZE; i++)
-				{
-					labuff[i]=i;
-				}
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:		triggers[macro-1]=(askint(LATRIGGERMENU, 1, 4, 4)-1);
 				break;
-		case 2:		displaybuff();
+		case 9:		period=(askint(LAPERIODMENU, 1, 65536, 4500));
 				break;
-		case 3:		getbuff();
+		case 10:	samples=(askint(LASAMPLEMENU, 1024, 256*1024, 4096));
+				extrasamples=3*(samples/4);
 				break;
-		case 4: bytetest();
+		case 11:	displaybuff();
+				break;
+		case 12:	getbuff();
+				break;
 				break;
 		default:	modeConfig.error=1;
 				cdcprintf("no such macro");
@@ -189,12 +225,20 @@ void LA_setup_exc(void)
 	gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); 	// 573 latch
 	gpio_set_mode(BP_LA_SRAM_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CS_PIN);	// CS
 	gpio_set(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);
+	setup_spix1rw();
+
+	//force to sequencial mode just in case
+	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
+	spixferx1(CMDWRITERREG);
+	spixferx1(0x40);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
 
 	// softspi setup sram chip into quad mode
-	setup_spix1rw();
 	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	delayms(1);
 	spixferx1(CMDQUADMODE);
-	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
 
 	// program timer as much as possible
 	rcc_periph_clock_enable(BP_LA_TIM_CLOCK);								// enable clock
@@ -207,20 +251,27 @@ void LA_setup_exc(void)
 	nvic_enable_irq(BP_LA_TIM_NVIC);									// enable timer irq
 
 	// setup triggers
-	exti_select_source(EXTI0, GPIOC);
-	exti_select_source(EXTI1, GPIOC);
+	exti_select_source(EXTI0, GPIOA);
+	exti_select_source(EXTI1, GPIOA);
 	exti_select_source(EXTI2, GPIOA);
 	exti_select_source(EXTI3, GPIOA);
-	exti_select_source(EXTI4, GPIOC);
-	exti_select_source(EXTI5, GPIOC);
+	exti_select_source(EXTI4, GPIOA);
+	exti_select_source(EXTI5, GPIOA);
 	exti_select_source(EXTI6, GPIOA);
 	exti_select_source(EXTI7, GPIOA);
+	nvic_enable_irq(NVIC_EXTI0_IRQ);
+	nvic_enable_irq(NVIC_EXTI1_IRQ);
+	nvic_enable_irq(NVIC_EXTI2_IRQ);
+	nvic_enable_irq(NVIC_EXTI3_IRQ);
+	nvic_enable_irq(NVIC_EXTI4_IRQ);
+	nvic_enable_irq(NVIC_EXTI9_5_IRQ);
+
 
 	// defaults
 	period=4500;
 	samples=4096;
+	extrasamples=4096-1024;
 	for(i=0; i<8; i++) triggers[i]=3; 	// no triggers
-
 }
 void LA_cleanup(void)
 {
@@ -278,7 +329,7 @@ void displaybuff(void)
 		for(j=0; j<8; j++)
 		{
 			mask=0x01<<j;
-			cdcprintf("\x1B[0;9%dmCH%d:\t", j, j);
+			cdcprintf("\x1B[0;9%dmCH%d:\t", j, j+1);
 
 			for(i=0; i<70; i++)
 			{
@@ -323,6 +374,8 @@ void setup_spix1rw(void)
 	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
 }
 
+
+#if(0)
 void bytetest(void){
 	
 	setup_spix1rw();
@@ -330,7 +383,7 @@ delayms(1);
 	//force to sequencial mode just in case
 	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
 	delayms(1);
-	spixferx1(0x05);//write
+	spixferx1(0x05);//write register
 	spixferx1(0x40);
 	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
 delayms(1);
@@ -402,7 +455,7 @@ delayms(1);
 	gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high	
 
 }
-
+#endif
 
 void setup_spix4w(void)
 {
@@ -438,12 +491,12 @@ static uint8_t spixferx1(uint8_t d)
 		if(d&mask) gpio_set(BP_SRAM1_MOSI_PORT, BP_SRAM1_MOSI_PIN);
 			else gpio_clear(BP_SRAM1_MOSI_PORT, BP_SRAM1_MOSI_PIN);
 			
-		delayms(1);
+//		delayms(1);
 		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
-		delayms(1);
+//		delayms(1);
 		received<<=1; //move the rx byte up one bit before next read
 		received|=(gpio_get(BP_SRAM1_MISO_PORT, BP_SRAM1_MISO_PIN)?1:0);
-		delayms(1);
+//		delayms(1);
 		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
 		mask>>=1;
 
@@ -462,9 +515,9 @@ static uint8_t spiRx4(void)
 
 	for(i=0; i<2; i++)
 	{
-		delayms(1);
+//		delayms(1);
 		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK HIGH
-		delayms(1);
+//		delayms(1);
 		
 		//READ
 		received<<=1;
@@ -505,10 +558,10 @@ static void spiWx4(uint8_t d)
 			else gpio_clear(BP_LA_CHAN1_PORT, BP_LA_CHAN1_PIN);
 		mask>>=1;
 
-		delayms(1);
+//		delayms(1);
 		
 		gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK HIGH
-		delayms(1);
+//		delayms(1);
 		gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN); //CLOCK LOW
 	}
 
@@ -565,20 +618,19 @@ static void getbuff(void)
 	int i;
 	uint8_t temp;
 
+	setup_spix4w(); //write
 	gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
-
-	setup_spix4w();
-
-	spixferx4(CMDREAD);
-	spixferx4(0x00);
-	spixferx4(0x00);
-	spixferx4(0x00);
-
-	setup_spix4r();
+	delayms(1);
+	spiWx4(0x03); //read command
+	spiWx4(0);
+	spiWx4(0);
+	spiWx4(0); //3 byte address
+	setup_spix4r(); //read
+	spiRx4(); //dummy byte
 
 	for(i=0; i<(BP_LA_BUFFSIZE); i+=2)
 	{
-		temp=spixferx4(0xff);
+		temp=spiRx4();
 		labuff[i]=temp&0xF0;
 		labuff[i+1]=((temp<<4)&0xF0);
 		
@@ -610,30 +662,55 @@ void tim1_cc_isr(void)
 	}
 }
 
-
-#if(0)
-void exti4_isr(void)
+void exti0_isr(void)
 {
 	stop=1;
+	exti_reset_request(EXTI0);
+}
+
+void exti1_isr(void)
+{
+	stop=2;
+	exti_reset_request(EXTI1);
+}
+
+void exti2_isr(void)
+{
+	stop=3;
+	exti_reset_request(EXTI2);
+}
+
+void exti3_isr(void)
+{
+	stop=4;
+	exti_reset_request(EXTI3);
+}
+
+void exti4_isr(void)
+{
+	stop=5;
 	exti_reset_request(EXTI4);
 }
 
-void exti5_isr(void)
+void exti9_5_isr(void)
 {
-	stop=1;
-	exti_reset_request(EXTI5);
+	if(exti_get_flag_status(EXTI5))
+	{
+		stop=6;
+		exti_reset_request(EXTI5);
+	}
+
+	if(exti_get_flag_status(EXTI6))
+	{
+		stop=7;
+		exti_reset_request(EXTI6);
+	}
+
+	if(exti_get_flag_status(EXTI7))
+	{
+		stop=8;
+		exti_reset_request(EXTI7);
+	}
 }
 
-void exti6_isr(void)
-{
-	stop=1;
-	exti_reset_request(EXTI6);
-}
-
-void exti7_isr(void)
-{
-	stop=1;
-	exti_reset_request(EXTI7);
-}
-#endif
 

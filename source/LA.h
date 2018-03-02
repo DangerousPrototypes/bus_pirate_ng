@@ -8,3 +8,8 @@ void LA_setup_exc(void);
 void LA_cleanup(void);
 void LA_pins(void);
 void LA_settings(void);
+
+
+#define LATRIGGERMENU	"Trigger\r\n 1. Rising\r\n 2. Falling\r\n 3. Both\r\n 4. No trigger*\r\n> "
+#define LAPERIODMENU 	"period> "
+#define LASAMPLEMENU	"samples> "

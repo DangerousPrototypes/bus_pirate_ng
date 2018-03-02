@@ -868,6 +868,8 @@ void getuserinput(void)
 					{
 						cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
 						cdcputs("\x08 \x08");
+						cmdbuff[cmdhead]=0x00;
+
 					}
 					break;
 			case '\r':	//cmdbuff[cmdhead]=0x00;
