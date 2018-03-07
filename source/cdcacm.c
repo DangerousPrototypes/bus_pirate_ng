@@ -40,14 +40,22 @@
 
 // globals
 static usbd_device *my_usbd_dev;		// usb device
-static volatile uint8_t rxbuff[RXBUFFSIZE];	// intermediate receive buffer
-static volatile uint8_t txbuff[TXBUFFSIZE];	// intermediate transmit bufff
-static volatile uint8_t	rxhead;			// pointers to position in buffers
-static volatile uint8_t	txhead;
-static volatile uint8_t	rxtail;
-static volatile uint8_t	txtail;
-uint8_t usbd_control_buffer[128];		// Buffer to be used for control requests.
-static char  printbuf[PRINTBUFLEN];
+// first cdc endpoint
+static volatile uint8_t rxbuff1[RXBUFFSIZE];	// intermediate receive buffer
+static volatile uint8_t txbuff1[TXBUFFSIZE];	// intermediate transmit bufff
+static volatile uint8_t	rxhead1;		// pointers to position in buffers
+static volatile uint8_t	txhead1;
+static volatile uint8_t	rxtail1;
+static volatile uint8_t	txtail1;
+// second cdc endpoint
+static volatile uint8_t rxbuff2[RXLABUFFSIZE];	// intermediate receive buffer
+static volatile uint8_t txbuff2[TXLABUFFSIZE];	// intermediate transmit bufff
+static volatile uint8_t	rxhead2;		// pointers to position in buffers
+static volatile uint8_t	txhead2;
+static volatile uint8_t	rxtail2;
+static volatile uint8_t	txtail2;
+uint8_t usbd_control_buffer[256];		// Buffer to be used for control requests.
+static char  printbuf[PRINTBUFLEN];		// used as printf buffer
 
 
 static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *req, uint8_t **buf,
@@ -76,25 +84,25 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
 		local_buf[8] = req->wValue & 3;
 		local_buf[9] = 0;
 		// usbd_ep_write_packet(0x83, buf, 10);
-		return 1;
+		return USBD_REQ_HANDLED;
 		}
 	case USB_CDC_REQ_SET_LINE_CODING: 
 		if(*len < sizeof(struct usb_cdc_line_coding))
-			return 0;
+			return USBD_REQ_NOTSUPP;
 
-		return 1;
+		return USBD_REQ_HANDLED;
 	}
-	return 0;
+	return USBD_REQ_NOTSUPP;
 }
 
-static void cdcacm_data_tx_cb(usbd_device *usbd_dev, uint8_t ep)
+static void cdcacm_data_tx_cb1(usbd_device *usbd_dev, uint8_t ep)
 {
 	(void)usbd_dev;
 	(void)ep;
 }
 
 
-static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
+static void cdcacm_data_rx_cb1(usbd_device *usbd_dev, uint8_t ep)
 {
 	int i=0;
 
@@ -105,32 +113,58 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 
 	while (len)
 	{
-		rxbuff[rxhead]=buf[i++];
-		rxhead=(rxhead+1)&(RXBUFFSIZE-1);
+		rxbuff1[rxhead1]=buf[i++];
+		rxhead1=(rxhead1+1)&(RXBUFFSIZE-1);
 		len--;
 	}
 }
 
+static void cdcacm_data_tx_cb2(usbd_device *usbd_dev, uint8_t ep)
+{
+	(void)usbd_dev;
+	(void)ep;
+}
+
+
+static void cdcacm_data_rx_cb2(usbd_device *usbd_dev, uint8_t ep)
+{
+	int i=0;
+
+	(void)ep;
+
+	char buf[64];
+	int len = usbd_ep_read_packet(usbd_dev, 0x03, buf, 64);
+
+	while (len)
+	{
+		rxbuff2[rxhead2]=buf[i++];
+		rxhead2=(rxhead2+1)&(RXLABUFFSIZE-1);
+		len--;
+	}
+}
+
+
+// first cdc channel (usermode)
 uint8_t cdcbyteready(void)
 {
-	return !(rxhead==rxtail);
+	return !(rxhead1==rxtail1);
 }
 
 uint8_t cdcgetc(void)
 {
 	uint8_t c;
 
-	while(rxhead==rxtail);				// block until data available
+	while(rxhead1==rxtail1);				// block until data available
 
-	c=rxbuff[rxtail];
-	rxtail=(rxtail+1)&(RXBUFFSIZE-1);
+	c=rxbuff1[rxtail1];
+	rxtail1=(rxtail1+1)&(RXBUFFSIZE-1);
 	return c;	
 }
 
 void cdcputc(char c)
 {
-	txbuff[txhead]=c;
-	txhead=(txhead+1)&(TXBUFFSIZE-1);
+	txbuff1[txhead1]=c;
+	txhead1=(txhead1+1)&(TXBUFFSIZE-1);
 }
 
 void cdcputs(char *s)
@@ -149,13 +183,55 @@ void cdcprintf(const char *fmt, ...)
 
 
 
+// second cdc channel (binmode)
+uint8_t cdcbyteready2(void)
+{
+	return !(rxhead2==rxtail2);
+}
+
+uint8_t cdcgetc2(void)
+{
+	uint8_t c;
+
+	while(rxhead2==rxtail2);				// block until data available
+
+	c=rxbuff2[rxtail2];
+	rxtail2=(rxtail2+1)&(RXLABUFFSIZE-1);
+	return c;	
+}
+
+void cdcputc2(char c)
+{
+	txbuff2[txhead2]=c;
+	txhead2=(txhead2+1)&(TXLABUFFSIZE-1);
+}
+
+void cdcputs2(char *s)
+{
+	while(*s) cdcputc2(*(s++));
+}
+
+void cdcprintf2(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(printbuf, PRINTBUFLEN, fmt, args);
+	cdcputs2(printbuf);
+	va_end(args);
+}
+
+
+
 static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 {
 	(void)wValue;
 
-	usbd_ep_setup(usbd_dev, 0x01, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_rx_cb);
-	usbd_ep_setup(usbd_dev, 0x82, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_tx_cb);
-	usbd_ep_setup(usbd_dev, 0x83, USB_ENDPOINT_ATTR_INTERRUPT, 16, NULL);
+	usbd_ep_setup(usbd_dev, 0x01, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_rx_cb1);
+	usbd_ep_setup(usbd_dev, 0x81, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_tx_cb1);
+	usbd_ep_setup(usbd_dev, 0x03, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_rx_cb2);
+	usbd_ep_setup(usbd_dev, 0x83, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_tx_cb2);
+	usbd_ep_setup(usbd_dev, 0x82, USB_ENDPOINT_ATTR_INTERRUPT, 16, NULL);
+	usbd_ep_setup(usbd_dev, 0x84, USB_ENDPOINT_ATTR_INTERRUPT, 16, NULL);
 
 	usbd_register_control_callback(
 				usbd_dev,
@@ -176,18 +252,34 @@ void cdcpoll(void)
 	if(my_usbd_dev!=NULL) usbd_poll(my_usbd_dev);
 
 	//move to somewhere else??
-	if(txtail!=txhead)							// we have data to send?
+	if(txtail1!=txhead1)							// we have data to send?
 	{
 		gpio_set(BP_USB_LED_PORT, BP_USB_LED_PIN);			// flash led during TX
 
 		i=0;
-		while((txtail!=txhead)&&(i<63))
+		while((txtail1!=txhead1)&&(i<63))
 		{
-			buf[i++]=txbuff[txtail];
-			txtail=(txtail+1)&(TXBUFFSIZE-1);
+			buf[i++]=txbuff1[txtail1];
+			txtail1=(txtail1+1)&(TXBUFFSIZE-1);
 		}
 		buf[i++]=0;
-		while((usbd_ep_write_packet(my_usbd_dev, 0x82, buf, i)==0));	// try resending until it is succeeded
+		while((usbd_ep_write_packet(my_usbd_dev, 0x81, buf, i)==0));	// try resending until it is succeeded
+
+		gpio_clear(BP_USB_LED_PORT, BP_USB_LED_PIN);
+	}
+	//move to somewhere else??
+	if(txtail2!=txhead2)							// we have data to send?
+	{
+		gpio_set(BP_USB_LED_PORT, BP_USB_LED_PIN);			// flash led during TX
+
+		i=0;
+		while((txtail2!=txhead2)&&(i<63))
+		{
+			buf[i++]=txbuff2[txtail2];
+			txtail2=(txtail2+1)&(TXLABUFFSIZE-1);
+		}
+		buf[i++]=0;
+		while((usbd_ep_write_packet(my_usbd_dev, 0x83, buf, i)==0));	// try resending until it is succeeded
 
 		gpio_clear(BP_USB_LED_PORT, BP_USB_LED_PIN);
 	}
@@ -200,12 +292,20 @@ void cdcinit(void)
 	int i;
 
 	my_usbd_dev=NULL;
-	for(i=0; i<RXBUFFSIZE; i++) rxbuff[i]=0x0;
-	for(i=0; i<TXBUFFSIZE; i++) txbuff[i]=0x0;
-	rxhead=0;
-	txhead=0;
-	rxtail=0;
-	txtail=0;
+	// first cdc channel
+	for(i=0; i<RXBUFFSIZE; i++) rxbuff1[i]=0x0;
+	for(i=0; i<TXBUFFSIZE; i++) txbuff1[i]=0x0;
+	rxhead1=0;
+	txhead1=0;
+	rxtail1=0;
+	txtail1=0;
+
+	for(i=0; i<RXBUFFSIZE; i++) rxbuff2[i]=0x0;
+	for(i=0; i<TXBUFFSIZE; i++) txbuff2[i]=0x0;
+	rxhead2=0;
+	txhead2=0;
+	rxtail2=0;
+	txtail2=0;
 
 	// setup usb
 	my_usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));

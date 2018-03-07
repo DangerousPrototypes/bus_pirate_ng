@@ -859,33 +859,41 @@ void getuserinput(void)
 	go=0;
 	while(!go)
 	{
-		c=cdcgetc();
-		
-		switch(c)
+		if(cdcbyteready())
 		{
-			case 0x08:			// delete
-					if(cmdhead!=cmdtail)
-					{
-						cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
-						cdcputs("\x08 \x08");
-						cmdbuff[cmdhead]=0x00;
+			c=cdcgetc();
+		
+			switch(c)
+			{
+				case 0x08:			// delete
+						if(cmdhead!=cmdtail)
+						{
+							cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
+							cdcputs("\x08 \x08");
+							cmdbuff[cmdhead]=0x00;
 
-					}
-					break;
-			case '\r':	//cmdbuff[cmdhead]=0x00;
-					//cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
-					go=1;
-					break;
-			default:	
-					if((c>=0x20)&&(c<=0x7E))	// only accept printable characters
-					{
-						cdcputc(c);
-						cmdbuff[cmdhead]=c;
-						cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
-					}
-					break;	
+						}
+						break;
+				case '\r':	//cmdbuff[cmdhead]=0x00;
+						//cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+						go=1;
+						break;
+				default:	
+						if((c>=0x20)&&(c<=0x7E))	// only accept printable characters
+						{
+							cdcputc(c);
+							cmdbuff[cmdhead]=c;
+							cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+						}
+						break;	
+			}
 		}
 
+		if(cdcbyteready2())
+		{
+			c=cdcgetc2();
+			cdcputc2(c);
+		}
 	}
 }
 
