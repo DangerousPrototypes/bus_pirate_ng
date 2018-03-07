@@ -11,7 +11,6 @@
 #define		USB_PID		0x7331
 #define		USB_VENDOR	"dangerousprototypes.com"
 #define		USB_PRODUCT	"buspirateNG"
-#define		USB_SERIAL	"00000000"
 
 // enable protocols
 #define 	BP_USE_DUMMY1

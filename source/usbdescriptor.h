@@ -6,6 +6,8 @@
 #error "USB_PID not defined; we need this to function!!"
 #endif
 
+extern char usbserial[25];
+
 static const struct usb_device_descriptor dev = {
 	.bLength = USB_DT_DEVICE_SIZE,
 	.bDescriptorType = USB_DT_DEVICE,
@@ -267,6 +269,6 @@ static const struct usb_config_descriptor config = {
 static const char *usb_strings[] = {
 	USB_VENDOR,
 	USB_PRODUCT,
-	USB_SERIAL,
+	usbserial,
 };
 

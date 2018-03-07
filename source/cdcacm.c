@@ -56,7 +56,8 @@ static volatile uint8_t	rxtail2;
 static volatile uint8_t	txtail2;
 uint8_t usbd_control_buffer[256];		// Buffer to be used for control requests.
 static char  printbuf[PRINTBUFLEN];		// used as printf buffer
-
+// usbserialnumber
+char usbserial[25];
 
 static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *req, uint8_t **buf,
 		uint16_t *len, void (**complete)(usbd_device *usbd_dev, struct usb_setup_data *req))
@@ -290,6 +291,7 @@ void cdcpoll(void)
 void cdcinit(void)
 {
 	int i;
+	uint16_t *id = (uint16_t *)0x1FFFF7E8;			// unique 96bit id location
 
 	my_usbd_dev=NULL;
 	// first cdc channel
@@ -306,6 +308,10 @@ void cdcinit(void)
 	txhead2=0;
 	rxtail2=0;
 	txtail2=0;
+
+	//create something unique (some bitshuffling to match the same outut as i command)
+	// using 32 bits will trigger a warning
+	snprintf(usbserial, 25, "%04X%04X%04X%04X%04X%04X", id[1], id[0], id[3], id[2], id[5], id[4]);
 
 	// setup usb
 	my_usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
