@@ -29,7 +29,8 @@ extern volatile uint32_t systicks;
 // include platform
 // TODO we need some makefile tricks for this
 //#include	"platform/testplatform.h"			// hw is not made yet
-#include	"platform/beta1.h"				// BPNG v1.0 dec 2017
+//#include	"platform/beta1.h"				// BPNG v1.0 dec 2017
+#include	"platform/beta2.h"				// BPNG v1.0 feb 2018
 
 
 

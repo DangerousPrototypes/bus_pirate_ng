@@ -40,6 +40,7 @@
 
 // globals
 static usbd_device *my_usbd_dev;		// usb device
+static uint8_t configured;
 // first cdc endpoint
 static volatile uint8_t rxbuff1[RXBUFFSIZE];	// intermediate receive buffer
 static volatile uint8_t txbuff1[TXBUFFSIZE];	// intermediate transmit bufff
@@ -65,6 +66,8 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
 	(void)complete;
 	(void)buf;
 	(void)usbd_dev;
+
+configured=1;
 
 	switch(req->bRequest) {
 	case USB_CDC_REQ_SET_CONTROL_LINE_STATE: {
@@ -239,6 +242,13 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 				USB_REQ_TYPE_CLASS | USB_REQ_TYPE_INTERFACE,
 				USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
 				cdcacm_control_request);
+
+//	configured=1;
+}
+
+uint8_t usbready(void)
+{
+ 	return configured;
 }
 
 //void  usb_lp_can_rx0_isr(void)
@@ -308,6 +318,8 @@ void cdcinit(void)
 	txhead2=0;
 	rxtail2=0;
 	txtail2=0;
+
+	configured=0;
 
 	//create something unique (some bitshuffling to match the same outut as i command)
 	// using 32 bits will trigger a warning

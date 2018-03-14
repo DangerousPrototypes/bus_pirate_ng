@@ -190,6 +190,15 @@ void doUI(void)
 
 	go=0;
 
+	// wait for usb ready
+//	while(!usbready());
+	delayms(500);
+
+	// show welcome
+	versioninfo();
+	cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
+
+
 	while(1)
 	{
 		getuserinput();
@@ -293,17 +302,20 @@ void doUI(void)
 							modeConfig.error=1;
 						}
 						break;
-				case 'b':	temp=askint(VPUMENU, 1, 3, 1);
-						modeConfig.vpumode=temp-1;
-						gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);			// turn all psu off to avoid shorts
-						gpio_clear(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
+				case 'b':	if(modeConfig.mode!=HIZ)
+						{
+							temp=askint(VPUMENU, 1, 3, 1);
+							modeConfig.vpumode=temp-1;
+							gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);			// Vpu=ext
+							gpio_clear(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
+						}
 						switch(modeConfig.vpumode)
 						{
-							case 1:
-								gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);
+							case 1:								// 3v3
 								gpio_set(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
-							case 2:
-								gpio_clear(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
+								gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);
+							case 2:								// 5v0
+								gpio_set(BP_VPU33EN_PORT, BP_VPU33EN_PIN);
 								gpio_set(BP_VPU50EN_PORT, BP_VPU50EN_PIN);
 							default:
 								gpio_clear(BP_VPU50EN_PORT, BP_VPU50EN_PIN);
@@ -565,7 +577,7 @@ void versioninfo(void)
 	else if(flashsize<=512) ramsize=64;
 	else ramsize=96;
 
-	cdcprintf("Buspirate NextGen (ARM) HW:%s\r\n", BP_PLATFORM);
+	cdcprintf("Buspirate NextGen (ARM) HW: %s\r\n", BP_PLATFORM);
 	cdcprintf("Firmware %s, bootloader N/A\r\n", FWVER);
 	cdcprintf("STM32 with %dK FLASH, %dK SRAM ", flashsize, ramsize);
 	cdcprintf("s/n: %08X%08X%08X\r\n", id[0], id[1], id[2]);
@@ -723,7 +735,7 @@ void showstates(void)
 	// adcs
 	v33=voltage(BP_3V3_CHAN, 1);
 	v50=voltage(BP_5V0_CHAN, 1);
-	vpu=voltage(BP_VPU_CHAN, 1);
+	vpu=voltage(BP_VPU_CHAN, 1);  // TODO make difference between vextern (pin) and vpu (voltage used)??
 	adc=voltage(BP_ADC_CHAN, 1);
 
 	// show state of pin

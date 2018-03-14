@@ -8,6 +8,7 @@ void cdcputs(char *s);
 void cdcprintf(const char *fmt, ...);
 void cdcinit(void);
 void cdcpoll(void);
+uint8_t usbready(void);
 
 uint8_t cdcbyteready2(void);
 uint8_t cdcgetc2(void);

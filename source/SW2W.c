@@ -165,12 +165,15 @@ void SW2W_clk(void)
 uint32_t SW2W_bitr(void)
 {
 	uint32_t returnval;
+
+	returnval=0;
 	cdcprintf("SW2W bitr()=%08X", returnval);
 	return returnval;
 }
 uint32_t SW2W_period(void)
 {
 	uint32_t returnval;
+	returnval=0;
 	cdcprintf("SW2W period()=%08X", returnval);
 	return returnval;
 }

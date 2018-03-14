@@ -11,17 +11,10 @@
 #include "cdcacm.h"
 #include "UI.h"
 
-#define CMDREAD		0x03
-#define CMDWRITE	0x02
-#define CMDQUADMODE	0x38
-#define CMDRESETSPI	0xFF
-#define CMDWRITERREG	0x05
-
 
 static volatile uint8_t stop;
 static volatile uint32_t counts;
 static uint32_t returnval;
-static uint8_t lamode;
 static uint16_t period;
 static uint32_t samples, extrasamples;
 static uint8_t triggers[8];
@@ -34,7 +27,6 @@ static uint8_t spixferx1(uint8_t d);
 static uint8_t spixferx4(uint8_t d);
 static void spiWx4(uint8_t d);
 static uint8_t spiRx4(void);
-static void bytetest(void);
 static void getbuff(void);
 static void setup_spix1rw(void);
 static void setup_spix4w(void);
@@ -183,8 +175,6 @@ uint32_t LA_read(void)
 
 void LA_macro(uint32_t macro)
 {
-	int i;
-
 	switch(macro)
 	{
 		case 0:		cdcprintf("1..8. Setup trigger on chan 1..8\r\n9. set period\r\n10. set samples\r\n11. show buffer\r\n12. transfer buffer");
@@ -315,14 +305,14 @@ void LA_settings(void)
 
 void displaybuff(void)
 {
-	int i, j, stop;
+	int i, j, exit;
 	uint8_t mask;
 	uint32_t offset;
 
-	stop=0;
+	exit=0;
 	offset=0;
 
-	while(!stop)
+	while(!exit)
 	{
 		cdcprintf("\x1B[2J\x1B[H");
 
@@ -349,7 +339,7 @@ void displaybuff(void)
 					break;
 			case '-':	offset-=70;
 					break;
-			case 'x':	stop=1;
+			case 'x':	exit=1;
 					break;
 		}
 		
