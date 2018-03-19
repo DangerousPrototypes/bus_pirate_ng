@@ -203,6 +203,14 @@ void LA_macro(uint32_t macro)
 		case 14:
 				latest();
 				break;
+		case 15:
+				//pins input
+				//open latch
+				setup_spix4r(); //read mode
+				//open 573 latch (LOW)
+				gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); // 573 latch
+				gpio_clear(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);				
+				break;
 		default:	modeConfig.error=1;
 				cdcprintf("no such macro");
 				break;
