@@ -30,7 +30,8 @@ static void getbuff(void);
 static void setup_spix1rw(void);
 static void setup_spix4w(void);
 static void setup_spix4r(void);
-
+void bytetest(void);
+void latest(void);
 
 const char spinner[]={'-', '\\', '|', '/'};
 char triggermodes[][4]={
@@ -196,12 +197,163 @@ void LA_macro(uint32_t macro)
 				break;
 		case 12:	getbuff();
 				break;
+		case 13:
+				bytetest();
+				break;
+		case 14:
+				latest();
+				break;
+		case 15:
+				//pins input
+				//open latch
+				setup_spix4r(); //read mode
+				//open 573 latch (LOW)
+				gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); // 573 latch
+				gpio_clear(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);				
 				break;
 		default:	modeConfig.error=1;
 				cdcprintf("no such macro");
 				break;
 	}
 }
+
+void latest(void){
+    int i;
+    setup_spix1rw();
+	delayms(1);
+    //force to sequencial mode just in case
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spixferx1(CMDWRITERREG);//write register
+    spixferx1(CMDSEQLMODE);
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
+	delayms(1);
+   
+    //quad mode
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spixferx1(CMDQUADMODE);
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+    
+    //write some bytes
+    setup_spix4w(); //write
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spiWx4(CMDWRITE); //write command
+    spiWx4(0);
+    spiWx4(0);
+    spiWx4(0); //3 byte address
+	setup_spix4r(); //read mode
+	//open 573 latch (LOW)
+	gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); // 573 latch
+	gpio_clear(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);
+	//manually flip click for 8 bytes
+	for(i=0; i<16; i++){
+		//gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+		BP_LA_SRAM_CLK_HIGH();
+		delayms(1);
+		BP_LA_SRAM_CLK_LOW(); //gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN);
+	}
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+    
+    //read some bytes
+    setup_spix4w(); //write
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spiWx4(CMDREAD); //read command
+    spiWx4(0);
+    spiWx4(0);
+    spiWx4(0); //3 byte address
+    setup_spix4r(); //read
+    spiRx4(); //dummy byte
+	for(i=0; i<16; i++){
+		cdcprintf("%d\t",spiRx4());
+	}
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
+
+}
+
+void bytetest(void){
+    
+    setup_spix1rw();
+delayms(1);
+    //force to sequencial mode just in case
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spixferx1(0x05);//write register
+    spixferx1(0x40);
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
+delayms(1);
+    //test save a few bytes to the SRAM
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spixferx1(0x02);//write
+    spixferx1(0);
+    spixferx1(0);
+    spixferx1(0);
+    spixferx1(0X00);
+    spixferx1(0X55);
+    spixferx1(0X00);
+    spixferx1(0X55);
+    spixferx1(0X00);
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
+delayms(1);    
+    
+    //test read few bytes to the SRAM
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spixferx1(0x03);//read
+    spixferx1(0);
+    spixferx1(0);
+    spixferx1(0);
+    cdcprintf("%d\t",spixferx1(0xff));
+    cdcprintf("%d\t",spixferx1(0xff));
+    cdcprintf("%d\t",spixferx1(0xff));
+    cdcprintf("%d\t",spixferx1(0xff));
+    cdcprintf("%d\t",spixferx1(0xff));
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
+    
+    //quad mode
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spixferx1(CMDQUADMODE);
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+    
+    //write some bytes
+    setup_spix4w(); //write
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spiWx4(0x02); //write command
+    spiWx4(0);
+    spiWx4(0);
+    spiWx4(0); //3 byte address
+    spiWx4(0x00);
+    spiWx4(0x55);
+    spiWx4(0x00);
+    spiWx4(0x55);
+    spiWx4(0x00);
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
+    
+    //read some bytes
+    setup_spix4w(); //write
+    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    delayms(1);
+    spiWx4(0x03); //read command
+    spiWx4(0);
+    spiWx4(0);
+    spiWx4(0); //3 byte address
+    setup_spix4r(); //read
+    spiRx4(); //dummy byte
+    cdcprintf("%d\t",spiRx4());
+    cdcprintf("%d\t",spiRx4());
+    cdcprintf("%d\t",spiRx4());
+    cdcprintf("%d\t",spiRx4());
+    cdcprintf("%d\t",spiRx4());
+    gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
+
+}
+
+
 void LA_setup(void)
 {
 	cdcprintf("Please use macro system for setting and viewing parameters");

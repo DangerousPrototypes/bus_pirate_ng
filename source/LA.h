@@ -17,5 +17,6 @@ void LA_settings(void);
 #define CMDREAD		0x03
 #define CMDWRITE	0x02
 #define CMDQUADMODE	0x38
+#define CMDSEQLMODE
 #define CMDRESETSPI	0xFF
 #define CMDWRITERREG	0x05
