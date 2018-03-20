@@ -195,8 +195,8 @@ void doUI(void)
 	delayms(500);
 
 	// show welcome
-	versioninfo();
-	cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
+	//versioninfo();
+	//cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
 
 
 	while(1)

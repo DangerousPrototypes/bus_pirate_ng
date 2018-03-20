@@ -224,15 +224,15 @@ void latest(void){
     //force to sequencial mode just in case
     gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
     delayms(1);
-    spixferx1(CMDWRITERREG);//write register
-    spixferx1(CMDSEQLMODE);
+    spiWx1(CMDWRITERREG);//write register
+    spiWx1(CMDSEQLMODE);
     gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
 	delayms(1);
    
     //quad mode
     gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
     delayms(1);
-    spixferx1(CMDQUADMODE);
+    spiWx1(CMDQUADMODE);
     gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
     
     //write some bytes
@@ -280,43 +280,43 @@ delayms(1);
     //force to sequencial mode just in case
     gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
     delayms(1);
-    spixferx1(0x05);//write register
-    spixferx1(0x40);
+    spiWx1(0x05);//write register
+    spiWx1(0x40);
     gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
 delayms(1);
     //test save a few bytes to the SRAM
     gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
     delayms(1);
-    spixferx1(0x02);//write
-    spixferx1(0);
-    spixferx1(0);
-    spixferx1(0);
-    spixferx1(0X00);
-    spixferx1(0X55);
-    spixferx1(0X00);
-    spixferx1(0X55);
-    spixferx1(0X00);
+    spiWx1(0x02);//write
+    spiWx1(0);
+    spiWx1(0);
+    spiWx1(0);
+    spiWx1(0X00);
+    spiWx1(0X55);
+    spiWx1(0X00);
+    spiWx1(0X55);
+    spiWx1(0X00);
     gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
 delayms(1);    
     
     //test read few bytes to the SRAM
-    gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
+    /*gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
     delayms(1);
-    spixferx1(0x03);//read
-    spixferx1(0);
-    spixferx1(0);
-    spixferx1(0);
-    cdcprintf("%d\t",spixferx1(0xff));
-    cdcprintf("%d\t",spixferx1(0xff));
-    cdcprintf("%d\t",spixferx1(0xff));
-    cdcprintf("%d\t",spixferx1(0xff));
-    cdcprintf("%d\t",spixferx1(0xff));
+    spiWx1(0x03);//read
+    spiWx1(0);
+    spiWx1(0);
+    spiWx1(0);
+    cdcprintf("%d\t",spiWx1(0xff));
+    cdcprintf("%d\t",spiWx1(0xff));
+    cdcprintf("%d\t",spiWx1(0xff));
+    cdcprintf("%d\t",spiWx1(0xff));
+    cdcprintf("%d\t",spiWx1(0xff));
     gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high    
-    
+    */
     //quad mode
     gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN);
     delayms(1);
-    spixferx1(CMDQUADMODE);
+    spiWx1(CMDQUADMODE);
     gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN); //SRAM CS high
     
     //write some bytes
