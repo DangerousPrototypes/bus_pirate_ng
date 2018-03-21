@@ -17,7 +17,7 @@
 #include "bpflash.h"
 
 // globals
-uint32_t cmdhead, cmdtail;
+uint32_t cmdhead, cmdtail, cursor;		// TODO swap head an tail?
 char cmdbuff[CMDBUFFSIZE];
 struct _modeConfig modeConfig;
 
@@ -202,7 +202,6 @@ void doUI(void)
 	while(1)
 	{
 		getuserinput();
-
 
 		if(protocols[modeConfig.mode].protocol_periodic())
 			go=2;
@@ -495,6 +494,7 @@ void doUI(void)
 						}
 						else
 							cdcprintf("missing terminating \"");
+				case 0x00:
 				case ' ':	break;
 				case ',':	break;	// reuse this command??
 				case '$':	jumptobootloader();
@@ -536,7 +536,7 @@ void doUI(void)
 						break;	
 			}
 			cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);	// advance to next char/command
-			if(c!=' ') cdcprintf("\r\n");
+			if((c!=' ')&&(c!=0x00)&&(c!=',')) cdcprintf("\r\n");
 
 			if(modeConfig.error)			// something went wrong
 			{
@@ -772,7 +772,7 @@ void changemode(void)
 		cdcprintf("Mode> ");
 		cmdtail=cmdhead;	// flush all input
 		getuserinput();
-		consumewhitechars();
+		consumewhitechars(); 
 		mode=getint();
 
 		if((mode>MAXPROTO)||(mode==0))
@@ -867,8 +867,11 @@ void getuserinput(void)
 {
 	int go;
 	char c;
+	uint32_t temp;
 
 	go=0;
+	cursor=cmdhead;
+
 	while(!go)
 	{
 		if(cdcbyteready())
@@ -877,26 +880,100 @@ void getuserinput(void)
 		
 			switch(c)
 			{
-				case 0x08:			// delete
-						if(cmdhead!=cmdtail)
+				case 0x08:							// backspace
+						if((cmdhead!=cmdtail)&&(cursor!=cmdtail))	// not empty or at beginning?
 						{
-							cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
-							cdcputs("\x08 \x08");
-							cmdbuff[cmdhead]=0x00;
+							if(cursor==cmdhead)			// at end?
+							{
+								cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
+								cursor=cmdhead;
+								cdcputs("\x08 \x08");
+								cmdbuff[cmdhead]=0x00;
+							}
+							else
+							{
+								temp=cursor;
+								cdcprintf("\x1B[D");
+								while(temp!=cmdhead)
+								{
+									cmdbuff[((temp-1)&(CMDBUFFSIZE-1))]=cmdbuff[temp];
+									cdcputc(cmdbuff[temp]);
+									temp=(temp+1)&(CMDBUFFSIZE-1);
+								}
+								cdcputc(' ');
+								cmdbuff[cmdhead]=0x00;
+								cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
+								cursor=(cursor-1)&(CMDBUFFSIZE-1);
+								cdcprintf("\x1B[%dD", ((cmdhead-cursor+1)&(CMDBUFFSIZE-1)));
+							}
+						}
+						else cdcputc('\x07');
+						break;
+				case '\r':	cmdbuff[cmdhead]=0x00;
+						cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+						go=1;
+						break;
+				case '\x1B':	c=cdcgetc();
+						if(c=='[')
+						{
+							c=cdcgetc();
+							switch(c)
+							{
+								case 'D':	if(cursor!=cmdtail)	// left
+										{
+											cursor=(cursor-1)&(CMDBUFFSIZE-1);
+											cdcprintf("\x1B[D");
+										}
+										else cdcputc('\x07');
+
+										break;
+								case 'C':	if(cursor!=cmdhead)	// right
+										{
+											cursor=(cursor+1)&(CMDBUFFSIZE-1);
+											cdcprintf("\x1B[C");
+										}
+										else cdcputc('\x07');
+
+										break;
+								case 'A':	// up
+										break;
+								case 'B':	// down
+										break;
+								default: 	break;
+							}
 
 						}
 						break;
-				case '\r':	//cmdbuff[cmdhead]=0x00;
-						//cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
-						go=1;
-						break;
-				default:	
-						if((c>=0x20)&&(c<=0x7E))	// only accept printable characters
+				default:	if((((cmdhead+1)&(CMDBUFFSIZE-1))!=cmdtail)&&(c>=0x20)&&(c<=0x7E))	// only accept printable characters if room available
 						{
-							cdcputc(c);
-							cmdbuff[cmdhead]=c;
-							cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+							if(cursor==cmdhead)		// at end
+							{
+								cdcputc(c);
+								cmdbuff[cmdhead]=c;
+								cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+								cursor=cmdhead;
+							}
+							else
+							{
+								temp=cmdhead+1;
+								while(temp!=cursor)
+								{
+									cmdbuff[temp]=cmdbuff[(temp-1)&(CMDBUFFSIZE-1)];
+									temp=(temp-1)&(CMDBUFFSIZE-1);
+								}
+								cmdbuff[cursor]=c;
+								temp=cursor;
+								while(temp!=((cmdhead+1)&(CMDBUFFSIZE-1)))
+								{
+									cdcputc(cmdbuff[temp]);
+									temp=(temp+1)&(CMDBUFFSIZE-1);
+								}
+								cursor=(cursor+1)&(CMDBUFFSIZE-1);
+								cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+								cdcprintf("\x1B[%dD", ((cmdhead-cursor)&(CMDBUFFSIZE-1)));
+							}
 						}
+						else cdcputc('\x07');
 						break;	
 			}
 		}

@@ -25,7 +25,7 @@ typedef struct _modeConfig
 
 
 // define our globals
-extern uint32_t cmdhead, cmdtail;
+extern uint32_t cmdhead, cmdvhead, cmdtail;
 extern char cmdbuff[CMDBUFFSIZE];
 extern struct _modeConfig modeConfig;
 extern const char vpumodes[][4];
