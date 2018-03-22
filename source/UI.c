@@ -203,6 +203,13 @@ void doUI(void)
 	{
 		getuserinput();
 
+//cdcprintf2("cmd=%s\r\n", cmdbuff+cmdtail);
+for(i=0; i<512; i++)
+{
+	cdcputc2(((cmdbuff[i]>=0x20)&&(cmdbuff[i]<=0x7E))?cmdbuff[i]:'_');
+}
+cdcprintf2("\r\n");
+
 		if(protocols[modeConfig.mode].protocol_periodic())
 			go=2;
 		else
@@ -862,15 +869,59 @@ void printhelp(void)
 	cdcprintf(" w/W\tPSU (off/ON)\t\t<x>/<x= >/<0>\tUsermacro x/assign x/list all\r\n");
 }
 
+// copies an previous cmd to current position int cmdbuff
+int cmdhistory(int ptr)
+{
+	int i;
+	uint32_t temp;
+	
+	i=1;
+
+	for (temp=(cmdtail-2)&(CMDBUFFSIZE-1); temp!=cmdhead; temp=(temp-1)&(CMDBUFFSIZE-1))
+	{
+		if(!cmdbuff[temp]) ptr--;
+
+		if((ptr==0)&&(cmdbuff[(temp+1)&(CMDBUFFSIZE-1)]))		// do we want this one?
+		{
+			while(cursor!=((cmdhead)&(CMDBUFFSIZE-1)))			//clear line to end
+			{
+				cdcputc(' ');
+				cursor=(cursor+1)&(CMDBUFFSIZE-1);
+			}
+			while(cursor!=((cmdtail)&(CMDBUFFSIZE-1)))			//move back to start;
+			{
+				cdcprintf("\x1B[D \x1B[D");
+				cursor=(cursor-1)&(CMDBUFFSIZE-1);
+			}
+
+
+			while(cmdbuff[(temp+i)&(CMDBUFFSIZE-1)])
+			{
+				cmdbuff[(cmdtail+i-1)&(CMDBUFFSIZE-1)]=cmdbuff[(temp+i)&(CMDBUFFSIZE-1)];
+				cdcputc(cmdbuff[(temp+i)&(CMDBUFFSIZE-1)]);
+				i++;
+			}
+			cmdhead=(cmdtail+i-1)&(CMDBUFFSIZE-1);
+			cursor=cmdhead;
+			cmdbuff[cmdhead]=0x00;
+			break;
+		}
+	}
+
+	return (!ptr);
+}
+
+
 // handles the userinput 
 void getuserinput(void)
 {
-	int go;
+	int go, histptr;
 	char c;
 	uint32_t temp;
 
 	go=0;
 	cursor=cmdhead;
+	histptr=0;
 
 	while(!go)
 	{
@@ -936,8 +987,20 @@ void getuserinput(void)
 
 										break;
 								case 'A':	// up
+										histptr++;
+										if(!cmdhistory(histptr))	// on error restore ptr and ring a bell
+										{
+											histptr--;
+											cdcputc('\x07');
+										}
 										break;
 								case 'B':	// down
+										histptr--;
+										if((histptr<1)||(!cmdhistory(histptr)))
+										{
+											histptr=0;
+											cdcputc('\x07');
+										}
 										break;
 								default: 	break;
 							}

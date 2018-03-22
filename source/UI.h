@@ -42,6 +42,7 @@ void initUI(void);
 void showstates(void);
 void changemode(void);
 void printhelp(void);
+int cmdhistory(int ptr);
 void getuserinput(void);
 void changedisplaymode(void);
 uint32_t askint(const char *menu, uint32_t minval, uint32_t maxval, uint32_t defval);
