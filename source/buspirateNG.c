@@ -8,6 +8,7 @@
 #include "buspirateNG.h"
 #include "UI.h"
 #include "ADC.h"
+#include "LA.h"
 
 
 //globals
@@ -80,7 +81,6 @@ int main(void)
 	gpio_clear(BP_USB_LED_PORT, BP_USB_LED_PIN);
 	gpio_set_mode(BP_USB_LED_PORT, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_USB_LED_PIN);	// mode led
 
-
 	// enable debug
 	debuginit();
 
@@ -108,6 +108,9 @@ int main(void)
 
 	//setup ADC
 	initADC();
+
+	//logic analyzer hardware setup
+	logicAnalyzerSetup();
 
 	while (1)
 	{

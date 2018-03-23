@@ -15,6 +15,8 @@
 #include "AUXpin.h"
 #include "ADC.h"
 #include "bpflash.h"
+#include "LA.h"
+#include "sump.h"
 
 // globals
 uint32_t cmdhead, cmdtail;
@@ -202,7 +204,10 @@ void doUI(void)
 	while(1)
 	{
 		getuserinput();
-
+		
+		//command received, start logic capture
+		//TODO: destinguish between bus and non-bus commands
+		logicAnalyzerCaptureStart();
 
 		if(protocols[modeConfig.mode].protocol_periodic())
 			go=2;
@@ -546,6 +551,12 @@ void doUI(void)
 				modeConfig.error=0;
 			}
 		}
+
+		//stop logic capture and dump data
+		//TODO:destinguish between bus activity and other commands
+		//only dump if bus command executed
+		logicAnalyzerCaptureStop();
+		
 		cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
 		if(go==2)
 		{
@@ -903,9 +914,16 @@ void getuserinput(void)
 
 		if(cdcbyteready2())
 		{
-			c=cdcgetc2();
-			cdcputc2(c);
+			//c=cdcgetc2();
+			//cdcputc2(c);
+
+
+			SUMPlogicCommand(cdcgetc2());
+
+		
+
 		}
+		//SUMPlogicService();
 	}
 }
 
