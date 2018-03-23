@@ -211,11 +211,11 @@ void doUI(void)
 
 
 		//cdcprintf2("cmd=%s\r\n", cmdbuff+cmdtail);
-		for(i=0; i<512; i++)
-		{
-			cdcputc2(((cmdbuff[i]>=0x20)&&(cmdbuff[i]<=0x7E))?cmdbuff[i]:'_');
-		}
-		cdcprintf2("\r\n");
+//		for(i=0; i<512; i++)
+//		{
+//			cdcputc2(((cmdbuff[i]>=0x20)&&(cmdbuff[i]<=0x7E))?cmdbuff[i]:'_');
+//		}
+//		cdcprintf2("\r\n");
 
 
 		if(protocols[modeConfig.mode].protocol_periodic())
