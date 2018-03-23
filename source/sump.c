@@ -180,7 +180,7 @@ void SUMPlogicCommand(unsigned char inByte){
 //
 //
 void SUMPlogicService(void){
-	//static unsigned int i;
+	static unsigned int i;
 //	static unsigned char j;
 
 	switch(LAstate){//dump data
