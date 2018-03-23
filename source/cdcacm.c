@@ -273,7 +273,7 @@ void cdcpoll(void)
 			buf[i++]=txbuff1[txtail1];
 			txtail1=(txtail1+1)&(TXBUFFSIZE-1);
 		}
-		buf[i++]=0;
+		buf[i+1]=0;
 		while((usbd_ep_write_packet(my_usbd_dev, 0x81, buf, i)==0));	// try resending until it is succeeded
 
 		gpio_clear(BP_USB_LED_PORT, BP_USB_LED_PIN);
