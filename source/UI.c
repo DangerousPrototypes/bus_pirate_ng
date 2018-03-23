@@ -19,7 +19,7 @@
 #include "sump.h"
 
 // globals
-uint32_t cmdhead, cmdtail;
+uint32_t cmdhead, cmdtail, cursor;		// TODO swap head an tail?
 char cmdbuff[CMDBUFFSIZE];
 struct _modeConfig modeConfig;
 
@@ -208,6 +208,15 @@ void doUI(void)
 		//command received, start logic capture
 		//TODO: destinguish between bus and non-bus commands
 		logicAnalyzerCaptureStart();
+
+
+		//cdcprintf2("cmd=%s\r\n", cmdbuff+cmdtail);
+		for(i=0; i<512; i++)
+		{
+			cdcputc2(((cmdbuff[i]>=0x20)&&(cmdbuff[i]<=0x7E))?cmdbuff[i]:'_');
+		}
+		cdcprintf2("\r\n");
+
 
 		if(protocols[modeConfig.mode].protocol_periodic())
 			go=2;
@@ -500,6 +509,7 @@ void doUI(void)
 						}
 						else
 							cdcprintf("missing terminating \"");
+				case 0x00:
 				case ' ':	break;
 				case ',':	break;	// reuse this command??
 				case '$':	jumptobootloader();
@@ -541,7 +551,7 @@ void doUI(void)
 						break;	
 			}
 			cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);	// advance to next char/command
-			if(c!=' ') cdcprintf("\r\n");
+			if((c!=' ')&&(c!=0x00)&&(c!=',')) cdcprintf("\r\n");
 
 			if(modeConfig.error)			// something went wrong
 			{
@@ -783,7 +793,7 @@ void changemode(void)
 		cdcprintf("Mode> ");
 		cmdtail=cmdhead;	// flush all input
 		getuserinput();
-		consumewhitechars();
+		consumewhitechars(); 
 		mode=getint();
 
 		if((mode>MAXPROTO)||(mode==0))
@@ -873,13 +883,60 @@ void printhelp(void)
 	cdcprintf(" w/W\tPSU (off/ON)\t\t<x>/<x= >/<0>\tUsermacro x/assign x/list all\r\n");
 }
 
+// copies an previous cmd to current position int cmdbuff
+int cmdhistory(int ptr)
+{
+	int i;
+	uint32_t temp;
+	
+	i=1;
+
+	for (temp=(cmdtail-2)&(CMDBUFFSIZE-1); temp!=cmdhead; temp=(temp-1)&(CMDBUFFSIZE-1))
+	{
+		if(!cmdbuff[temp]) ptr--;
+
+		if((ptr==0)&&(cmdbuff[(temp+1)&(CMDBUFFSIZE-1)]))		// do we want this one?
+		{
+			while(cursor!=((cmdhead)&(CMDBUFFSIZE-1)))			//clear line to end
+			{
+				cdcputc(' ');
+				cursor=(cursor+1)&(CMDBUFFSIZE-1);
+			}
+			while(cursor!=((cmdtail)&(CMDBUFFSIZE-1)))			//move back to start;
+			{
+				cdcprintf("\x1B[D \x1B[D");
+				cursor=(cursor-1)&(CMDBUFFSIZE-1);
+			}
+
+
+			while(cmdbuff[(temp+i)&(CMDBUFFSIZE-1)])
+			{
+				cmdbuff[(cmdtail+i-1)&(CMDBUFFSIZE-1)]=cmdbuff[(temp+i)&(CMDBUFFSIZE-1)];
+				cdcputc(cmdbuff[(temp+i)&(CMDBUFFSIZE-1)]);
+				i++;
+			}
+			cmdhead=(cmdtail+i-1)&(CMDBUFFSIZE-1);
+			cursor=cmdhead;
+			cmdbuff[cmdhead]=0x00;
+			break;
+		}
+	}
+
+	return (!ptr);
+}
+
+
 // handles the userinput 
 void getuserinput(void)
 {
-	int go;
+	int go, histptr;
 	char c;
+	uint32_t temp;
 
 	go=0;
+	cursor=cmdhead;
+	histptr=0;
+
 	while(!go)
 	{
 		if(cdcbyteready())
@@ -888,26 +945,112 @@ void getuserinput(void)
 		
 			switch(c)
 			{
-				case 0x08:			// delete
-						if(cmdhead!=cmdtail)
+				case 0x08:							// backspace
+						if((cmdhead!=cmdtail)&&(cursor!=cmdtail))	// not empty or at beginning?
 						{
-							cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
-							cdcputs("\x08 \x08");
-							cmdbuff[cmdhead]=0x00;
+							if(cursor==cmdhead)			// at end?
+							{
+								cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
+								cursor=cmdhead;
+								cdcputs("\x08 \x08");
+								cmdbuff[cmdhead]=0x00;
+							}
+							else
+							{
+								temp=cursor;
+								cdcprintf("\x1B[D");
+								while(temp!=cmdhead)
+								{
+									cmdbuff[((temp-1)&(CMDBUFFSIZE-1))]=cmdbuff[temp];
+									cdcputc(cmdbuff[temp]);
+									temp=(temp+1)&(CMDBUFFSIZE-1);
+								}
+								cdcputc(' ');
+								cmdbuff[cmdhead]=0x00;
+								cmdhead=(cmdhead-1)&(CMDBUFFSIZE-1);
+								cursor=(cursor-1)&(CMDBUFFSIZE-1);
+								cdcprintf("\x1B[%dD", ((cmdhead-cursor+1)&(CMDBUFFSIZE-1)));
+							}
+						}
+						else cdcputc('\x07');
+						break;
+				case '\r':	cmdbuff[cmdhead]=0x00;
+						cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+						go=1;
+						break;
+				case '\x1B':	c=cdcgetc();
+						if(c=='[')
+						{
+							c=cdcgetc();
+							switch(c)
+							{
+								case 'D':	if(cursor!=cmdtail)	// left
+										{
+											cursor=(cursor-1)&(CMDBUFFSIZE-1);
+											cdcprintf("\x1B[D");
+										}
+										else cdcputc('\x07');
+
+										break;
+								case 'C':	if(cursor!=cmdhead)	// right
+										{
+											cursor=(cursor+1)&(CMDBUFFSIZE-1);
+											cdcprintf("\x1B[C");
+										}
+										else cdcputc('\x07');
+
+										break;
+								case 'A':	// up
+										histptr++;
+										if(!cmdhistory(histptr))	// on error restore ptr and ring a bell
+										{
+											histptr--;
+											cdcputc('\x07');
+										}
+										break;
+								case 'B':	// down
+										histptr--;
+										if((histptr<1)||(!cmdhistory(histptr)))
+										{
+											histptr=0;
+											cdcputc('\x07');
+										}
+										break;
+								default: 	break;
+							}
 
 						}
 						break;
-				case '\r':	//cmdbuff[cmdhead]=0x00;
-						//cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
-						go=1;
-						break;
-				default:	
-						if((c>=0x20)&&(c<=0x7E))	// only accept printable characters
+				default:	if((((cmdhead+1)&(CMDBUFFSIZE-1))!=cmdtail)&&(c>=0x20)&&(c<=0x7E))	// only accept printable characters if room available
 						{
-							cdcputc(c);
-							cmdbuff[cmdhead]=c;
-							cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+							if(cursor==cmdhead)		// at end
+							{
+								cdcputc(c);
+								cmdbuff[cmdhead]=c;
+								cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+								cursor=cmdhead;
+							}
+							else
+							{
+								temp=cmdhead+1;
+								while(temp!=cursor)
+								{
+									cmdbuff[temp]=cmdbuff[(temp-1)&(CMDBUFFSIZE-1)];
+									temp=(temp-1)&(CMDBUFFSIZE-1);
+								}
+								cmdbuff[cursor]=c;
+								temp=cursor;
+								while(temp!=((cmdhead+1)&(CMDBUFFSIZE-1)))
+								{
+									cdcputc(cmdbuff[temp]);
+									temp=(temp+1)&(CMDBUFFSIZE-1);
+								}
+								cursor=(cursor+1)&(CMDBUFFSIZE-1);
+								cmdhead=(cmdhead+1)&(CMDBUFFSIZE-1);
+								cdcprintf("\x1B[%dD", ((cmdhead-cursor)&(CMDBUFFSIZE-1)));
+							}
 						}
+						else cdcputc('\x07');
 						break;	
 			}
 		}
