@@ -34,9 +34,9 @@ static enum _LAstate {
 	LA_ARMED,
 } LAstate = LA_IDLE;
 
-#define LA_SAMPLE_SIZE 4096
+#define LA_SAMPLE_SIZE 256000
 static unsigned char sumpPadBytes;
-static unsigned int sumpSamples;
+static uint32_t sumpSamples;
 
 
 void SUMPreset(void){

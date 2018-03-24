@@ -79,6 +79,34 @@ for(i=0;i<256000;i++)
 	spiWx4(0xff);*/
 
 	setup_spix4r(); //read mode
+	
+	
+rcc_periph_clock_enable(RCC_GPIOA);
+rcc_periph_clock_enable(RCC_TIM1);
+timer_reset(TIM1);
+timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1,TIM_CR1_DIR_UP);
+timer_set_oc_mode(TIM1, TIM_OC1, TIM_OCM_PWM2);
+timer_enable_oc_output(TIM1, TIM_OC1);
+timer_enable_break_main_output(TIM1);
+//timer_set_oc_value(TIM1, TIM_OC1, 200);
+//timer_set_period(TIM1, 1000);
+//timer_enable_counter(TIM1);
+	
+	// program timer as much as possible
+	/*rcc_periph_clock_enable(BP_LA_TIM_CLOCK);								// enable clock
+	timer_reset(BP_LA_TIMER);										// reset peripheral
+	timer_set_mode(BP_LA_TIMER, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1, TIM_CR1_DIR_UP);			// count up
+	timer_set_oc_mode(BP_LA_TIMER, BP_LA_TIM_CHAN, TIM_OCM_PWM1);						// PWM1 == high/low; PWM2= low/high
+	timer_enable_oc_output(BP_LA_TIMER, BP_LA_TIM_CHAN);							// output channel
+	timer_enable_break_main_output(BP_LA_TIMER);								// need to set break
+	//timer_enable_irq(BP_LA_TIMER, TIM_DIER_CC1IE);
+	//nvic_enable_irq(BP_LA_TIM_NVIC);									// enable timer irq
+*/
+	// defaults
+	period=4500;
+	samples=4096;
+	extrasamples=4096-1024;
+	//for(i=0; i<8; i++) triggers[i]=3; 	// no triggers
 }
 
 //begin logic capture during user commands 
@@ -113,11 +141,15 @@ void logicAnalyzerCaptureStart(void)
 	//setup the timer
 	// timer controls clock line
 	gpio_set_mode(BP_LA_SRAM_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_LA_SRAM_CLK_PIN); // CLK
-
+rcc_periph_clock_enable(RCC_TIM1);
 	// timer
 	timer_set_oc_value(BP_LA_TIMER, BP_LA_TIM_CHAN, (period/2));							// set match value
 	timer_set_period(BP_LA_TIMER, period);									// set period 
 	timer_enable_counter(BP_LA_TIMER);									// enable the timer
+	
+//timer_set_oc_value(TIM1, TIM_OC1, 200);
+//timer_set_period(TIM1, 1000);
+//timer_enable_counter(TIM1);
 
 }
 
@@ -159,6 +191,7 @@ void logicAnalyzerDumpSamples(uint32_t numSamples){
 	spiWx4(0); //3 byte address
 	setup_spix4r(); //read
 	spiRx4(); //dummy byte
+	spiRx4(); //dummy byte (need two reads to clear one byte)
 	for(i=0; i<numSamples; i++){
 		cdcputc2(spiRx4());
 		//cdcprintf2("%d\t",spiRx4());
@@ -329,6 +362,7 @@ void LA_macro(uint32_t macro)
 	}
 }
 
+
 void LA_setup(void)
 {
 	cdcprintf("Please use macro system for setting and viewing parameters");
@@ -337,7 +371,7 @@ void LA_setup_exc(void)
 {
 	int i;
 
-	// setup GPIOs
+	/*// setup GPIOs
 	gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN); 	// 573 latch
 	gpio_set_mode(BP_LA_SRAM_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CS_PIN);	// CS
 	gpio_set(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN);
@@ -388,11 +422,12 @@ void LA_setup_exc(void)
 	samples=4096;
 	extrasamples=4096-1024;
 	for(i=0; i<8; i++) triggers[i]=3; 	// no triggers
+	*/
 }
 
 void LA_cleanup(void)
 {
-	// back to regular spi
+	/*// back to regular spi
 	spiWx4(CMDRESETSPI);
 
 	gpio_set_mode(BP_LA_CHAN1_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN1_PIN);		// MOSI
@@ -402,7 +437,8 @@ void LA_cleanup(void)
 	gpio_set_mode(BP_LA_CHAN5_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN5_PIN);		// MOSI
 	gpio_set_mode(BP_LA_CHAN6_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN6_PIN);		// MISO
 	gpio_set_mode(BP_LA_CHAN7_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN7_PIN);
-	gpio_set_mode(BP_LA_CHAN8_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN8_PIN);
+	gpio_set_mode(BP_LA_CHAN8_PORT, GPIO_MODE_INPUT, GPI
+O_CNF_INPUT_FLOAT, BP_LA_CHAN8_PIN);
 	gpio_set_mode(BP_LA_SRAM_CS_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_SRAM_CS_PIN);		// CS
 	gpio_set_mode(BP_LA_SRAM_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_SRAM_CLK_PIN);		// CLK
 	gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_LATCH_PIN); 		// 373 latch
@@ -421,6 +457,8 @@ void LA_cleanup(void)
 	exti_disable_request(EXTI5);
 	exti_disable_request(EXTI6);
 	exti_disable_request(EXTI7);
+	*/
+
 
 }
 void LA_pins(void)
