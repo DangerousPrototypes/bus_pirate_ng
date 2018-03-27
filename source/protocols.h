@@ -27,6 +27,9 @@ enum
 #ifdef BP_USE_SW3W
 	SW3W,
 #endif
+#ifdef BP_USE_SW3W
+	DIO,
+#endif
 	MAXPROTO
 };
 
