@@ -14,6 +14,24 @@ void HWSPI_settings(void);
 void HWSPI_printSPIflags(void);
 void HWSPI_help(void);
 
+// special for binmode and lcd
+void HWSPI_setcpol(uint32_t val);
+void HWSPI_setcpha(uint32_t val);
+void HWSPI_setbr(uint32_t val);
+void HWSPI_setdff(uint32_t val);
+void HWSPI_setlsbfirst(uint32_t val);
+void HWSPI_setcsidle(uint32_t val);
+void HWSPI_setcs(uint8_t cs);
+uint16_t HWSPI_xfer(uint16_t d);
+
+
+
+
+
+
+
+
+
 // menu's
 
 #define SPISPEEDMENU	"\r\nSPI Clock speed\r\n 1. 18.00Mhz\r\n 2.  9.00Mhz\r\n 3. 4.500Mhz\r\n 4. 2.250Mhz\r\n 5. 1.125Mhz\r\n 6. 562.5khz\r\n 7. 281.3Khz\r\nspeed> "
