@@ -31,6 +31,13 @@ char triggermodes[][4]={
 "N/A"
 };
 
+void logicAnalyzerSetSampleSpeed(uint16_t speed){
+
+	period=speed;
+	cdcprintf("\r\nLA period: %d", period);
+
+}
+
 void logicAnalyzerSetup(void)
 {
 	uint8_t i;
@@ -86,7 +93,7 @@ void logicAnalyzerSetup(void)
 	//slave timer, counts samples
 	timer_reset(TIM2);
 	rcc_periph_clock_enable(BP_LA_COUNTER_CLOCK);
-	timer_set_prescaler(BP_LA_COUNTER,0x01); //counts two ticks per PWM pulse for some reason, still need to debug
+	timer_set_prescaler(BP_LA_COUNTER,0x00); //counts two ticks per PWM pulse for some reason, still need to debug
 	timer_slave_set_polarity(BP_LA_COUNTER, TIM_ET_RISING);
 	timer_slave_set_trigger(BP_LA_COUNTER,TIM_SMCR_TS_ITR0); //timer1 ouit to timer2/3/4 in with ITR0
 	timer_slave_set_mode(BP_LA_COUNTER,TIM_SMCR_SMS_ECM1); //slave counting mode
@@ -207,7 +214,7 @@ void logicAnalyzerCaptureStop(void)
 	exti_disable_request(EXTI7);*/
 	
 	capturedsamples=timer_get_counter(BP_LA_COUNTER);
-	cdcprintf("Samples: %d\r\n", capturedsamples);
+	cdcprintf("LA samples: %d\r\n", capturedsamples);
 
 }
 

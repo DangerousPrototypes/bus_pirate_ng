@@ -7,9 +7,21 @@
 #include "HWSPI.h"
 #include "cdcacm.h"
 #include "UI.h"
+#include "LA.h"
 
 
 static uint32_t cpol, cpha, br, dff, lsbfirst, csidle;
+
+static uint16_t LA_period[8]={
+LA_SPI_SAMPLE_18MHZ,
+LA_SPI_SAMPLE_9MHZ,
+LA_SPI_SAMPLE_4MHZ,
+LA_SPI_SAMPLE_2MHZ,
+LA_SPI_SAMPLE_1MHZ,
+LA_SPI_SAMPLE_560KHZ,
+LA_SPI_SAMPLE_280KHZ,
+LA_SPI_SAMPLE_140KHZ
+};
 
 void HWSPI_start(void)
 {
@@ -142,8 +154,8 @@ void HWSPI_setup(void)
 	if(modeConfig.error)			// go interactive 
 	{
 
-		br=(askint(SPISPEEDMENU, 1, 7, 5))<<3;
-		cpol=((askint(SPICPOLMENU, 1, 2, 2)-1)<<1);
+		br=((askint(SPISPEEDMENU, 1, 8, 8))-1)<<3;
+		cpol=((askint(SPICPOLMENU, 1, 2, 1)-1)<<1);
 		cpha=(askint(SPICPHAMENU, 1, 2, 2)-1);
 		csidle=(askint(SPICSIDLEMENU, 1, 2, 2)-1);
 
@@ -155,6 +167,8 @@ void HWSPI_setup(void)
 
 void HWSPI_setup_exc(void)
 {
+	uint8_t i;
+	
 	// start the clock
 	rcc_periph_clock_enable(BP_SPI_CLK);
 
@@ -193,6 +207,8 @@ void HWSPI_setup_exc(void)
 	modeConfig.mosipin=BP_SPI_MOSI_PIN;
 	modeConfig.cspin=BP_SPI_CS_PIN;
 	modeConfig.clkpin=BP_SPI_CLK_PIN;
+	
+	logicAnalyzerSetSampleSpeed(LA_period[br>>3]);
 
 }
 
