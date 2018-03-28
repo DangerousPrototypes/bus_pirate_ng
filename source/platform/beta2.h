@@ -130,6 +130,17 @@
 #define BP_SW2W_SDA_PIN		GPIO7
 #define BP_SW2W_CLK_PIN		GPIO6
 
+// DIO
+#define BP_DIO_DIO0_PORT	GPIOB
+#define BP_DIO_DIO0_PIN		GPIO12
+#define BP_DIO_DIO1_PORT	GPIOB
+#define BP_DIO_DIO1_PIN		GPIO14
+#define BP_DIO_DIO2_PORT	GPIOB
+#define BP_DIO_DIO2_PIN		GPIO13
+#define BP_DIO_DIO3_PORT	GPIOB
+#define BP_DIO_DIO3_PIN		GPIO15
+
+
 // voltage regulators and pullupvoltages
 #define BP_PSUEN_PORT		GPIOB
 #define BP_PSUEN_PIN		GPIO9
@@ -150,6 +161,7 @@
 //#define BP_CONTROLS_PU	
 //#define BP_USB_PULLUP_PORT	GPIOC
 //#define BP_USB_PULLUP_PIN	GPIO10
+
 
 
 
