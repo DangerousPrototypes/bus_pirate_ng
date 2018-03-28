@@ -222,12 +222,12 @@ struct _protocol protocols[MAXPROTO]={
 #endif
 #ifdef BP_USE_LA
 {
-	LA_start,				// start
+	nullfunc1,				// start
 	nullfunc1,				// start with read
 	nullfunc1,				// stop
 	nullfunc1,				// stop with read
-	LA_send,				// send(/read) max 32 bit
-	LA_read,				// read max 32 bit
+	nullfunc2,				// send(/read) max 32 bit
+	nullfunc3,				// read max 32 bit
 	nullfunc1,				// set clk high
 	nullfunc1,				// set clk low
 	nullfunc1,				// set dat hi
