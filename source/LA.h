@@ -14,7 +14,6 @@ void logicAnalyzerSetup(void);
 void logicAnalyzerCaptureStop(void);
 void logicAnalyzerCaptureStart(void);
 void logicAnalyzerDumpSamples(uint32_t numSamples);
-void logicAnalyzerSetSampleSpeed(uint16_t speed);
 
 
 

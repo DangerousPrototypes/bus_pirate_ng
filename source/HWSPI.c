@@ -167,7 +167,6 @@ void HWSPI_setup(void)
 
 void HWSPI_setup_exc(void)
 {
-	uint8_t i;
 	
 	// start the clock
 	rcc_periph_clock_enable(BP_SPI_CLK);
@@ -208,7 +207,8 @@ void HWSPI_setup_exc(void)
 	modeConfig.cspin=BP_SPI_CS_PIN;
 	modeConfig.clkpin=BP_SPI_CLK_PIN;
 	
-	logicAnalyzerSetSampleSpeed(LA_period[br>>3]);
+	//logic analyzer speed based on mode speed
+	modeConfig.logicanalyzerperiod=LA_period[br>>3];
 
 }
 

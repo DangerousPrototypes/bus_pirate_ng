@@ -21,7 +21,6 @@ static void setup_spix4r(void);
 static uint8_t spiRx4(void);
 
 static uint8_t stop;
-static uint16_t period;
 static uint32_t samples,counts;
 static uint8_t triggers[8];
 char triggermodes[][4]={
@@ -30,13 +29,6 @@ char triggermodes[][4]={
 "#X#",
 "N/A"
 };
-
-void logicAnalyzerSetSampleSpeed(uint16_t speed){
-
-	period=speed;
-	cdcprintf("\r\nLA period: %d", period);
-
-}
 
 void logicAnalyzerSetup(void)
 {
@@ -120,7 +112,6 @@ void logicAnalyzerSetup(void)
 	*/
 
 	// defaults
-	period=4500;
 	samples=4096;
 	for(i=0; i<8; i++) triggers[i]=3; 	// triggers (not used in interactive mode)
 }
@@ -160,8 +151,8 @@ void logicAnalyzerCaptureStart(void)
 	rcc_periph_clock_enable(BP_LA_TIM_CLOCK);
 	
 	// timer
-	timer_set_oc_value(BP_LA_TIMER, BP_LA_TIM_CHAN, (period/2));				// set match value
-	timer_set_period(BP_LA_TIMER, period);									// set period 
+	timer_set_oc_value(BP_LA_TIMER, BP_LA_TIM_CHAN, (modeConfig.logicanalyzerperiod/2)); // set match value
+	timer_set_period(BP_LA_TIMER, modeConfig.logicanalyzerperiod);					// set period 
 	timer_set_counter(BP_LA_TIMER,0);
 	timer_set_counter(BP_LA_COUNTER,0);
 	
@@ -269,7 +260,7 @@ void LA_macro(uint32_t macro)
 		case 7:
 		case 8:	triggers[macro-1]=(askint(LATRIGGERMENU, 1, 4, 4)-1);
 				break;
-		case 9:	period=(askint(LAPERIODMENU, 1, 65536, 4500));
+		case 9:	modeConfig.logicanalyzerperiod=(askint(LAPERIODMENU, 1, 65536, 4500));
 				break;
 		case 10:	samples=(askint(LASAMPLEMENU, 1024, 256*1024, 4096));
 				break;
