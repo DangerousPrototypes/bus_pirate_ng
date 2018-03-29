@@ -27,8 +27,7 @@ void HWSPI_start(void)
 {
 	cdcprintf("set CS=%d", !csidle);
 
-	if(csidle) spi_set_nss_low(BP_SPI);
-		else spi_set_nss_high(BP_SPI);
+	HWSPI_setcs(0);
 
 	modeConfig.wwr=0;
 }
@@ -37,8 +36,7 @@ void HWSPI_startr(void)
 {
 	cdcprintf("set CS=%d", !csidle);
 
-	if(csidle) spi_set_nss_low(BP_SPI);
-		else spi_set_nss_high(BP_SPI);
+	HWSPI_setcs(0);
 
 	modeConfig.wwr=1;
 }
@@ -47,9 +45,8 @@ void HWSPI_stop(void)
 {
 	cdcprintf("set CS=%d", csidle);
 
-	if(csidle) spi_set_nss_high(BP_SPI);
-		else spi_set_nss_low(BP_SPI);
-
+	HWSPI_setcs(1);
+	
 	modeConfig.wwr=0;
 
 }
@@ -58,8 +55,7 @@ void HWSPI_stopr(void)
 {
 	cdcprintf("set CS=%d", csidle);
 
-	if(csidle) spi_set_nss_high(BP_SPI);
-		else spi_set_nss_low(BP_SPI);
+	HWSPI_setcs(1);
 
 	modeConfig.wwr=0;
 }
@@ -73,8 +69,9 @@ uint32_t HWSPI_send(uint32_t d)
 	{
 		if(modeConfig.numbits==8) spi_set_dff_8bit(BP_SPI);			// is there a less overhead way of doing this?
 		if(modeConfig.numbits==16) spi_set_dff_16bit(BP_SPI);
-	
-		returnval=spi_xfer(BP_SPI, (uint16_t)d);
+
+		returnval=HWSPI_xfer((uint16_t)d);
+//		returnval=spi_xfer(BP_SPI, (uint16_t)d);
 	}
 	else
 	{
@@ -96,7 +93,8 @@ uint32_t HWSPI_read(void)
 		if(modeConfig.numbits==8) spi_set_dff_8bit(BP_SPI);			// is there a less overhead way of doing this?
 		if(modeConfig.numbits==16) spi_set_dff_16bit(BP_SPI);
 
-		returnval = spi_xfer(BP_SPI, 0xFF);					// is 0xFF ok?
+		returnval = HWSPI_xfer(0xFF);					// is 0xFF ok?
+//		returnval = spi_xfer(BP_SPI, 0xFF);					// is 0xFF ok?
 	}
 	else
 	{
@@ -173,6 +171,7 @@ void HWSPI_setup_exc(void)
 
 	// setup gpio as alternate function
 	gpio_set_mode(BP_SPI_MOSI_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_MOSI_PIN);
+//	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CS_PIN);
 	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SPI_CS_PIN);
 	gpio_set_mode(BP_SPI_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CLK_PIN);
 	gpio_set_mode(BP_SPI_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_MISO_PIN);
@@ -187,12 +186,15 @@ void HWSPI_setup_exc(void)
 	spi_set_full_duplex_mode(BP_SPI);
 
 	// we use software control of /cs
-	spi_enable_software_slave_management(BP_SPI);
-	spi_enable_ss_output(BP_SPI);
+//	spi_enable_software_slave_management(BP_SPI);
+//	spi_enable_ss_output(BP_SPI);
 
 	// cs=1 
-	if(csidle) spi_set_nss_high(BP_SPI);
-		else spi_set_nss_low(BP_SPI);
+//	if(csidle) spi_set_nss_high(BP_SPI);
+//		else spi_set_nss_low(BP_SPI);
+//	if(csidle) gpio_set(BP_SPI_CS_PORT, BP_SPI_CS_PIN);
+//		else gpio_clear(BP_SPI_CS_PORT, BP_SPI_CS_PIN);
+	HWSPI_setcs(1);
 	
 	// unleash the beast
 	spi_enable(BP_SPI);
@@ -307,3 +309,56 @@ void HWSPI_help(void)
 	cdcprintf("\tCS\t------------------ CS\r\n");
 	cdcprintf("\tGND\t------------------ GND\r\n");
 }
+
+
+// helpers for binmode and other protocols
+void HWSPI_setcpol(uint32_t val)
+{
+	cpol=val;
+}
+
+void HWSPI_setcpha(uint32_t val)
+{
+	cpha=val;
+}
+
+void HWSPI_setbr(uint32_t val)
+{
+	br=val;
+}
+
+void HWSPI_setdff(uint32_t val)
+{
+	dff=val;
+}
+
+void HWSPI_setlsbfirst(uint32_t val)
+{
+	lsbfirst=val;
+}
+
+void HWSPI_setcsidle(uint32_t val)
+{
+	csidle=val;
+}
+
+void HWSPI_setcs(uint8_t cs)
+{
+
+	if(cs==0)		// 'start'
+	{
+		if(csidle) gpio_clear(BP_SPI_CS_PORT, BP_SPI_CS_PIN);
+			else gpio_set(BP_SPI_CS_PORT, BP_SPI_CS_PIN);
+	}
+	else			// 'stop' 
+	{
+		if(csidle) gpio_set(BP_SPI_CS_PORT, BP_SPI_CS_PIN);
+			else gpio_clear(BP_SPI_CS_PORT, BP_SPI_CS_PIN);
+	}
+}
+
+uint16_t HWSPI_xfer(uint16_t d)
+{
+	return (uint16_t) spi_xfer(BP_SPI, (uint16_t)d);
+}
+
