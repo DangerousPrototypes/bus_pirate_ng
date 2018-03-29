@@ -15,6 +15,8 @@
 #include "LA.h"
 #include "SW2W.h"
 #include "SW3W.h"
+#include "DIO.h"
+#include "LCDSPI.h"
 
 
 
@@ -214,18 +216,18 @@ struct _protocol protocols[MAXPROTO]={
 	HWI2C_cleanup,				// cleanup for HiZ
 	HWI2C_pins,				// display pin config
 	HWI2C_settings,				// display settings 
-	HWI2C_help,					// display small help about the protocol
+	HWI2C_help,				// display small help about the protocol
 	"HW-I2C",				// friendly name (promptname)
 },
 #endif
 #ifdef BP_USE_LA
 {
-	LA_start,				// start
+	nullfunc1,				// start
 	nullfunc1,				// start with read
 	nullfunc1,				// stop
 	nullfunc1,				// stop with read
-	LA_send,				// send(/read) max 32 bit
-	LA_read,				// read max 32 bit
+	nullfunc2,				// send(/read) max 32 bit
+	nullfunc3,				// read max 32 bit
 	nullfunc1,				// set clk high
 	nullfunc1,				// set clk low
 	nullfunc1,				// set dat hi
@@ -292,8 +294,60 @@ struct _protocol protocols[MAXPROTO]={
 	SW3W_cleanup,				// cleanup for HiZ
 	SW3W_pins,				// display pin config
 	SW3W_settings,				// display settings 
-	SW3W_help,					// display small help about the protocol
-	"SW3W",				// friendly name (promptname)
+	SW3W_help,				// display small help about the protocol
+	"SW3W",					// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_DIO
+{
+	nullfunc1,				// start
+	nullfunc1,				// start with read
+	nullfunc1,				// stop
+	nullfunc1,				// stop with read
+	DIO_send,				// send(/read) max 32 bit
+	DIO_read,				// read max 32 bit
+	nullfunc1,				// set clk high
+	nullfunc1,				// set clk low
+	nullfunc1,				// set dat hi
+	nullfunc1,				// set dat lo
+	nullfunc3,				// toggle dat (?)
+	nullfunc1,				// toggle clk (?)
+	nullfunc3,				// read 1 bit (?)
+	noperiodic,				// service to regular poll whether a byte ahs arrived
+	DIO_macro,				// macro
+	DIO_setup,				// setup UI
+	DIO_setup_exc,				// real setup
+	DIO_cleanup,				// cleanup for HiZ
+	DIO_pins,				// display pin config
+	DIO_settings,				// display settings 
+	DIO_help,				// display small help about the protocol
+	"DIO",					// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_LCDSPI
+{
+	nullfunc1,				// start
+	nullfunc1,				// start with read
+	nullfunc1,				// stop
+	nullfunc1,				// stop with read
+	LCDSPI_send,				// send(/read) max 32 bit
+	LCDSPI_read,				// read max 32 bit
+	nullfunc1,				// set clk high
+	nullfunc1,				// set clk low
+	nullfunc1,				// set dat hi
+	nullfunc1,				// set dat lo
+	nullfunc3,				// toggle dat (?)
+	nullfunc1,				// toggle clk (?)
+	nullfunc3,				// read 1 bit (?)
+	noperiodic,				// service to regular poll whether a byte ahs arrived
+	LCDSPI_macro,				// macro
+	LCDSPI_setup,				// setup UI
+	LCDSPI_setup_exc,			// real setup
+	LCDSPI_cleanup,				// cleanup for HiZ
+	LCDSPI_pins,				// display pin config
+	LCDSPI_settings,			// display settings 
+	nohelp,					// display small help about the protocol
+	"LCDSPI",				// friendly name (promptname)
 },
 #endif
 };

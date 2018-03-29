@@ -27,6 +27,12 @@ enum
 #ifdef BP_USE_SW3W
 	SW3W,
 #endif
+#ifdef BP_USE_DIO
+	DIO,
+#endif
+#ifdef BP_USE_LCDSPI
+	LCDSPI,
+#endif
 	MAXPROTO
 };
 

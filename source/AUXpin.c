@@ -106,12 +106,12 @@ uint32_t getfreq(void)
 }
 
 // timer isr count the number of overflows
-void tim2_isr(void)
+void tim3_isr(void)
 {
-	if (timer_get_flag(TIM2, TIM_SR_CC1IF))					// did we overflow?
+	if (timer_get_flag(BP_FREQ_TIMER, TIM_SR_CC1IF))					// did we overflow?
 	{
 		overflows++;
-		timer_clear_flag(TIM2, TIM_SR_CC1IF);
+		timer_clear_flag(BP_FREQ_TIMER, TIM_SR_CC1IF);
 	}
 }
 
