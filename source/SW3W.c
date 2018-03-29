@@ -348,6 +348,9 @@ void SW3W_setup_exc(void)
 	modeConfig.mosipin=BP_SW3W_MOSI_PIN;
 	modeConfig.cspin=BP_SW3W_CS_PIN;
 	modeConfig.clkpin=BP_SW3W_CLK_PIN;
+
+	//a guess... 72 period in the PWM is .99999uS. Multiply the period in uS * 72, divide by 4 four 4* over sample
+	modeConfig.logicanalyzerperiod=((period*72)/4);
 }
 void SW3W_cleanup(void)
 {

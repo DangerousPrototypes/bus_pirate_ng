@@ -182,8 +182,7 @@ void logicAnalyzerCaptureStart(void)
 
 void logicAnalyzerCaptureStop(void)
 {
-	uint32_t capturedsamples;
-	
+
 	BP_LA_SRAM_DESELECT();    
 	BP_LA_LATCH_CLOSE();
 	// disable clk
@@ -203,15 +202,16 @@ void logicAnalyzerCaptureStop(void)
 	exti_disable_request(EXTI5);
 	exti_disable_request(EXTI6);
 	exti_disable_request(EXTI7);*/
-	
-	capturedsamples=timer_get_counter(BP_LA_COUNTER);
-	cdcprintf("LA samples: %d\r\n", capturedsamples);
+
+	//TODO: interrupt on overflow and increment bigger counter!
+	modeConfig.logicanalyzersamplecount=timer_get_counter(BP_LA_COUNTER);
+	cdcprintf("LA samples: %d\r\n", modeConfig.logicanalyzersamplecount);
 
 }
 
 void logicAnalyzerDumpSamples(uint32_t numSamples){
 
-	uint32_t i;
+	uint32_t i, invalidSamples;
 
 	BP_LA_LATCH_CLOSE();
 	BP_LA_SRAM_DESELECT();  
@@ -238,9 +238,20 @@ void logicAnalyzerDumpSamples(uint32_t numSamples){
 	setup_spix4r(); //read
 	spiRx4(); //dummy byte
 	spiRx4(); //dummy byte (need two reads to clear one byte)
+
+	//handle pull more samples than available
+	if(numSamples>modeConfig.logicanalyzersamplecount){
+		invalidSamples=numSamples-modeConfig.logicanalyzersamplecount;
+		numSamples=modeConfig.logicanalyzersamplecount;
+	}
+
 	for(i=0; i<numSamples; i++){
 		cdcputc2(spiRx4());
 	}
+	for(i=0; i<invalidSamples; i++){
+		cdcputc2(0x00);
+	}
+
 	BP_LA_SRAM_DESELECT();//SRAM CS high  
 
 }

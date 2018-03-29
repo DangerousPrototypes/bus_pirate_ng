@@ -1,4 +1,4 @@
-
+//TODO: add timeout to all I2C stuff that can hang!
 #include <stdint.h>
 #include "buspirateNG.h"
 #include <libopencm3/stm32/i2c.h>
@@ -9,6 +9,11 @@
 #include "UI.h"
 
 static uint8_t	speed;
+
+static uint16_t LA_period[2]={
+    LA_I2C_PERIOD_100KHZ,
+    LA_I2C_PERIOD_400KHZ
+};
 
 void HWI2C_start(void)
 {
@@ -167,6 +172,8 @@ void HWI2C_setup_exc(void)
 	modeConfig.clkport=BP_I2C_SDA_PORT;
 	modeConfig.mosipin=BP_I2C_SDA_PIN;
 	modeConfig.clkpin=BP_I2C_SDA_PIN;
+
+	modeconfig.logicanalyzerperiod=LA_period[speed];
 }
 
 void HWI2C_cleanup(void)

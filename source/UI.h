@@ -13,6 +13,7 @@ typedef struct _modeConfig
 	uint8_t displaymode;			// display mode (dec, hex, oct, bin)
 	uint8_t pwm;					// pwm active?
 	uint16_t logicanalyzerperiod; 	// period of the logic analyzer clock
+	uint32_t logicanalyzersamplecount; //number of samples in most recent capture
 
 	uint32_t csport;				// cs is located on this port/gpio
 	uint32_t cspin;

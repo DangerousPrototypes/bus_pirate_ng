@@ -9,7 +9,6 @@
 #include "HWUSART.h"
 #include "UI.h"
 
-
 static uint32_t br, nbits, sbits, parity, block;
 
 uint32_t HWUSART_send(uint32_t d)
@@ -128,6 +127,8 @@ void HWUSART_setup(void)
 
 void HWUSART_setup_exc(void)
 {
+    uint32_t i;
+
 	// enable clock
 	rcc_periph_clock_enable(BP_USART_CLK);
 
@@ -153,6 +154,18 @@ void HWUSART_setup_exc(void)
 	modeConfig.mosiport=BP_USART_TX_PORT;
 	modeConfig.misopin=BP_USART_RX_PIN;
 	modeConfig.mosipin=BP_USART_TX_PIN;
+
+	//logc analyzer period
+    //calculate custom value
+    //using big 32 bit integers, but the chip does it in hardware so we shouldn't feel too guilty
+    //there is probably a trick to this, but my PHP addled mind can't find it
+    //300 baud becomes 3, so should give ok accuracy at all possible baud rates
+    if(br<300){
+        i=300;
+    }else{
+        i=br;
+    }
+    modeConfig.logicanalyzerperiod=(((1000000000/(i/100)/4)/(138))/10);
 
 }
 

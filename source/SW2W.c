@@ -214,6 +214,9 @@ void SW2W_setup_exc(void)
 	modeConfig.mosiport=BP_SW2W_SDA_PORT;
 	modeConfig.clkport=BP_SW2W_CLK_PORT;
 
+	//a guess... 72 period in the PWM is .99999uS. Multiply the period in uS * 72, divide by 4 four 4* over sample
+	modeConfig.logicanalyzerperiod=((period*72)/4);
+
 }
 
 void SW2W_cleanup(void)
