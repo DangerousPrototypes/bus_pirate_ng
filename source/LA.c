@@ -211,7 +211,7 @@ void logicAnalyzerCaptureStop(void)
 
 void logicAnalyzerDumpSamples(uint32_t numSamples){
 
-	uint32_t i, invalidSamples;
+	uint32_t i, invalidSamples=0;
 
 	BP_LA_LATCH_CLOSE();
 	BP_LA_SRAM_DESELECT();  

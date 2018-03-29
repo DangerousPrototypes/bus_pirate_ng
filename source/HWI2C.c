@@ -173,7 +173,7 @@ void HWI2C_setup_exc(void)
 	modeConfig.mosipin=BP_I2C_SDA_PIN;
 	modeConfig.clkpin=BP_I2C_SDA_PIN;
 
-	modeconfig.logicanalyzerperiod=LA_period[speed];
+	modeConfig.logicanalyzerperiod=LA_period[speed];
 }
 
 void HWI2C_cleanup(void)
