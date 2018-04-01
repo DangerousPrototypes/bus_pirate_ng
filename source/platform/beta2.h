@@ -78,6 +78,7 @@
 #define BP_I2C_CLK_PIN		GPIO6
 
 // logic analyzer
+#define BP_LA_SRAM_SIZE 0x20000 //size in bytes
 #define BP_LA_BUFFSIZE		2048
 
 #define BP_LA_SRAM_CLK_PORT	GPIOA

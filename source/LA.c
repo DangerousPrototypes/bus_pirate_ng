@@ -20,8 +20,15 @@ static void spiWx4(uint8_t d);
 static void setup_spix4r(void);
 static uint8_t spiRx4(void);
 
-static uint8_t stop;
-static uint32_t samples,counts;
+/*static enum _stop
+        {
+         NORMAL=0,
+         OVERFLOW
+        } stop=NORMAL;*/
+
+
+static uint32_t samples;
+static volatile uint32_t counts;
 static uint8_t triggers[8];
 char triggermodes[][4]={
 "_/\"",
@@ -32,7 +39,6 @@ char triggermodes[][4]={
 
 void logicAnalyzerSetup(void)
 {
-	uint8_t i;
 
 	BP_LA_LATCH_SETUP(); // 573 latch
 	BP_LA_LATCH_CLOSE();
@@ -80,21 +86,34 @@ void logicAnalyzerSetup(void)
 	timer_set_oc_mode(BP_LA_TIMER, TIM_OC1, TIM_OCM_PWM2); // PWM1 == high/low; PWM2= low/high
 	timer_enable_oc_output(BP_LA_TIMER, TIM_OC1); // output channel
 	timer_enable_break_main_output(BP_LA_TIMER); // need to set break
-	timer_set_master_mode(BP_LA_TIMER,TIM_CR2_MMS_UPDATE); //enable master output to slave
+	timer_set_master_mode(BP_LA_TIMER,TIM_CR2_MMS_UPDATE); //enable master output
+	
+	//PWM timer gated to enable/disable of sample counter
+	timer_slave_set_polarity(BP_LA_TIMER, TIM_ET_RISING);
+	timer_slave_set_trigger(BP_LA_TIMER,TIM_SMCR_TS_ITR1); //timer2 out to timer1/8 in with ITR1
+	timer_slave_set_mode(BP_LA_TIMER,TIM_SMCR_SMS_GM); //slave gate mode	
 
-	//slave timer, counts samples
-	timer_reset(TIM2);
+	//sample timer, counts samples
+	timer_reset(BP_LA_COUNTER);
 	rcc_periph_clock_enable(BP_LA_COUNTER_CLOCK);
 	timer_set_prescaler(BP_LA_COUNTER,0x00); //counts two ticks per PWM pulse for some reason, still need to debug
+	timer_update_on_overflow(BP_LA_COUNTER);
+	timer_set_master_mode(BP_LA_COUNTER,TIM_CR2_MMS_ENABLE); //enable master output
+	
+	//sample timer uses PWM timer as external clock source
 	timer_slave_set_polarity(BP_LA_COUNTER, TIM_ET_RISING);
 	timer_slave_set_trigger(BP_LA_COUNTER,TIM_SMCR_TS_ITR0); //timer1 ouit to timer2/3/4 in with ITR0
 	timer_slave_set_mode(BP_LA_COUNTER,TIM_SMCR_SMS_ECM1); //slave counting mode
-	//counter interrupts for overflow detection and sample tracking
+	
+	//when capturing bus pirate CLI activity we don't know how many samples we'll have
+	//an optional preload is used for debugging 
+	//timer_set_period(BP_LA_COUNTER, BP_LA_COUNTER_PRELOAD);
+	
+	//setup the counter interrupt
 	timer_enable_irq(BP_LA_COUNTER, TIM_DIER_CC1IE);
-	nvic_enable_irq(BP_LA_COUNTER_NVIC);	// enable timer irq
 	
 	// setup triggers
-	/*exti_select_source(EXTI0, BP_LA_CHAN1_PORT);
+	exti_select_source(EXTI0, BP_LA_CHAN1_PORT);
 	exti_select_source(EXTI1, BP_LA_CHAN2_PORT);
 	exti_select_source(EXTI2, BP_LA_CHAN3_PORT);
 	exti_select_source(EXTI3, BP_LA_CHAN4_PORT);
@@ -108,17 +127,18 @@ void logicAnalyzerSetup(void)
 	nvic_enable_irq(NVIC_EXTI3_IRQ);
 	nvic_enable_irq(NVIC_EXTI4_IRQ);
 	nvic_enable_irq(NVIC_EXTI9_5_IRQ);
-	for(i=0; i<8; i++) triggers[i]=3; 	// no triggers
-	*/
+	modeConfig.logicanalyzertriggersactive=0;	// no triggers
 
-	// defaults
-	samples=4096;
-	for(i=0; i<8; i++) triggers[i]=3; 	// triggers (not used in interactive mode)
 }
 
 //begin logic capture during user commands 
 void logicAnalyzerCaptureStart(void)
 {
+	uint8_t i,mask;
+
+	modeConfig.logicanalyzerstop=0;
+	counts=0;
+	
 	BP_LA_LATCH_CLOSE();
 
 	//send mode reset command just in case
@@ -153,27 +173,31 @@ void logicAnalyzerCaptureStart(void)
 	// timer
 	timer_set_oc_value(BP_LA_TIMER, BP_LA_TIM_CHAN, (modeConfig.logicanalyzerperiod/2)); // set match value
 	timer_set_period(BP_LA_TIMER, modeConfig.logicanalyzerperiod);					// set period 
-	timer_set_counter(BP_LA_TIMER,0);
-	timer_set_counter(BP_LA_COUNTER,0);
+	timer_continuous_mode(BP_LA_COUNTER);
+	timer_generate_event(BP_LA_COUNTER,TIM_EGR_UG);
+	
+	//counter interrupts for overflow detection and sample tracking
+	timer_clear_flag(BP_LA_COUNTER, TIM_SR_CC1IF);
+	nvic_enable_irq(BP_LA_COUNTER_NVIC);	// enable timer irq
 	
 	// setup triggers
-	/*for(i=0; i<8; i++)
+	//there is also a exti_set_trigger((1<<i), EXTI_TRIGGER_BOTH); option not supported by SUMP protocol
+	for(i=0; i<8; i++)
 	{
-		switch(triggers[i])
-		{
-			case 0:	exti_set_trigger((1<<i), EXTI_TRIGGER_RISING);
-					exti_enable_request((1<<i));
-					break;
-			case 1:	exti_set_trigger((1<<i), EXTI_TRIGGER_FALLING);
-					exti_enable_request((1<<i));
-					break;
-			case 2:	exti_set_trigger((1<<i), EXTI_TRIGGER_BOTH);
-					exti_enable_request((1<<i));
-					break;
-			default:	exti_disable_request((1<<i));
-					break;
+		mask=1<<i;
+		if(modeConfig.logicanalyzertriggersactive && mask){
+			if(modeConfig.logicanalyzertriggersdirection && mask){
+				exti_set_trigger(mask, EXTI_TRIGGER_RISING);
+				exti_enable_request(mask);
+			}else{
+				exti_set_trigger(mask, EXTI_TRIGGER_FALLING);
+				exti_enable_request(mask);			
+			}
+				
+		}else{
+			exti_disable_request(mask);
 		}
-	}*/
+	}
 	
 	timer_enable_counter(BP_LA_COUNTER);	
 	timer_enable_counter(BP_LA_TIMER);									// enable the timer
@@ -183,15 +207,15 @@ void logicAnalyzerCaptureStart(void)
 void logicAnalyzerCaptureStop(void)
 {
 
-	BP_LA_SRAM_DESELECT();    
-	BP_LA_LATCH_CLOSE();
 	// disable clk
 	timer_disable_counter(BP_LA_TIMER);
 	rcc_periph_clock_disable(BP_LA_TIM_CLOCK);					// turn peripheral off
-	gpio_set_mode(BP_LA_SRAM_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CLK_PIN); // CLK
+	nvic_disable_irq(BP_LA_COUNTER_NVIC);	// disable timer irq
 	
-	/*// timer
-	nvic_disable_irq(BP_LA_COUNTER_NVIC);
+	BP_LA_SRAM_DESELECT();    
+	BP_LA_LATCH_CLOSE();
+
+	gpio_set_mode(BP_LA_SRAM_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CLK_PIN); // CLK
 	
 	// disable triggers
 	exti_disable_request(EXTI0);
@@ -201,10 +225,13 @@ void logicAnalyzerCaptureStop(void)
 	exti_disable_request(EXTI4);
 	exti_disable_request(EXTI5);
 	exti_disable_request(EXTI6);
-	exti_disable_request(EXTI7);*/
+	exti_disable_request(EXTI7);
 
-	//TODO: interrupt on overflow and increment bigger counter!
-	modeConfig.logicanalyzersamplecount=timer_get_counter(BP_LA_COUNTER);
+	//store the number of samples
+	modeConfig.logicanalyzersamplecount=(counts * (BP_LA_COUNTER_PRELOAD+1));
+	if(modeConfig.logicanalyzerstop<0xff){
+		modeConfig.logicanalyzersamplecount+=(timer_get_counter(BP_LA_COUNTER)+1);
+	}
 	cdcprintf("LA samples: %d\r\n", modeConfig.logicanalyzersamplecount);
 
 }
@@ -238,6 +265,13 @@ void logicAnalyzerDumpSamples(uint32_t numSamples){
 	setup_spix4r(); //read
 	spiRx4(); //dummy byte
 	spiRx4(); //dummy byte (need two reads to clear one byte)
+	
+	/*cdcputc(0xFF);
+	cdcputc(numSamples>>24);
+	cdcputc(numSamples>>16);
+	cdcputc(numSamples>>8);
+	cdcputc(numSamples);
+	cdcputc(0xFF);*/
 
 	//handle pull more samples than available
 	if(numSamples>modeConfig.logicanalyzersamplecount){
@@ -251,6 +285,7 @@ void logicAnalyzerDumpSamples(uint32_t numSamples){
 	for(i=0; i<invalidSamples; i++){
 		cdcputc2(0x00);
 	}
+
 
 	BP_LA_SRAM_DESELECT();//SRAM CS high  
 
@@ -341,7 +376,7 @@ static void spiWx1(uint8_t d)
 			
 		BP_LA_SRAM_CLOCK_HIGH();
 		BP_LA_SRAM_CLOCK_LOW();
-		mask>>=1;
+		mask>>=1;timer_clear_flag(BP_LA_COUNTER, TIM_SR_CC1IF);
 
 	}
 
@@ -457,42 +492,45 @@ void tim2_isr(void)
 	{
 		counts++;
 		timer_clear_flag(BP_LA_COUNTER, TIM_SR_CC1IF);
+		
 
-		if(counts==samples)						// smaples enough
+		if(counts==(BP_LA_OVERFLOW_COUNT-1)) // next count is last before overflow, set timer to end after next count
 		{
-			stop=10;
-			timer_disable_counter(BP_LA_COUNTER);			// enable the timer
+			//cdcprintf("LA COUNTER OVERFLOW %d\r\n",timer_get_counter(BP_LA_COUNTER)+1);
+			timer_one_shot_mode(BP_LA_COUNTER);//next overflow will stop the PWM timer preventing overflow
+		}else if(counts==BP_LA_OVERFLOW_COUNT){
+			modeConfig.logicanalyzerstop=0xff;
 		}	
 	}
 }
 
 void exti0_isr(void)
 {
-	stop=1;
+	modeConfig.logicanalyzerstop=1;
 	exti_reset_request(EXTI0);
 }
 
 void exti1_isr(void)
 {
-	stop=2;
+	modeConfig.logicanalyzerstop=2;
 	exti_reset_request(EXTI1);
 }
 
 void exti2_isr(void)
 {
-	stop=3;
+	modeConfig.logicanalyzerstop=3;
 	exti_reset_request(EXTI2);
 }
 
 void exti3_isr(void)
 {
-	stop=4;
+	modeConfig.logicanalyzerstop=4;
 	exti_reset_request(EXTI3);
 }
 
 void exti4_isr(void)
 {
-	stop=5;
+	modeConfig.logicanalyzerstop=5;
 	exti_reset_request(EXTI4);
 }
 
@@ -500,19 +538,19 @@ void exti9_5_isr(void)
 {
 	if(exti_get_flag_status(EXTI5))
 	{
-		stop=6;
+		modeConfig.logicanalyzerstop=6;
 		exti_reset_request(EXTI5);
 	}
 
 	if(exti_get_flag_status(EXTI6))
 	{
-		stop=7;
+		modeConfig.logicanalyzerstop=7;
 		exti_reset_request(EXTI6);
 	}
 
 	if(exti_get_flag_status(EXTI7))
 	{
-		stop=8;
+		modeConfig.logicanalyzerstop=8;
 		exti_reset_request(EXTI7);
 	}
 }

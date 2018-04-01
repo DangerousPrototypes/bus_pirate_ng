@@ -567,6 +567,10 @@ void doUI(void)
 		//only dump if bus command executed
 		logicAnalyzerCaptureStop();
 		
+		if(modeConfig.logicanalyzerstop==0xff){
+			cdcprintf("Logic analyzer full before end of command!\r\n");
+		}	
+		
 		cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
 		if(go==2)
 		{

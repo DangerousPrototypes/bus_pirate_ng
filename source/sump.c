@@ -19,7 +19,7 @@
 //http://www.sump.org/projects/analyzer/protocol/
 #define SUMP_RESET 	0x00
 #define SUMP_RUN	0x01
-#define SUMP_ID		0x02
+#define SUMP_ID	0x02
 #define SUMP_DESC	0x04
 #define SUMP_XON	0x11
 #define SUMP_XOFF 	0x13
@@ -34,7 +34,7 @@ static enum _LAstate {
 	LA_ARMED,
 } LAstate = LA_IDLE;
 
-#define LA_SAMPLE_SIZE 256000
+#define LA_SAMPLE_SIZE BP_LA_SAMPLES_PER_CHANNEL
 static unsigned char sumpPadBytes;
 static uint32_t sumpSamples;
 
@@ -62,6 +62,9 @@ void SUMPlogicCommand(unsigned char inByte){
 		unsigned char parCnt;
 	} sumpRX;
 
+	//for debugging via usb1
+	//cdcputc(inByte);
+
 	switch(sumpRXstate){ //this is a state machine that grabs the incoming commands one byte at a time
 
 		case C_IDLE:
@@ -81,23 +84,27 @@ void SUMPlogicCommand(unsigned char inByte){
 				case SUMP_DESC:
 					// device name string
 					cdcputc2(0x01);
-					cdcprintf2("BPv3");
+					cdcprintf2("Bus Pirate NG1");
 					cdcputc2(0x00);
-					//sample memory (4096)
+					//firmware version string
+					cdcputc2(0x02);
+					cdcprintf2("Fwv1");
+					cdcputc2(0x00);					
+					//sample memory 
 					cdcputc2(0x21);
 					cdcputc2(0x00);
+					cdcputc2(0x04);
 					cdcputc2(0x00);
-					cdcputc2(0x10);
 					cdcputc2(0x00);
-					//sample rate (1MHz)
+					//sample rate 
 					cdcputc2(0x23);
+					cdcputc2(0x02);
+					cdcputc2(0x25);
+					cdcputc2(0x51);
 					cdcputc2(0x00);
-					cdcputc2(0x0F);
-					cdcputc2(0x42);
+					//number of probes
 					cdcputc2(0x40);
-					//number of probes (5)
-					cdcputc2(0x40);
-					cdcputc2(0x07);
+					cdcputc2(0x08);
 					//protocol version (2)
 					cdcputc2(0x41);
 					cdcputc2(0x02);
@@ -114,28 +121,29 @@ void SUMPlogicCommand(unsigned char inByte){
 					break;
 			}
 			break;
+			
 		case C_PARAMETERS: 
 			sumpRX.parCnt++;
 			sumpRX.command[sumpRX.parCnt]=inByte;//store each parameter
 			if(sumpRX.parCnt<sumpRX.parameters) break; //if not all parameters, quit
+			
 		case C_PROCESS: //ignore all long commands for now
 			switch(sumpRX.command[0]){
 
 				case SUMP_TRIG: //set CN on these pins
-					//if(sumpRX.command[1] & 0b10000)	CNEN2|=0b1; //AUX
-					//if(sumpRX.command[1] & 0b1000)  CNEN2|=0b100000;
-					//if(sumpRX.command[1] & 0b100)   CNEN2|=0b1000000;
-					//if(sumpRX.command[1] & 0b10)  	CNEN2|=0b10000000;
-					//if(sumpRX.command[1] & 0b1) 	CNEN2|=0b100000000;
-/*
+					modeConfig.logicanalyzertriggersactive=sumpRX.command[1];
+					break;
+				case SUMP_TRIG_VALS:
+					modeConfig.logicanalyzertriggersdirection=sumpRX.command[1];
+					break;
 				case SUMP_FLAGS:
-					sumpPadBytes=0;//if user forgot to uncheck chan groups 2,3,4, we can send padding bytes
+					/*sumpPadBytes=0;//if user forgot to uncheck chan groups 2,3,4, we can send padding bytes
 					if(sumpRX.command[1] & 0b100000) sumpPadBytes++;
 					if(sumpRX.command[1] & 0b10000) sumpPadBytes++;
-					if(sumpRX.command[1] & 0b1000) sumpPadBytes++;
+					if(sumpRX.command[1] & 0b1000) sumpPadBytes++;*/
 					break;
-*/
 				case SUMP_CNT:
+					//TODO: before and after ratio in byte 3 & 4
 					sumpSamples=sumpRX.command[2];
 					sumpSamples<<=8;
 					sumpSamples|=sumpRX.command[1];
@@ -150,19 +158,11 @@ void SUMPlogicCommand(unsigned char inByte){
 					l<<=8;
 					l|=sumpRX.command[1];
 
-					//convert from SUMP 100MHz clock to our 16MIPs
+					//convert from SUMP 100MHz clock to our 76Mhz clock
 					//l=((l+1)*16)/100;
 					l=((l+1)*4)/25; 
 
-					//adjust downwards a bit
-					if(l>0x10)
-						l-=0x10;
-					else //fast as possible
-						l=1;
-
-					//setup PR register
-					//PR5=(l>>16);//most significant word
-					//PR4=l;//least significant word
+					modeConfig.logicanalyzerperiod=l;
 					break;
 			}
 
@@ -172,13 +172,6 @@ void SUMPlogicCommand(unsigned char inByte){
 
 }
 
-//
-//
-//	To avoid rewriting interrupt vectors with the bootloader,
-//  this firmware currently uses polling to read the trigger and timer
-// 	A final version should use interrupts after lots of testing.
-//
-//
 void SUMPlogicService(void){
 	//static unsigned int i;
 //	static unsigned char j;

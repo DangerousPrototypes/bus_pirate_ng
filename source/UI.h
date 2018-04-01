@@ -12,9 +12,13 @@ typedef struct _modeConfig
 	uint8_t error;					// error occurred
 	uint8_t displaymode;			// display mode (dec, hex, oct, bin)
 	uint8_t pwm;					// pwm active?
+	
+	uint8_t	logicanalyzertriggersactive;
+	uint8_t	logicanalyzertriggersdirection; 
 	uint16_t logicanalyzerperiod; 	// period of the logic analyzer clock
 	uint32_t logicanalyzersamplecount; //number of samples in most recent capture
-
+	uint8_t logicanalyzerstop;		//why did the logic analyzer stop?
+	
 	uint32_t csport;				// cs is located on this port/gpio
 	uint32_t cspin;
 	uint32_t misoport;				// cs is located on this port/gpio

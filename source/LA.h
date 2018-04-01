@@ -28,6 +28,11 @@ void logicAnalyzerDumpSamples(uint32_t numSamples);
 #define CMDRESETSPI	0xFF
 #define CMDWRITERREG	0x05
 
+#define BP_LA_SAMPLES_PER_CHANNEL (((BP_LA_SRAM_SIZE)*8)/4) //8 bits per byte, 4 channels per SRAM
+#define BP_LA_OVERFLOW_COUNT (BP_LA_SAMPLES_PER_CHANNEL/(0xFFFF+1)) //divide by 16bit timer count
+
+#define BP_LA_COUNTER_PRELOAD (0xFFFF-(0)) //preload the sample counter, can be used to avoid sampling overrun
+
 #define BP_LA_LATCH_SETUP() gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN)
 #define BP_LA_LATCH_OPEN() gpio_clear(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN)
 #define BP_LA_LATCH_CLOSE() gpio_set(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN)
