@@ -169,7 +169,7 @@ void cdcputc(char c)
 {
 	txbuff1[txhead1]=c;
 
-	while(txhead1==((txtail1-1)&(TXBUFFSIZE-1)));
+	while(txhead1==((txtail1-1)&(TXBUFFSIZE-1)));		// is there room for us?
 
 	txhead1=(txhead1+1)&(TXBUFFSIZE-1);
 }
@@ -210,6 +210,9 @@ uint8_t cdcgetc2(void)
 void cdcputc2(char c)
 {
 	txbuff2[txhead2]=c;
+
+	while(txhead1==((txtail1-1)&(TXBUFFSIZE-1)));		// is there room for us?
+
 	txhead2=(txhead2+1)&(TXLABUFFSIZE-1);
 }
 

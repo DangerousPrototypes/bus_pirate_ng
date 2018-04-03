@@ -864,7 +864,7 @@ void printhelp(void)
 {
 	cdcprintf(" General\t\t\t\t\tProtocol interaction\r\n");
 	cdcprintf(" ---------------------------------------------------------------------------\r\n");
-	cdcprintf(" \t\t\t\t\t\t(0)\tList current macros\r\n");
+	cdcprintf(" \t\t\t\t\t(0)\tList current macros\r\n");
 	cdcprintf(" =X/|X\tConverts X/reverse X\t\t(x)\tMacro x\r\n");
 	cdcprintf(" ~\tSelftest\t\t\t[\tStart\r\n");
 	cdcprintf(" #\tReset the BP   \t\t\t]\tStop\r\n");
