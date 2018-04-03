@@ -168,6 +168,9 @@ uint8_t cdcgetc(void)
 void cdcputc(char c)
 {
 	txbuff1[txhead1]=c;
+
+	while(txhead1==((txtail1-1)&(TXBUFFSIZE-1)));
+
 	txhead1=(txhead1+1)&(TXBUFFSIZE-1);
 }
 
@@ -251,16 +254,16 @@ uint8_t usbready(void)
  	return configured;
 }
 
-//void  usb_lp_can_rx0_isr(void)
+void  usb_lp_can_rx0_isr(void)
+{
+	if(my_usbd_dev!=NULL) usbd_poll(my_usbd_dev);
+}
 
 // polls the usb for new data and sends data back if available
 void cdcpoll(void)
 {
 	int i;
 	uint8_t buf[64];
-
-
-	if(my_usbd_dev!=NULL) usbd_poll(my_usbd_dev);
 
 	//move to somewhere else??
 	if(txtail1!=txhead1)							// we have data to send?
@@ -329,8 +332,8 @@ void cdcinit(void)
 	my_usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
 	usbd_register_set_config_callback(my_usbd_dev, cdcacm_set_config);
 
-	//nvic_set_priority(NVIC_USB_LP_CAN_RX0_IRQ, IRQ_PRI_USB);
-	//nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ);
+	nvic_set_priority(NVIC_USB_LP_CAN_RX0_IRQ, IRQ_PRI_USB);
+	nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ);
 }
 
 

@@ -20,10 +20,14 @@ void cdcprintf2(const char *fmt, ...);
 
 
 // defines
-#define RXBUFFSIZE	128		// needs to be power of 2 cmd
-#define TXBUFFSIZE	128		// needs to be power of 2
-#define RXLABUFFSIZE	128		// needs to be power of 2 
-#define TXLABUFFSIZE	128		// needs to be power of 2
+//#define RXBUFFSIZE	128		// needs to be power of 2 cmd
+//#define TXBUFFSIZE	128		// needs to be power of 2
+//#define RXLABUFFSIZE	128		// needs to be power of 2 
+//#define TXLABUFFSIZE	128		// needs to be power of 2
+#define RXBUFFSIZE	512		// needs to be power of 2 cmd
+#define TXBUFFSIZE	512		// needs to be power of 2
+#define RXLABUFFSIZE	512		// needs to be power of 2 
+#define TXLABUFFSIZE	512		// needs to be power of 2
 #define PRINTBUFLEN	256		// buffer for cdcprintf
 
 #define IRQ_PRI_USB	(2 << 4)	// not used prio of usb interrupt

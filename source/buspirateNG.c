@@ -23,7 +23,7 @@ void sys_tick_handler(void)
 	systicks++;
 
 	// check usb for new data
-	if (usbpolltime==5)
+	if (usbpolltime==100)
 	{
 		cdcpoll();
 		usbpolltime=0;
