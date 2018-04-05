@@ -15,8 +15,6 @@ void logicAnalyzerCaptureStop(void);
 void logicAnalyzerCaptureStart(void);
 void logicAnalyzerDumpSamples(uint32_t numSamples);
 
-
-
 #define LATRIGGERMENU	"Trigger\r\n 1. Rising\r\n 2. Falling\r\n 3. Both\r\n 4. No trigger*\r\n> "
 #define LAPERIODMENU 	"period> "
 #define LASAMPLEMENU	"samples> "
