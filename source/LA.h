@@ -1,4 +1,3 @@
-
 void LA_start(void);
 uint32_t LA_send(uint32_t d);
 uint32_t LA_read(void);
@@ -70,4 +69,3 @@ void logicAnalyzerDumpSamples(uint32_t numSamples);
 #define BP_SRAM2_SIO2_PIN BP_LA_CHAN7_PIN
 #define BP_SRAM2_SIO3_PORT BP_LA_CHAN8_PORT
 #define BP_SRAM2_SIO3_PIN BP_LA_CHAN8_PIN
-
