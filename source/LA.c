@@ -48,7 +48,7 @@ void logicAnalyzerSetup(void)
 	//send mode reset command just in case
 	setup_spix4w(); //write
 	BP_LA_SRAM_SELECT();  
-	delayms_error(1);
+	delayms(1);
 	spiWx4(CMDRESETSPI); //write command
 	BP_LA_SRAM_DESELECT();  
 
