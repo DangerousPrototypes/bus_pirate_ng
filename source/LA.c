@@ -39,8 +39,6 @@ char triggermodes[][4]={
 
 void logicAnalyzerSetup(void)
 {
-
-	uint8_t unused_warn;
 	
 	BP_LA_LATCH_SETUP(); // 573 latch
 	BP_LA_LATCH_CLOSE();
