@@ -40,13 +40,15 @@ char triggermodes[][4]={
 void logicAnalyzerSetup(void)
 {
 
+	uint8_t unused_warn;
+	
 	BP_LA_LATCH_SETUP(); // 573 latch
 	BP_LA_LATCH_CLOSE();
 
 	//send mode reset command just in case
 	setup_spix4w(); //write
 	BP_LA_SRAM_SELECT();  
-	delayms(1);
+	delayms_error(1);
 	spiWx4(CMDRESETSPI); //write command
 	BP_LA_SRAM_DESELECT();  
 
