@@ -1061,14 +1061,7 @@ void getuserinput(void)
 
 		if(cdcbyteready2())
 		{
-			//c=cdcgetc2();
-			//cdcputc2(c);
-
-
 			SUMPlogicCommand(cdcgetc2());
-
-		
-
 		}
 		//SUMPlogicService();
 	}

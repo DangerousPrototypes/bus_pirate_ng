@@ -12,21 +12,21 @@
 
 
 //globals
-uint32_t usbpolltime;				// usb poll timer
+uint32_t usbflushtime;				// usb poll timer
 volatile uint32_t systicks;
 
 // systick timer 
 // handles the USB polling
 void sys_tick_handler(void)
 {
-	usbpolltime++;
+	usbflushtime++;
 	systicks++;
 
 	// check usb for new data
-	if (usbpolltime==100)
+	if (usbflushtime==50)
 	{
-		cdcpoll();
-		usbpolltime=0;
+		cdcflush();
+		usbflushtime=0;
 	}
 }
 
@@ -35,7 +35,7 @@ int main(void)
 {
 
 	// init vars
-	usbpolltime=0;
+	usbflushtime=0;
 
 	// initialize the cmdbuffer
 	initUI();

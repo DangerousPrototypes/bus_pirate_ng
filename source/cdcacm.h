@@ -7,8 +7,7 @@ void cdcputc(char c);
 void cdcputs(char *s);
 void cdcprintf(const char *fmt, ...);
 void cdcinit(void);
-void cdcpoll(void);
-uint8_t usbready(void);
+void cdcflush(void);
 
 uint8_t cdcbyteready2(void);
 uint8_t cdcgetc2(void);
@@ -20,14 +19,11 @@ void cdcprintf2(const char *fmt, ...);
 
 
 // defines
-//#define RXBUFFSIZE	128		// needs to be power of 2 cmd
-//#define TXBUFFSIZE	128		// needs to be power of 2
-//#define RXLABUFFSIZE	128		// needs to be power of 2 
-//#define TXLABUFFSIZE	128		// needs to be power of 2
-#define RXBUFFSIZE	512		// needs to be power of 2 cmd
-#define TXBUFFSIZE	512		// needs to be power of 2
-#define RXLABUFFSIZE	512		// needs to be power of 2 
-#define TXLABUFFSIZE	512		// needs to be power of 2
+// !!pointer for the ringbuffer are 8bit!!
+#define RXBUFFSIZE	256		// needs to be power of 2 cmd 
+#define TXBUFFSIZE	256		// needs to be power of 2
+#define RXLABUFFSIZE	256		// needs to be power of 2 la
+#define TXLABUFFSIZE	256		// needs to be power of 2
 #define PRINTBUFLEN	256		// buffer for cdcprintf
 
 #define IRQ_PRI_USB	(2 << 4)	// not used prio of usb interrupt

@@ -40,7 +40,6 @@
 
 // globals
 static usbd_device *my_usbd_dev;		// usb device
-static uint8_t configured;
 // first cdc endpoint
 static volatile uint8_t rxbuff1[RXBUFFSIZE];	// intermediate receive buffer
 static volatile uint8_t txbuff1[TXBUFFSIZE];	// intermediate transmit bufff
@@ -66,8 +65,6 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
 	(void)complete;
 	(void)buf;
 	(void)usbd_dev;
-
-configured=1;
 
 	switch(req->bRequest) {
 	case USB_CDC_REQ_SET_CONTROL_LINE_STATE: {
@@ -190,7 +187,7 @@ void cdcprintf(const char *fmt, ...)
 
 
 
-// second cdc channel (binmode)
+// second cdc channel (lamode)
 uint8_t cdcbyteready2(void)
 {
 	return !(rxhead2==rxtail2);
@@ -211,7 +208,7 @@ void cdcputc2(char c)
 {
 	txbuff2[txhead2]=c;
 
-	while(txhead1==((txtail1-1)&(TXBUFFSIZE-1)));		// is there room for us?
+	while(txhead2==((txtail2-1)&(TXLABUFFSIZE-1)));		// is there room for us?
 
 	txhead2=(txhead2+1)&(TXLABUFFSIZE-1);
 }
@@ -248,13 +245,6 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 				USB_REQ_TYPE_CLASS | USB_REQ_TYPE_INTERFACE,
 				USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
 				cdcacm_control_request);
-
-//	configured=1;
-}
-
-uint8_t usbready(void)
-{
- 	return configured;
 }
 
 void  usb_lp_can_rx0_isr(void)
@@ -262,40 +252,37 @@ void  usb_lp_can_rx0_isr(void)
 	if(my_usbd_dev!=NULL) usbd_poll(my_usbd_dev);
 }
 
-// polls the usb for new data and sends data back if available
-void cdcpoll(void)
+// flushed the tx buffers
+void cdcflush(void)
 {
 	int i;
 	uint8_t buf[64];
 
-	//move to somewhere else??
 	if(txtail1!=txhead1)							// we have data to send?
 	{
 		gpio_set(BP_USB_LED_PORT, BP_USB_LED_PIN);			// flash led during TX
 
 		i=0;
-		while((txtail1!=txhead1)&&(i<63))
+		while((txtail1!=txhead1)&&(i<64))
 		{
 			buf[i++]=txbuff1[txtail1];
 			txtail1=(txtail1+1)&(TXBUFFSIZE-1);
 		}
-//		buf[i++]=0;
 		while((usbd_ep_write_packet(my_usbd_dev, 0x81, buf, i)==0));	// try resending until it is succeeded
 
 		gpio_clear(BP_USB_LED_PORT, BP_USB_LED_PIN);
 	}
-	//move to somewhere else??
+
 	if(txtail2!=txhead2)							// we have data to send?
 	{
 		gpio_set(BP_USB_LED_PORT, BP_USB_LED_PIN);			// flash led during TX
 
 		i=0;
-		while((txtail2!=txhead2)&&(i<63))
+		while((txtail2!=txhead2)&&(i<64))
 		{
 			buf[i++]=txbuff2[txtail2];
 			txtail2=(txtail2+1)&(TXLABUFFSIZE-1);
 		}
-//		buf[i+1]=0;
 		while((usbd_ep_write_packet(my_usbd_dev, 0x83, buf, i)==0));	// try resending until it is succeeded
 
 		gpio_clear(BP_USB_LED_PORT, BP_USB_LED_PIN);
@@ -318,14 +305,12 @@ void cdcinit(void)
 	rxtail1=0;
 	txtail1=0;
 
-	for(i=0; i<RXBUFFSIZE; i++) rxbuff2[i]=0x0;
-	for(i=0; i<TXBUFFSIZE; i++) txbuff2[i]=0x0;
+	for(i=0; i<RXLABUFFSIZE; i++) rxbuff2[i]=0x0;
+	for(i=0; i<TXLABUFFSIZE; i++) txbuff2[i]=0x0;
 	rxhead2=0;
 	txhead2=0;
 	rxtail2=0;
 	txtail2=0;
-
-	configured=0;
 
 	//create something unique (some bitshuffling to match the same outut as i command)
 	// using 32 bits will trigger a warning
