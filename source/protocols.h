@@ -33,6 +33,12 @@ enum
 #ifdef BP_USE_LCDSPI
 	LCDSPI,
 #endif
+#ifdef BP_USE_LCDI2C	// future
+	LCDI2C,
+#endif
+#ifdef BP_USE_1WIRE
+	ONEWIRE,
+#endif
 	MAXPROTO
 };
 

@@ -141,6 +141,12 @@
 #define BP_DIO_DIO3_PORT	GPIOB
 #define BP_DIO_DIO3_PIN		GPIO15
 
+// 1wire
+#define BP_1WIRE_PORT		GPIOB
+#define BP_1WIRE_PIN		GPIO15
+#define BP_1WIRE_SENSE_PORT	GPIOB
+#define BP_1WIRE_SENSE_PIN	GPIO7
+
 
 // voltage regulators and pullupvoltages
 #define BP_PSUEN_PORT		GPIOB

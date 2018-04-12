@@ -23,6 +23,8 @@
 #define		BP_USE_SW3W
 #define 	BP_USE_DIO
 #define		BP_USE_LCDSPI
+//#define		BP_USE_LCDI2C
+#define		BP_USE_1WIRE
 
 
 // systicks (for delays) systick is 10us
