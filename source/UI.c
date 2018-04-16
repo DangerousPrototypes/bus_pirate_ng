@@ -1200,27 +1200,33 @@ void printnum(uint32_t d)
 		else cdcprintf(" (\'%c\')", ((d>=0x20)&&(d<0x7E)?d:0x20));
 }
 
-// delays num ms
-// TODO: use a proper timer?
-void delayms(uint32_t num)
+void initdelay(void)
 {
-	num*=1000; 		// convert to us
-	num/=10;
+	rcc_periph_clock_enable(BP_DELAYTIMER_CLOCK);
 
-	num+=systicks;		// should wrap around
-
-	while(systicks!=num);	
+	TIM_CNT(BP_DELAYTIMER) = 0;
+	TIM_PSC(BP_DELAYTIMER) = 72;
+	TIM_ARR(BP_DELAYTIMER) = 65535;
+	TIM_CR1(BP_DELAYTIMER) |= TIM_CR1_CEN;
 }
 
+// delays num ms
+void delayms(uint32_t num)
+{
+	while(num)
+	{
+		delayus(1000);
+		num--;
+	}
+}
+
+
 // delay num us
-// minimum is 10us because of systick setup TODO: rewrite to a proper timer?
 void delayus(uint32_t num)
 {
-	num/=10;
+	TIM_CNT(BP_DELAYTIMER)=0;
+	while(TIM_CNT(BP_DELAYTIMER)<=num);
 
-	num+=systicks;		// should wrap around
-
-	while(systicks!=num);	
 }
 
 // order bits according to lsb/msb setting

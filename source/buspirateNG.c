@@ -91,6 +91,9 @@ int main(void)
 	systick_counter_enable();				// go!
 	systicks=0;
 
+	// init the delay timer
+	initdelay();
+
 #ifdef BP_CONTROLS_PU
 	// enable USB pullup
 	
@@ -102,6 +105,7 @@ int main(void)
 	gpio_clear(GPIOA, GPIO12);
 	delayms(100);
 #endif
+
 
 	// setup USB
 	cdcinit();

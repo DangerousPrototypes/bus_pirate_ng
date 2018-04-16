@@ -1,5 +1,8 @@
 
 
+// took 1wire implementation from old buspirate
+// fiddled a bit with the timings to make it work on the NG version
+
 #include <stdint.h>
 #include <libopencm3/stm32/gpio.h>
 #include "buspirateNG.h"
@@ -119,61 +122,43 @@ void ONEWIRE_macro(uint32_t macro)
                         return;
                 }
                 								//write out the address of the device in the macro
-                //bpWstring(OUMSG_1W_MACRO_ADDRESS);//xxx WRITE BUS #X ID:
-                //BPMSG1005;
 		cdcprintf("ADDRESS MACRO %d: ", macro+1);
-                //bpWdec(macro+1);
-                //bpWstring(": ");
                 for(j=0;j<8;j++)
 		{
-                        //bpWbyte(OWroster.dev[macro].id[j]); 
-                        //bpSP; 
 			cdcprintf("%02X ", OWroster.dev[macro].id[j]);
                         OWWriteByte(OWroster.dev[macro].id[j]);
                 } 								//write address
                 cdcprintf("\r\n");
-		//bpBR;
+
                 return;
         }
         switch(macro)
 	{
                 case 0:								//menu
-                        //bpWline(OUMSG_1W_MACRO_MENU);
-                        //bpWline(OUMSG_1W_MACRO_SEARCH_ROM_HEADER);
-                        //BPMSG1006;
-                        //BPMSG1007;
 			cdcprintf(" 0.Macro menu\r\n");
-			cdcprintf("Macro     1WIRE address\r\n");
+			cdcprintf("Macro\t1WIRE address\r\n");
                         //write out roster of devices and macros, or SEARCH ROM NOT RUN, TRY (0xf0)
                         if(OWroster.num==0)
 			{
-                                //bpWline(OUMSG_1W_MACRO_ADDRESS_NODEVICE);
-                                //BPMSG1004;
 				cdcprintf("No device, try (ALARM) SEARCH macro first\r\n");
                         }
 			else
 			{
                                 for(c=0;c<OWroster.num; c++)
 				{
-                                        //bpSP;//space
-                                        //bpWdec(c+1);
-                                        //bpWstring(".");
-					cdcprintf(" %d.");
-                                        for(j=0;j<8;j++) cdcprintf("%02X ", OWroster.dev[c].id[j]);	//{bpWbyte(OWroster.dev[c].id[j]); bpSP;}
-                                        //bpWstring("\x0D\x0A   *");
-                                        //BPMSG1008;]
-					cdcprintf("\r\n   *");
+					cdcprintf(" %d.\t", c+1);
+                                        for(j=0;j<8;j++) cdcprintf("%02X ", OWroster.dev[c].id[j]);
+					cdcprintf("   *");
                                         DS1wireID(OWroster.dev[c].id[0]);       //print the device family identity (if known)
                                 }
                         }
-                        //bpWline(OUMSG_1W_MACRO_MENU_ROM);
-                        //BPMSG1009;
 			cdcprintf("1WIRE ROM COMMAND MACROs:\r\n");
-			cdcprintf(" 51.READ ROM (0x33) *for single device bus\r\n");
-			cdcprintf(" 85.MATCH ROM (0x55) *followed by 64bit address\r\n");
+			cdcprintf(" 51. READ ROM (0x33) *for single device bus\r\n");
+			cdcprintf(" 85. MATCH ROM (0x55) *followed by 64bit address\r\n");
 			cdcprintf(" 204.SKIP ROM (0xCC) *followed by command\r\n");
 			cdcprintf(" 236.ALARM SEARCH (0xEC)\r\n");
-			cdcprintf(" 240.SEARCH ROM (0xF0)");
+			cdcprintf(" 240.SEARCH ROM (0xF0)\r\n");
+			cdcprintf(" 255.reset bus");
                         break;
                 //1WIRE ROM COMMANDS
                 case 0xec://ALARM SEARCH
@@ -181,42 +166,28 @@ void ONEWIRE_macro(uint32_t macro)
                         SearchChar=macro;
                         if(macro==0xec)
 			{
-                                //bpWline(OUMSG_1W_MACRO_ALARMSEARCH_ROM);
-                                //BPMSG1010;
 				cdcprintf("ALARM SEARCH (0xEC)\r\n");
                         }
 			else
 			{							//SEARCH ROM command...
-                                //bpWline(OUMSG_1W_MACRO_SEARCH_ROM);
-                                //BPMSG1011;
 				cdcprintf("SEARCH (0xF0)\r\n");
                         }
 
-                        //bpWline(OUMSG_1W_MACRO_SEARCH_ROM_HEADER);
-                        //BPMSG1007;
-			cdcprintf("Macro     1WIRE address");
+			cdcprintf("Macro\t1WIRE address\r\n");
                         							// find ALL devices
                         j = 0;
                         c = OWFirst();
                         OWroster.num=0;
                         while (c)
 			{
-                                //the roster number is the shortcut macro
-                                //bpSP;
-                                //bpWdec(j+1);
-                                //bpWstring(".");
-				cdcprintf(" %d. ", j);
+				cdcprintf(" %d.\t", j);
                 
                                 // print address
                                 for (i = 0; i <8; i++)
 				{
-                                        //bpWbyte(ROM_NO[i]);
-                                        //bpSP;
 					cdcprintf("%02X ", ROM_NO[i]);
                                 }
-                                //bpWstring("\x0D\x0A   *");
-                                //BPMSG1008;
-				cdcprintf("\r\n   *");
+				cdcprintf("\t*");
                                 DS1wireID(ROM_NO[0]);   			//print the device family identity (if known)
                                 
                                 //keep the first X number of one wire IDs in a roster
@@ -232,38 +203,27 @@ void ONEWIRE_macro(uint32_t macro)
                                 c = OWNext();
                         }
 
-                        //bpWline(OUMSG_1W_MACRO_SEARCH_ROM_NOTE);
-                        //BPMSG1012;
 			cdcprintf("Device IDs are available by MACRO, see (0).\r\n");              
                         break;
                 case 0x33://READ ROM
                         DS1wireReset();
-                        //bpWstring(OUMSG_1W_MACRO_READ_ROM);
-                        //BPMSG1013;
 			cdcprintf("READ ROM (0x33): ");
                         OWWriteByte(0x33);
                         for(i=0; i<8; i++)
 			{
                                 devID[i]=OWReadByte();
-                                //bpWbyte(devID[i]);
-                                //bpSP;   
 				cdcprintf("%02X ", devID[i]);
                         }
-                        //bpWBR;  
 			cdcprintf("\r\n");
                         DS1wireID(devID[0]);
                         break;
                 case 0x55://MATCH ROM
                         DS1wireReset();
-                        //bpWline(OUMSG_1W_MACRO_MATCH_ROM);
-                        //BPMSG1014;
 			cdcprintf("MATCH ROM (0x55)\r\n");
                         OWWriteByte(0x55);
                         break;
                 case 0xcc://SKIP ROM
                         DS1wireReset();
-                        //bpWline(OUMSG_1W_MACRO_SKIP_ROM);
-                        //BPMSG1015;
 			cdcprintf("SKIP ROM (0xCC)\r\n");
                         OWWriteByte(0xCC);
                         break;
@@ -277,8 +237,6 @@ void ONEWIRE_macro(uint32_t macro)
 			gpio_clear(BP_1WIRE_PORT, BP_1WIRE_PIN);
 			break;
                 default:
-                        //bpWmessage(MSG_ERROR_MACRO);
-                        //BPMSG1016;
 			cdcprintf("No such macro\r\n");
 			modeConfig.error=1;
         }
@@ -326,39 +284,23 @@ void ONEWIRE_settings(void)
 *********************************************************************************** */
 unsigned char OWReset(void)
 {
-	unsigned int Presence=0,i;	
+	unsigned int Presence=0;	
 
 	gpio_set(BP_1WIRE_PORT, BP_1WIRE_PIN);
-	//OW_bpResPins(); 				//found out i needed this after all.
-
-	//SDA_TRIS=0;					//go low
-	gpio_clear(BP_1WIRE_PORT, BP_1WIRE_PIN);
+	gpio_clear(BP_1WIRE_PORT, BP_1WIRE_PIN);	// go low
 
 							//Maxim says a minimum of 480. 
-	//for(i=0;i<34;i++) 
-	//{						//BP Timing seems off; adjusting it looks like each FOR takes 4us. 
-	//	bpDelayUS(10);				//So 10+4=14 ## I want ~490 so (((TIMEWANTED)/(DELAY_TIME)+(ADJUST))=(LOOPS_NEEDED)) OR (490/(10+4))=(35)
-	//}						//-- above is old. 35x10=506. So im setting it at 34 which is about 490 (turns out to be 491 :)
-	delayus(500);	
+	delayus(490);	
 
-
-	//SDA_TRIS=1;					//release. My logic analyzer says we stayed low for exatly 488us. Thats pretty damn near perfect.
 	gpio_set(BP_1WIRE_PORT, BP_1WIRE_PIN);
-		
-	//bpDelayUS(65);					// ADJUSTED. Timing looks great now with the odd numbers.
-	delayus(60);
-	//if(SDA)						// if lines still high, then no device
+	delayus(65);
+
 	if(gpio_get(BP_1WIRE_SENSE_PORT, BP_1WIRE_SENSE_PIN))						// if lines still high, then no device
 		Presence=2;				// if no device then return 2.
-		
-	//for(i=0;i<35;i++)
-	//{						//delay for 506us (found above) which is way after the 480 reccomended. thats ok.
-	//	bpDelayUS(10);
-	//}
+
 	delayus(500);
 	
-	//if(SDA==0)					// if lines still low; then theres a short
-	if(gpio_get(BP_1WIRE_SENSE_PORT, BP_1WIRE_SENSE_PIN))			// if lines still low; then theres a short
+	if(!gpio_get(BP_1WIRE_SENSE_PORT, BP_1WIRE_SENSE_PIN))			// if lines still low; then theres a short
 	{
 		return 1;
 	}
@@ -380,40 +322,28 @@ unsigned char OWReset(void)
 unsigned char OWBit(unsigned char OWbit)
 {
 	gpio_set(BP_1WIRE_PORT, BP_1WIRE_PIN);
-	//OW_bpResPins();					// I found not including this leaves the lines odd... :/
-
-	//SDA_TRIS=0;
 	gpio_clear(BP_1WIRE_PORT, BP_1WIRE_PIN);
 
-	//bpDelayUS(4);
-	delayus(10);
+	delayus(5);	// maxim says 6
 	if(OWbit)
 	{
-		//SDA_TRIS=1;
 		gpio_set(BP_1WIRE_PORT, BP_1WIRE_PIN);
 	}
-	//bpDelayUS(8);
-	delayus(10);
+
+	delayus(8);	// maxim says 9
 
 	if(OWbit)
-	{						// This is where the magic happens. If a OWbit value of 1 is sent to this function
-		//OWbit = SDA;				// well thats the same timing needed to get a value (not just send it) so why not
-		OWbit = gpio_get(BP_1WIRE_SENSE_PORT, BP_1WIRE_SENSE_PIN);	// well thats the same timing needed to get a value (not just send it) so why not
-    		//bpDelayUS(32);				// perform both? So sending one will not only send 1 bit; it will also read one bit
-		delayus(30);
+	{										// This is where the magic happens. If a OWbit value of 1 is sent to this function
+		OWbit = (gpio_get(BP_1WIRE_SENSE_PORT, BP_1WIRE_SENSE_PIN)?1:0);	// well thats the same timing needed to get a value (not just send it) so why not
+		delayus(44); //maxim says 45						// perform both? So sending one will not only send 1 bit; it will also read one bit		
 	}
 	else
-	{						// it all depends on what the iDevice is in the mood to do. If its in send mode then
-		//bpDelayUS(25);				// it will sends its data, if its in recive mode. Then we will send ours.
-		delayus(20);
-		//SDA_TRIS=1;				//    magical, i know. :)
-		gpio_set(BP_1WIRE_PORT, BP_1WIRE_PIN);
-		//bpDelayUS(7);
-		delayus(10);
+	{										// it all depends on what the iDevice is in the mood to do. If its in send mode then
+		delayus(44); // maxim says 45						// it will sends its data, if its in recive mode. Then we will send ours.
+		gpio_set(BP_1WIRE_PORT, BP_1WIRE_PIN);					// magical, i know :)
 	}
 
-	//bpDelayUS(5); 					//Just an adjust. 70us perfect.
-	//delayus(10);
+	delayus(9); 	// maxim says 9
 
 	return OWbit;
 }
@@ -442,7 +372,6 @@ unsigned char OWByte(unsigned char OWbyte)
 		OWbyte>>=1;
 		if(t) { OWbyte |= 0x80; }
 	} 
-	//bpDelayUS(8);
 	delayus(10);
 	return OWbyte;
 }
@@ -454,69 +383,111 @@ void DS1wireReset(void)
         unsigned char c;
 
         c=OWReset();
-        //bpWstring(OUMSG_1W_RESET);
-        //BPMSG1017;      
 	cdcprintf("BUS RESET ");
         if(c==0)
 	{
-                //bpWline(OUMSG_1W_RESET_OK);                   
-                //BPMSG1018; //remove?
-                //BPMSG1185;
 		cdcprintf(" OK\r\n");
-        }else{
-                //bpWstring(OUMSG_1W_RESET_ERROR);
-                //BPMSG1019;
+        }
+	else
+	{
 		cdcprintf("Warning: ");
-//                if(c&0b1)  BPMSG1020;           //bpWstring(OUMSG_1W_RESET_SHORT);      
-//                if(c&0b10) BPMSG1021;           //bpWstring(OUMSG_1W_RESET_NODEV);
-                if(c&0b1)  cdcprintf("*Short or no pull-up \r\n");           //bpWstring(OUMSG_1W_RESET_SHORT);      
-                if(c&0b10) cdcprintf("*No device detected \r\n");           //bpWstring(OUMSG_1W_RESET_NODEV);
-                //bpBR;
+                if(c&0b1)  cdcprintf("*Short or no pull-up \r\n");
+                if(c&0b10) cdcprintf("*No device detected \r\n");
         }
 }
 
+// device list from: http://owfs.sourceforge.net/commands.html
 void DS1wireID(unsigned char famID)
 {
-        //some devices, according to:
-        //http://owfs.sourceforge.net/commands.html
-        #define DS2404 0x04
-        #define DS18S20 0x10
-        #define DS1822 0x22
-        #define DS18B20 0x28
-        #define DS2431 0x2D
         switch(famID)
 	{									//check for device type
-                case DS18S20:
-                        //bpWline("DS18S20 High Pres Dig Therm");
-                        //BPMSG1022;
-			cdcprintf("DS18S20 High Pres Dig Therm\r\n");
-                        break;
-                case DS18B20:
-                        //bpWline("DS18B20 Prog Res Dig Therm");
-                        //BPMSG1023;
-			cdcprintf("DS18B20 Prog Res Dig Therm\r\n");
-                        break;
-                case DS1822:
-                        //bpWline("DS1822 Econ Dig Therm");
-                        //BPMSG1024;
-			cdcprintf("DS1822 Econ Dig Therm\r\n");
-                        break;
-                case DS2404:
-                        //bpWline("DS2404 Econram time Chip");
-                        //BPMSG1025;
-			cdcprintf("DS2404 Econram time Chip\r\n");
-                        break;
-                case DS2431:
-                        //bpWline("DS2431 1K EEPROM");
-                        //BPMSG1026;
-			cdcprintf("DS2431 1K EEPROM\r\n");
-                        break;
+		case 0x01:	cdcprintf("DS1990A Silicon Serial Number");
+				break;
+		case 0x02:	cdcprintf("DS1991 multikey 1153bit secure");
+				break;
+		case 0x04:	cdcprintf("DS1994 econoram time chip");
+				break;
+		case 0x05:	cdcprintf("Addresable Switch");
+				break;
+		case 0x06:	cdcprintf("DS1993 4k memory ibutton");
+				break;
+		case 0x08:	cdcprintf("DS1992 1k memory ibutton");
+				break;
+		case 0x09:	cdcprintf("DS1982 1k add-only memory");
+				break;
+		case 0x0A:	cdcprintf("DS1995 16k memory ibutton");
+				break;
+		case 0x0B:	cdcprintf("DS1985 16k add-only memory");
+				break;
+		case 0x0C:	cdcprintf("DS1996 64k memory ibutton");
+				break;
+		case 0x0F:	cdcprintf("DS1986 64k add-only  memory");
+				break;
+		case 0x10:	cdcprintf("DS1920 high precision digital thermometer");
+				break;
+		case 0x12:	cdcprintf("dual addressable switch plus 1k memory");
+				break;
+		case 0x14:	cdcprintf("DS1971 256 eeprom");
+				break;
+		case 0x1A:	cdcprintf("DS1963L 4k Monetary");
+				break;
+		case 0x1C:	cdcprintf("4k EEPROM withPIO");
+				break;
+		case 0x1D:	cdcprintf("4k ram with counter");
+				break;
+		case 0x1F:	cdcprintf("microlan coupler");
+				break;
+		case 0x20:	cdcprintf("quad a/d converter");
+				break;
+		case 0x21:	cdcprintf("DS1921 Thermachron");
+				break;
+		case 0x22:	cdcprintf("Econo Digital Thermometer");
+				break;
+		case 0x23:	cdcprintf("4k eeprom");
+				break;
+		case 0x24:	cdcprintf("time chip");
+				break;
+		case 0x26:	cdcprintf("smart battery monitor");
+				break;
+		case 0x27:	cdcprintf("time chip with interrupt");
+				break;
+		case 0x28:	cdcprintf("programmable resolution digital thermometer");
+				break;
+		case 0x29:	cdcprintf("8-channel addressable switch");
+				break;
+		case 0x2C:	cdcprintf("digital potentiometer");
+				break;
+		case 0x2D:	cdcprintf("1k eeprom");
+				break;
+		case 0x2E:	cdcprintf("battery monitor and charge controller");
+				break;
+		case 0x30:	cdcprintf("high-precision li+ battery monitor");
+				break;
+		case 0x31:	cdcprintf("efficient addressable single-cell rechargable lithium protection ic");
+				break;
+		case 0x33:	cdcprintf("DS1961S 1k protected eeprom with SHA-1");
+				break;
+		case 0x36:	cdcprintf("high precision coulomb counter");
+				break;
+		case 0x37:	cdcprintf("DS1977 Password protected 32k eeprom");
+				break;
+		case 0x41:	cdcprintf("DS1922/3 Temperature Logger 8k mem");
+				break;
+		case 0x51:	cdcprintf("multichemistry battery fuel gauge");
+				break;
+		case 0x84:	cdcprintf("dual port plus time");
+				break;
+		case 0x89:	cdcprintf("DS1982U 48 bit node address chip");
+				break;
+		case 0x8B:	cdcprintf("DS1985U 16k add-only uniqueware");
+				break;
+		case 0x8F:	cdcprintf("DS1986U 64k add-only uniqueware");
+				break;
                 default:
-                        //bpWline("Unknown device");
-                        //BPMSG1027;
-			cdcprintf("Unknown device\r\n");
+			cdcprintf("Unknown device");
 
         }
+	cdcprintf("\r\n");
 }
 
 

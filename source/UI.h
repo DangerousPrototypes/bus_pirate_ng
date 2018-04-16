@@ -55,6 +55,7 @@ uint32_t askint(const char *menu, uint32_t minval, uint32_t maxval, uint32_t def
 uint32_t getrepeat(void);
 uint32_t getnumbits(void);
 void printnum(uint32_t d);
+void initdelay(void);
 void delayms(uint32_t num);
 void delayus(uint32_t num);
 uint32_t orderbits(uint32_t d);
