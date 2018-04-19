@@ -7,9 +7,10 @@
 #include "cdcacm.h"
 #include "UI.h"
 #include "LCDSPI.h"
+#include "protocols.h"
 
 #include "HD44780.h"
-#include "ST7735R.h"
+#include "ST7735.h"
 
 static uint32_t currentdisplay;
 
@@ -25,23 +26,25 @@ typedef struct _display
 	char name[10];
 } display;
 
-static struct _display displays[2]={
+static struct _display displays[2]={			// HD44780 is mandatory
 {
 	HD44780_write,
-	0,	//HD44780_read,
+	nullfunc3,					// read is not used
 	HD44780_macro,
 	HD44780_setup,
 	HD44780_cleanup,
 	"HD44780"
 },
+#ifdef DISPLAY_USE_ST7735
 {
-	ST7735R_send,
-	0,	//HD44780_read,
-	ST7735R_macro,
-	ST7735R_setup,
-	ST7735R_cleanup,
+	ST7735_send,
+	nullfunc3,					// read is not used
+	ST7735_macro,
+	ST7735_setup,
+	ST7735_cleanup,
 	"ST7735D/R"
-}
+},
+#endif
 };
 
 uint32_t LCDSPI_send(uint32_t d)
@@ -61,18 +64,36 @@ void LCDSPI_macro(uint32_t macro)
 
 void LCDSPI_setup(void)
 {
-	
-	currentdisplay=1;
+	int i;
+
+	currentdisplay=0;
+	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+	consumewhitechars();
+	currentdisplay=getint();
+
+	if((currentdisplay==0)||(currentdisplay>MAXDISPLAYS))
+	{
+		for(i=0; i<MAXDISPLAYS; i++)
+			cdcprintf(" %2d. %s\r\n", i+1, displays[i].name);
+
+		currentdisplay=askint("\r\ndisplay> ", 1, 2, 1);
+		cdcprintf("\r\n");
+	}
+	currentdisplay--;
 }
 
 void LCDSPI_setup_exc(void)
 {
 	displays[currentdisplay].display_setup();
+
+	modeConfig.subprotocolname=displays[currentdisplay].name;
 }
 
 void LCDSPI_cleanup(void)
 {
 	displays[currentdisplay].display_cleanup();
+
+	modeConfig.subprotocolname=0;
 }
 
 void LCDSPI_pins(void)

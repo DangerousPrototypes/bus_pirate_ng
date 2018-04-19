@@ -176,6 +176,8 @@ void initUI(void)
 	modeConfig.cspin=0;
 	modeConfig.clkport=0;
 	modeConfig.clkpin=0;
+
+	modeConfig.subprotocolname=0;
 }
 
 
@@ -568,10 +570,13 @@ void doUI(void)
 		logicAnalyzerCaptureStop();
 		
 		if(modeConfig.logicanalyzerstop==0xff){
-			cdcprintf("Logic analyzer full before end of command!\r\n");
+			cdcprintf("\x07Logic analyzer full before end of command!\r\n");
 		}	
 		
-		cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
+		if(modeConfig.subprotocolname)
+			cdcprintf("%s-(%s)> ", protocols[modeConfig.mode].protocol_name, modeConfig.subprotocolname);
+		else
+			cdcprintf("%s> ", protocols[modeConfig.mode].protocol_name);
 		if(go==2)
 		{
 			temp=0;

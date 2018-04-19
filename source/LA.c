@@ -232,7 +232,7 @@ void logicAnalyzerCaptureStop(void)
 	if(modeConfig.logicanalyzerstop<0xff){
 		modeConfig.logicanalyzersamplecount+=(timer_get_counter(BP_LA_COUNTER)+1);
 	}
-	cdcprintf("LA samples: %d\r\n", modeConfig.logicanalyzersamplecount);
+	//cdcprintf("LA samples: %d\r\n", modeConfig.logicanalyzersamplecount);
 
 }
 

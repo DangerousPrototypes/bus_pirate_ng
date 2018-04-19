@@ -7,7 +7,7 @@
 #include "cdcacm.h"
 #include "UI.h"
 #include "LCDSPI.h"
-#include "ST7735R.h"
+#include "ST7735.h"
 #include "AUXpin.h"
 
 
@@ -164,21 +164,21 @@ static const uint8_t
       100 };                  //     100 ms delay
 
 
+uint8_t maxx, maxy;
 
 
-
-uint32_t ST7735R_send(uint32_t d)
+uint32_t ST7735_send(uint32_t d)
 {
 	ST7735_writedat(d);
 	return 0;
 }
 
-uint32_t ST7735R_read(void)
+uint32_t ST7735_read(void)
 {
 	return 0;
 }
 
-void ST7735R_macro(uint32_t macro)
+void ST7735_macro(uint32_t macro)
 {
 	uint32_t arg1;
 	uint32_t i;
@@ -187,8 +187,6 @@ void ST7735R_macro(uint32_t macro)
 	consumewhitechars();
 	arg1=getint();
 
-	cdcprintf("arg=%d", arg1);
-
 	switch(macro)
 	{
 		case 0: cdcprintf("\r\n");
@@ -196,25 +194,37 @@ void ST7735R_macro(uint32_t macro)
 			cdcprintf(" 2. init ST7735R 160x128 green tab\r\n");
 			cdcprintf(" 3. init ST7735R 160x128 red tab\r\n");
 			cdcprintf(" 4. init ST7735R 128x128\r\n");
-			cdcprintf(" 5. init ST7735R 160x80");
+			cdcprintf(" 5. init ST7735R 160x80\r\n");
+			cdcprintf(" 6. Clear screen\r\n");
+			cdcprintf(" 7. Send command\r\n");
 			break;
 		case 1:	ST7735_sendinitseq(Bcmd);
+			maxx=160;
+			maxy=128;
 			break;
 		case 2:	ST7735_sendinitseq(Rcmd1);
 			ST7735_sendinitseq(Rcmd2green);
 			ST7735_sendinitseq(Rcmd3);
+			maxx=160;
+			maxy=128;
 			break;
 		case 3:	ST7735_sendinitseq(Rcmd1);
 			ST7735_sendinitseq(Rcmd2red);
 			ST7735_sendinitseq(Rcmd3);
+			maxx=160;
+			maxy=128;
 			break;
 		case 4:	ST7735_sendinitseq(Rcmd1);
 			ST7735_sendinitseq(Rcmd2green144);
 			ST7735_sendinitseq(Rcmd3);
+			maxx=128;
+			maxy=128;
 			break;
 		case 5:	ST7735_sendinitseq(Rcmd1);
 			ST7735_sendinitseq(Rcmd2green160x80);
 			ST7735_sendinitseq(Rcmd3);
+			maxx=160;
+			maxy=80;
 			break;
 		case 6: ST7735_writecmd(0x2A);
 			ST7735_writedat(0x00);
@@ -227,7 +237,7 @@ void ST7735R_macro(uint32_t macro)
 			ST7735_writedat(0x00);
 			ST7735_writedat(0x7F);
 			ST7735_writecmd(0x2c);
-			for(i=0; i<2*128*128; i++) ST7735_writedat(0x00);
+			for(i=0; i<2*maxx*maxy; i++) ST7735_writedat(0x00);
 			break;
 		case 7: ST7735_writecmd(arg1);
 			
@@ -240,7 +250,7 @@ void ST7735R_macro(uint32_t macro)
 
 }
 
-void ST7735R_setup(void)
+void ST7735_setup(void)
 {
 	// setup SPI
 	HWSPI_setcpol(1<<1);
@@ -254,10 +264,13 @@ void ST7735R_setup(void)
 	setAUX(1);
 	HWSPI_setcs(1);
 
-	cdcprintf("Adafuit");
+	maxx=0;
+	maxy=0;
+
+	cdcprintf("code (C) Adafuit");
 }
 
-void ST7735R_cleanup(void)
+void ST7735_cleanup(void)
 {
 	HWSPI_cleanup();
 }

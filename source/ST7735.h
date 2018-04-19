@@ -1,10 +1,10 @@
 
 
-void ST7735R_setup(void);
-void ST7735R_cleanup(void);
-uint32_t ST7735R_send(uint32_t d);
-uint32_t ST7735R_read(void);
-void ST7735R_macro(uint32_t macro);
+void ST7735_setup(void);
+void ST7735_cleanup(void);
+uint32_t ST7735_send(uint32_t d);
+uint32_t ST7735_read(void);
+void ST7735_macro(uint32_t macro);
 void ST7735_writedat(uint8_t d);
 void ST7735_writecmd(uint8_t c);
 void ST7735_sendinitseq(const uint8_t *addr );

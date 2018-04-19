@@ -26,6 +26,10 @@
 //#define		BP_USE_LCDI2C
 #define		BP_USE_1WIRE
 
+// enable display support
+#define		DISPLAY_USE_HD44780	// is always enabled 
+#define		DISPLAY_USE_ST7735
+
 
 // systicks (for delays) systick is 10us
 extern volatile uint32_t systicks;

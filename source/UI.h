@@ -10,14 +10,15 @@ typedef struct _modeConfig
 	uint8_t bitorder;				// bitorder (0=msb, 1=lsb)
 	uint8_t psu;					// psu (0=off, 1=on)
 	uint8_t error;					// error occurred
-	uint8_t displaymode;			// display mode (dec, hex, oct, bin)
+	uint8_t displaymode;				// display mode (dec, hex, oct, bin)
 	uint8_t pwm;					// pwm active?
+	char *subprotocolname;				// can be set if there is a sub protocol
 	
 	uint8_t	logicanalyzertriggersactive;
 	uint8_t	logicanalyzertriggersdirection; 
-	uint16_t logicanalyzerperiod; 	// period of the logic analyzer clock
-	uint32_t logicanalyzersamplecount; //number of samples in most recent capture
-	uint8_t logicanalyzerstop;		//why did the logic analyzer stop?
+	uint16_t logicanalyzerperiod; 			// period of the logic analyzer clock
+	uint32_t logicanalyzersamplecount; 		//number of samples in most recent capture
+	uint8_t logicanalyzerstop;			//why did the logic analyzer stop?
 	
 	uint32_t csport;				// cs is located on this port/gpio
 	uint32_t cspin;
