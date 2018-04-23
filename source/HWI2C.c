@@ -10,6 +10,10 @@
 
 static uint8_t	speed;
 
+static uint8_t checkshort(void);
+static void I2Csearch(void);
+
+
 static uint16_t LA_period[2]={
     LA_I2C_PERIOD_100KHZ,
     LA_I2C_PERIOD_400KHZ
@@ -17,27 +21,57 @@ static uint16_t LA_period[2]={
 
 void HWI2C_start(void)
 {
+	uint8_t timeout;
+
+	if(checkshort())
+	{
+		cdcprintf("no pullup or short");
+		modeConfig.error=1;
+		return;
+	}
+
 	cdcprintf("I2C START");
 	i2c_send_start(BP_I2C);
 
+	timeout=100; // 1 us enough?
+
 	// wait for start (SB), switched to master (MSL) and a taken bus (BUSY)
-	while (!((I2C_SR1(BP_I2C)&I2C_SR1_SB)&(I2C_SR2(BP_I2C)&(I2C_SR2_MSL|I2C_SR2_BUSY))));
+	while ((!((I2C_SR1(BP_I2C)&I2C_SR1_SB)&&(I2C_SR2(BP_I2C)&(I2C_SR2_MSL|I2C_SR2_BUSY))))&&timeout) { timeout--; delayus(1); }
+
+	if(timeout==0)
+	{
+		cdcprintf(" TIMEOUT");
+		modeConfig.error=1;
+	}
 }
 
 void HWI2C_stop(void)
 {
+	uint8_t timeout;
+
 	if(!(I2C_SR2(BP_I2C)&I2C_SR2_TRA))
 	{
-		cdcprintf("!!WARNING: two extra bytes read!!\r\n");
+		cdcprintf("!!WARNING: two extra bytes read!!");
 
 	//	i2c_nack_current(BP_I2C);
 		i2c_disable_ack(BP_I2C);
 
-		// two bytes are buffered :(
-		while (!(I2C_SR1(BP_I2C) & I2C_SR1_RxNE));		// wait until data available
+		timeout=100; // 100 us enough?
+
+		// two bytes are buffered :( 
+		while ((!(I2C_SR1(BP_I2C) & I2C_SR1_RxNE))&&timeout) { timeout--; delayus(1); }		// wait until data available
 		(void)i2c_get_data(BP_I2C);
-		while (!(I2C_SR1(BP_I2C) & I2C_SR1_RxNE));		// wait until data available
+
+		if(timeout==0) cdcprintf(" TIMEOUT");
+
+		timeout=100;
+
+		while ((!(I2C_SR1(BP_I2C) & I2C_SR1_RxNE))&&timeout) { timeout--; delayus(1); }		// wait until data available
 		(void)i2c_get_data(BP_I2C);
+
+		if(timeout==0) cdcprintf(" TIMEOUT");
+
+		cdcprintf("\r\n");
 	}
 
 	cdcprintf("I2C STOP");
@@ -47,7 +81,7 @@ void HWI2C_stop(void)
 
 uint32_t HWI2C_send(uint32_t d)
 {
-	uint8_t ack;
+	uint8_t ack, timeout;
 	uint32_t temp;
 
 //	HWI2C_printI2Cflags();
@@ -62,8 +96,10 @@ uint32_t HWI2C_send(uint32_t d)
 
 //			HWI2C_printI2Cflags();
 
-			if (temp) while((!(I2C_SR1(BP_I2C)&I2C_SR1_ADDR))&&(!(I2C_SR1(BP_I2C)&I2C_SR1_AF))); // or BTF??
-			else while((!(I2C_SR1(BP_I2C)&I2C_SR1_BTF))&&(!(I2C_SR1(BP_I2C)&I2C_SR1_AF)));
+			timeout=100;	// 100us enough?
+
+			if (temp) while(((!(I2C_SR1(BP_I2C)&I2C_SR1_ADDR))&&(!(I2C_SR1(BP_I2C)&I2C_SR1_AF)))&&timeout) { timeout--; delayus(1); } // or BTF??
+			else while(((!(I2C_SR1(BP_I2C)&I2C_SR1_BTF))&&(!(I2C_SR1(BP_I2C)&I2C_SR1_AF)))&&timeout) { timeout--; delayus(1); }
 
 //			HWI2C_printI2Cflags();
 
@@ -99,12 +135,17 @@ uint32_t HWI2C_send(uint32_t d)
 uint32_t HWI2C_read(void)
 {
 	uint32_t returnval;
+	uint8_t timeout;
 
 	if(!(I2C_SR2(BP_I2C)&I2C_SR2_TRA))
 	{
 		i2c_enable_ack(BP_I2C);				// TODO: clever way to nack last byte as per spec
 
-		while (!(I2C_SR1(BP_I2C) & I2C_SR1_RxNE));		// wait until data available
+		timeout=100; // 100us enough?
+
+		while ((!(I2C_SR1(BP_I2C) & I2C_SR1_RxNE))&&timeout) { timeout--; delayus(1); };		// wait until data available
+
+		if(timeout==0) cdcprintf(" TIMEOUT");
 
 		returnval=i2c_get_data(BP_I2C);
 	}
@@ -122,7 +163,12 @@ void HWI2C_macro(uint32_t macro)
 {
 	switch(macro)
 	{
-		case 0:		cdcprintf("No macros available");
+		case 0:		cdcprintf(" 1. I2C Address search\r\n");
+//				cdcprintf(" 2. I2C sniffer\r\n";
+				break;
+		case 1:		I2Csearch();
+				break;
+		case 2:		cdcprintf("Macro not available");
 				break;
 		default:	cdcprintf("Macro not defined");
 				modeConfig.error=1;
@@ -269,3 +315,64 @@ void HWI2C_help(void)
 	cdcprintf("{BP}\tSCL\t----+------------- SCL  {DUT}\r\n");
 	cdcprintf("\tGND\t------------------ GND\r\n");			
 }
+
+
+static uint8_t checkshort(void)
+{
+	uint8_t temp;
+
+	temp=(gpio_get(BP_I2C_SDA_SENSE_PORT, BP_I2C_SDA_SENSE_PIN)==0?1:0);
+	temp|=(gpio_get(BP_I2C_SCL_SENSE_PORT, BP_I2C_SCL_SENSE_PIN)==0?2:0);
+
+	return (temp==3);			// there is only a short when both are 0 otherwise repeated start wont work
+}
+
+static void I2Csearch(void)
+{
+	int i=0;
+	uint8_t timeout;
+	uint16_t ack;
+
+	if(checkshort())
+	{
+		cdcprintf("no pullup or short");
+		modeConfig.error=1;
+		return;
+	}
+
+	cdcprintf("Found:\r\n");
+
+	for(i=0; i<256; i++)
+	{
+		i2c_send_start(BP_I2C);
+
+		timeout=100; // 1 us enough?
+
+		// wait for start (SB), switched to master (MSL) and a taken bus (BUSY)
+		while ((!((I2C_SR1(BP_I2C)&I2C_SR1_SB)&&(I2C_SR2(BP_I2C)&(I2C_SR2_MSL|I2C_SR2_BUSY))))&&timeout) { timeout--; delayus(1); }
+
+		if(timeout==0)
+		{
+				
+		}
+
+		i2c_send_data(BP_I2C, i);
+
+		timeout=100;	// 100us enough?
+
+		while(((!(I2C_SR1(BP_I2C)&I2C_SR1_ADDR))&&(!(I2C_SR1(BP_I2C)&I2C_SR1_AF)))&&timeout) { timeout--; delayus(1); } // or BTF??
+
+		ack=!(I2C_SR1(BP_I2C)&I2C_SR1_AF);
+
+		if(ack) cdcprintf("0x%02X(%c) ", i, ((i&0x1)?'R':'W'));
+
+		ack=I2C_SR1(BP_I2C);				// need to read both status registers??
+		ack=I2C_SR2(BP_I2C);
+		I2C_SR1(BP_I2C)=0;				// clear all errors/flags
+		I2C_SR2(BP_I2C)=0;				// clear all errors/flags
+
+		i2c_send_stop(BP_I2C);
+	}
+}
+
+

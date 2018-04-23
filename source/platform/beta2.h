@@ -77,6 +77,14 @@
 #define BP_I2C_SDA_PIN		GPIO7
 #define BP_I2C_CLK_PIN		GPIO6
 
+#define BP_I2C_SDA_SENSE_PORT	GPIOB
+#define BP_I2C_SDA_SENSE_PIN	GPIO10
+#define BP_I2C_SCL_SENSE_PORT	GPIOB
+#define BP_I2C_SCL_SENSE_PIN	GPIO13
+
+
+
+
 // logic analyzer
 #define BP_LA_SRAM_SIZE 0x20000 //size in bytes
 #define BP_LA_BUFFSIZE		2048
