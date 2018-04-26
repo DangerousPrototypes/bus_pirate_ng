@@ -607,8 +607,8 @@ void versioninfo(void)
 	else if(flashsize<=512) ramsize=64;
 	else ramsize=96;
 
-	cdcprintf("Buspirate NextGen (ARM) HW: %s\r\n", BP_PLATFORM);
-	cdcprintf("Firmware %s, bootloader N/A\r\n", FWVER);
+	cdcprintf("Bus Pirate NextGen %s\r\n", BP_PLATFORM);
+	cdcprintf("Firmware %s (%s), bootloader N/A\r\n", FIRMWARE_VERSION, FWVER);
 	cdcprintf("STM32 with %dK FLASH, %dK SRAM ", flashsize, ramsize);
 	cdcprintf("s/n: %08X%08X%08X\r\n", id[0], id[1], id[2]);
 	cdcprintf("https://dangerousprototypes.com/\r\n");

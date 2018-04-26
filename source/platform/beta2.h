@@ -1,7 +1,8 @@
 
 
 // development test platform
-#define BP_PLATFORM		"BPNG v1.0 feb 2018"
+#define BP_PLATFORM		"vNG1"
+#define FIRMWARE_VERSION "v8"
 
 // SPI hardware (HW-SPI)
 #define BP_SPI			SPI2
