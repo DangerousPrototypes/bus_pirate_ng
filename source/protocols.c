@@ -1,5 +1,3 @@
-
-
 #include <stdint.h>
 #include "cdcacm.h"
 #include "buspirateNG.h"
@@ -7,23 +5,46 @@
 #include "protocols.h"
 
 #include "HiZ.h"
-#include "dummy1.h"
-#include "dummy2.h"
-#include "HWSPI.h" 
-#include "HWUSART.h"
-#include "HWI2C.h"
-#include "LA.h"
-#include "SW2W.h"
-#include "SW3W.h"
-#include "DIO.h"
-#include "LCDSPI.h"
-
-#include "1WIRE.h"
-
+#ifdef	BP_USE_1WIRE
+    #include "1WIRE.h"
+#endif
+#ifdef	BP_USE_HWUSART
+    #include "HWUSART.h"
+#endif
+#ifdef	BP_USE_HWI2C
+    #include "HWI2C.h"
+#endif
+#ifdef	BP_USE_HWSPI
+    #include "HWSPI.h"
+#endif
+#ifdef	BP_USE_SW2W
+    #include "SW2W.h"
+#endif
+#ifdef	BP_USE_SW3W
+    #include "SW3W.h"
+#endif
+#ifdef 	BP_USE_DIO
+    #include "DIO.h"
+#endif
+#ifdef	BP_USE_LCDSPI
+    #include "LCDSPI.h"
+#endif
+#ifdef	BP_USE_LCDI2C
+    #include "LCDI2C.h"
+#endif
+#ifdef	BP_USE_LA
+    #include "LA.h"
+#endif
+#ifdef 	BP_USE_DUMMY1
+    #include "dummy1.h"
+#endif
+#ifdef 	BP_USE_DUMMY2
+    #include "dummy2.h"
+#endif
 
 
 // nulfuncs
-// these are the dummy functions when something aint used 
+// these are the dummy functions when something ain't used 
 
 void nullfunc1(void)
 {
@@ -67,7 +88,6 @@ uint32_t noperiodic(void)
 // buspirateNG.h has the conditional defines for protocols
 
 struct _protocol protocols[MAXPROTO]={
-
 {
 	nullfunc1,				// start
 	nullfunc1,				// start with read
@@ -92,56 +112,82 @@ struct _protocol protocols[MAXPROTO]={
 	nohelp,					// display small help about the protocol
 	"HiZ",					// friendly name (promptname)
 },
-#ifdef BP_USE_DUMMY1
+#ifdef BP_USE_1WIRE
 {
-	dummy1_start,				// start
-	dummy1_startr,				// start with read
-	dummy1_stop,				// stop
-	dummy1_stopr,				// stop with read
-	dummy1_send,				// send(/read) max 32 bit
-	dummy1_read,				// read max 32 bit
-	dummy1_clkh,				// set clk high
-	dummy1_clkl,				// set clk low
-	dummy1_dath,				// set dat hi
-	dummy1_datl,				// set dat lo
-	dummy1_dats,				// toggle dat (?)
-	dummy1_clk,				// toggle clk (?)
-	dummy1_bitr,				// read 1 bit (?)
-	dummy1_period,				// service to regular poll whether a byte ahs arrived
-	dummy1_macro,				// macro
-	dummy1_setup,				// setup UI
-	dummy1_setup_exc,			// real setup
-	dummy1_cleanup,				// cleanup for HiZ
-	dummy1_pins,				// display pin config
-	dummy1_settings,			// display settings 
-	nohelp,					// display small help about the protocol
-	"DUMMY1",				// friendly name (promptname)
+    ONEWIRE_start,				// start
+    ONEWIRE_startr,				// start with read
+    ONEWIRE_stop,				// stop
+    ONEWIRE_stopr,				// stop with read
+    ONEWIRE_send,				// send(/read) max 32 bit
+    ONEWIRE_read,				// read max 32 bit
+    ONEWIRE_clkh,				// set clk high
+    ONEWIRE_clkl,				// set clk low
+    ONEWIRE_dath,				// set dat hi
+    ONEWIRE_datl,				// set dat lo
+    ONEWIRE_dats,				// toggle dat (?)
+    ONEWIRE_clk,				// toggle clk (?)
+    ONEWIRE_bitr,				// read 1 bit (?)
+    ONEWIRE_period,				// service to regular poll whether a byte ahs arrived
+    ONEWIRE_macro,				// macro
+    ONEWIRE_setup,				// setup UI
+    ONEWIRE_setup_exc,			// real setup
+    ONEWIRE_cleanup,			// cleanup for HiZ
+    ONEWIRE_pins,				// display pin config
+    ONEWIRE_settings,			// display settings
+    nohelp,					// display small help about the protocol
+    "1-WIRE",				// friendly name (promptname)
 },
 #endif
-#ifdef BP_USE_DUMMY2
+#ifdef BP_USE_HWUSART
 {
-	dummy2_start,				// start
-	dummy2_startr,				// start with read
-	dummy2_stop,				// stop
-	dummy2_stopr,				// stop with read
-	dummy2_send,				// send(/read) max 32 bit
-	dummy2_read,				// read max 32 bit
-	dummy2_clkh,				// set clk high
-	dummy2_clkl,				// set clk low
-	dummy2_dath,				// set dat hi
-	dummy2_datl,				// set dat lo
-	dummy2_dats,				// toggle dat (?)
-	dummy2_clk,				// toggle clk (?)
-	dummy2_bitr,				// read 1 bit (?)
-	dummy2_period,				// service to regular poll whether a byte ahs arrived
-	dummy2_macro,				// macro
-	dummy2_setup,				// setup UI
-	dummy2_setup_exc,			// real setup
-	dummy2_cleanup,				// cleanup for HiZ
-	dummy2_pins,				// display pin config
-	dummy2_settings,			// display settings 
-	nohelp,					// display small help about the protocol
-	"DUMMY2",				// friendly name (promptname)
+    nullfunc1,				// start
+    nullfunc1,				// start with read
+    nullfunc1,				// stop
+    nullfunc1,				// stop with read
+    HWUSART_send,				// send(/read) max 32 bit
+    HWUSART_read,				// read max 32 bit
+    nullfunc1,				// set clk high
+    nullfunc1,				// set clk low
+    nullfunc1,				// set dat hi
+    nullfunc1,				// set dat lo
+    nullfunc3,				// toggle dat (?)
+    nullfunc1,				// toggle clk (?)
+    nullfunc3,				// read 1 bit (?)
+    noperiodic,				// service to regular poll whether a byte ahs arrived
+    HWUSART_macro,				// macro
+    HWUSART_setup,				// setup UI
+    HWUSART_setup_exc,			// real setup
+    HWUSART_cleanup,			// cleanup for HiZ
+    HWUSART_pins,				// display pin config
+    HWUSART_settings,			// display settings
+    HWUSART_help,				// display small help about the protocol
+    "UART",				// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_HWI2C
+{
+    HWI2C_start,				// start
+    HWI2C_start,				// start with read
+    HWI2C_stop,				// stop
+    HWI2C_stop,				// stop with read
+    HWI2C_send,				// send(/read) max 32 bit
+    HWI2C_read,				// read max 32 bit
+    nullfunc1,				// set clk high
+    nullfunc1,				// set clk low
+    nullfunc1,				// set dat hi
+    nullfunc1,				// set dat lo
+    nullfunc3,				// toggle dat (?)
+    nullfunc1,				// toggle clk (?)
+    nullfunc3,				// read 1 bit (?)
+    noperiodic,				// service to regular poll whether a byte ahs arrived
+    HWI2C_macro,				// macro
+    HWI2C_setup,				// setup UI
+    HWI2C_setup_exc,			// real setup
+    HWI2C_cleanup,				// cleanup for HiZ
+    HWI2C_pins,				// display pin config
+    HWI2C_settings,				// display settings
+    HWI2C_help,				// display small help about the protocol
+    "I2C",				// friendly name (promptname)
 },
 #endif
 #ifdef BP_USE_HWSPI
@@ -167,85 +213,7 @@ struct _protocol protocols[MAXPROTO]={
 	HWSPI_pins,				// display pin config
 	HWSPI_settings,				// display settings 
 	HWSPI_help,				// display small help about the protocol
-	"HW-SPI",				// friendly name (promptname)
-},
-#endif
-#ifdef BP_USE_HWUSART
-{
-	nullfunc1,				// start
-	nullfunc1,				// start with read
-	nullfunc1,				// stop
-	nullfunc1,				// stop with read
-	HWUSART_send,				// send(/read) max 32 bit
-	HWUSART_read,				// read max 32 bit
-	nullfunc1,				// set clk high
-	nullfunc1,				// set clk low
-	nullfunc1,				// set dat hi
-	nullfunc1,				// set dat lo
-	nullfunc3,				// toggle dat (?)
-	nullfunc1,				// toggle clk (?)
-	nullfunc3,				// read 1 bit (?)
-	noperiodic,				// service to regular poll whether a byte ahs arrived
-	HWUSART_macro,				// macro
-	HWUSART_setup,				// setup UI
-	HWUSART_setup_exc,			// real setup
-	HWUSART_cleanup,			// cleanup for HiZ
-	HWUSART_pins,				// display pin config
-	HWUSART_settings,			// display settings 
-	HWUSART_help,				// display small help about the protocol
-	"HW-USART",				// friendly name (promptname)
-},
-#endif
-#ifdef BP_USE_HWI2C
-{
-	HWI2C_start,				// start
-	HWI2C_start,				// start with read
-	HWI2C_stop,				// stop
-	HWI2C_stop,				// stop with read
-	HWI2C_send,				// send(/read) max 32 bit
-	HWI2C_read,				// read max 32 bit
-	nullfunc1,				// set clk high
-	nullfunc1,				// set clk low
-	nullfunc1,				// set dat hi
-	nullfunc1,				// set dat lo
-	nullfunc3,				// toggle dat (?)
-	nullfunc1,				// toggle clk (?)
-	nullfunc3,				// read 1 bit (?)
-	noperiodic,				// service to regular poll whether a byte ahs arrived
-	HWI2C_macro,				// macro
-	HWI2C_setup,				// setup UI
-	HWI2C_setup_exc,			// real setup
-	HWI2C_cleanup,				// cleanup for HiZ
-	HWI2C_pins,				// display pin config
-	HWI2C_settings,				// display settings 
-	HWI2C_help,				// display small help about the protocol
-	"HW-I2C",				// friendly name (promptname)
-},
-#endif
-#ifdef BP_USE_LA
-{
-	nullfunc1,				// start
-	nullfunc1,				// start with read
-	nullfunc1,				// stop
-	nullfunc1,				// stop with read
-	nullfunc2,				// send(/read) max 32 bit
-	nullfunc3,				// read max 32 bit
-	nullfunc1,				// set clk high
-	nullfunc1,				// set clk low
-	nullfunc1,				// set dat hi
-	nullfunc1,				// set dat lo
-	nullfunc3,				// toggle dat (?)
-	nullfunc1,				// toggle clk (?)
-	nullfunc3,				// read 1 bit (?)
-	noperiodic,				// service to regular poll whether a byte ahs arrived
-	LA_macro,				// macro
-	LA_setup,				// setup UI
-	LA_setup_exc,				// real setup
-	LA_cleanup,				// cleanup for HiZ
-	LA_pins,				// display pin config
-	LA_settings,				// display settings 
-	nohelp,					// display small help about the protocol
-	"LA",					// friendly name (promptname)
+	"SPI",				// friendly name (promptname)
 },
 #endif
 #ifdef BP_USE_SW2W
@@ -271,7 +239,7 @@ struct _protocol protocols[MAXPROTO]={
 	SW2W_pins,				// display pin config
 	SW2W_settings,				// display settings 
 	nohelp,					// display small help about the protocol
-	"SW2W",					// friendly name (promptname)
+	"2WIRE",					// friendly name (promptname)
 },
 #endif
 #ifdef BP_USE_SW3W
@@ -297,33 +265,7 @@ struct _protocol protocols[MAXPROTO]={
 	SW3W_pins,				// display pin config
 	SW3W_settings,				// display settings 
 	SW3W_help,				// display small help about the protocol
-	"SW3W",					// friendly name (promptname)
-},
-#endif
-#ifdef BP_USE_DIO
-{
-	nullfunc1,				// start
-	nullfunc1,				// start with read
-	nullfunc1,				// stop
-	nullfunc1,				// stop with read
-	DIO_send,				// send(/read) max 32 bit
-	DIO_read,				// read max 32 bit
-	nullfunc1,				// set clk high
-	nullfunc1,				// set clk low
-	nullfunc1,				// set dat hi
-	nullfunc1,				// set dat lo
-	nullfunc3,				// toggle dat (?)
-	nullfunc1,				// toggle clk (?)
-	nullfunc3,				// read 1 bit (?)
-	noperiodic,				// service to regular poll whether a byte ahs arrived
-	DIO_macro,				// macro
-	DIO_setup,				// setup UI
-	DIO_setup_exc,				// real setup
-	DIO_cleanup,				// cleanup for HiZ
-	DIO_pins,				// display pin config
-	DIO_settings,				// display settings 
-	DIO_help,				// display small help about the protocol
-	"DIO",					// friendly name (promptname)
+	"3WIRE",					// friendly name (promptname)
 },
 #endif
 #ifdef BP_USE_LCDSPI
@@ -378,30 +320,108 @@ struct _protocol protocols[MAXPROTO]={
 	"LCDI2C",				// friendly name (promptname)
 },
 #endif
-#ifdef BP_USE_1WIRE
+#ifdef BP_USE_DIO
 {
-	ONEWIRE_start,				// start
-	ONEWIRE_startr,				// start with read
-	ONEWIRE_stop,				// stop
-	ONEWIRE_stopr,				// stop with read
-	ONEWIRE_send,				// send(/read) max 32 bit
-	ONEWIRE_read,				// read max 32 bit
-	ONEWIRE_clkh,				// set clk high
-	ONEWIRE_clkl,				// set clk low
-	ONEWIRE_dath,				// set dat hi
-	ONEWIRE_datl,				// set dat lo
-	ONEWIRE_dats,				// toggle dat (?)
-	ONEWIRE_clk,				// toggle clk (?)
-	ONEWIRE_bitr,				// read 1 bit (?)
-	ONEWIRE_period,				// service to regular poll whether a byte ahs arrived
-	ONEWIRE_macro,				// macro
-	ONEWIRE_setup,				// setup UI
-	ONEWIRE_setup_exc,			// real setup
-	ONEWIRE_cleanup,			// cleanup for HiZ
-	ONEWIRE_pins,				// display pin config
-	ONEWIRE_settings,			// display settings 
-	nohelp,					// display small help about the protocol
-	"1WIRE",				// friendly name (promptname)
+    nullfunc1,				// start
+    nullfunc1,				// start with read
+    nullfunc1,				// stop
+    nullfunc1,				// stop with read
+    DIO_send,				// send(/read) max 32 bit
+    DIO_read,				// read max 32 bit
+    nullfunc1,				// set clk high
+    nullfunc1,				// set clk low
+    nullfunc1,				// set dat hi
+    nullfunc1,				// set dat lo
+    nullfunc3,				// toggle dat (?)
+    nullfunc1,				// toggle clk (?)
+    nullfunc3,				// read 1 bit (?)
+    noperiodic,				// service to regular poll whether a byte ahs arrived
+    DIO_macro,				// macro
+    DIO_setup,				// setup UI
+    DIO_setup_exc,				// real setup
+    DIO_cleanup,				// cleanup for HiZ
+    DIO_pins,				// display pin config
+    DIO_settings,				// display settings
+    DIO_help,				// display small help about the protocol
+    "DIO",					// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_LA
+{
+    nullfunc1,				// start
+    nullfunc1,				// start with read
+    nullfunc1,				// stop
+    nullfunc1,				// stop with read
+    nullfunc2,				// send(/read) max 32 bit
+    nullfunc3,				// read max 32 bit
+    nullfunc1,				// set clk high
+    nullfunc1,				// set clk low
+    nullfunc1,				// set dat hi
+    nullfunc1,				// set dat lo
+    nullfunc3,				// toggle dat (?)
+    nullfunc1,				// toggle clk (?)
+    nullfunc3,				// read 1 bit (?)
+    noperiodic,				// service to regular poll whether a byte ahs arrived
+    LA_macro,				// macro
+    LA_setup,				// setup UI
+    LA_setup_exc,				// real setup
+    LA_cleanup,				// cleanup for HiZ
+    LA_pins,				// display pin config
+    LA_settings,				// display settings
+    nohelp,					// display small help about the protocol
+    "LA",					// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_DUMMY1
+{
+    dummy1_start,				// start
+    dummy1_startr,				// start with read
+    dummy1_stop,				// stop
+    dummy1_stopr,				// stop with read
+    dummy1_send,				// send(/read) max 32 bit
+    dummy1_read,				// read max 32 bit
+    dummy1_clkh,				// set clk high
+    dummy1_clkl,				// set clk low
+    dummy1_dath,				// set dat hi
+    dummy1_datl,				// set dat lo
+    dummy1_dats,				// toggle dat (?)
+    dummy1_clk,				// toggle clk (?)
+    dummy1_bitr,				// read 1 bit (?)
+    dummy1_period,				// service to regular poll whether a byte ahs arrived
+    dummy1_macro,				// macro
+    dummy1_setup,				// setup UI
+    dummy1_setup_exc,			// real setup
+    dummy1_cleanup,				// cleanup for HiZ
+    dummy1_pins,				// display pin config
+    dummy1_settings,			// display settings
+    nohelp,					// display small help about the protocol
+    "DUMMY1",				// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_DUMMY2
+{
+    dummy2_start,				// start
+    dummy2_startr,				// start with read
+    dummy2_stop,				// stop
+    dummy2_stopr,				// stop with read
+    dummy2_send,				// send(/read) max 32 bit
+    dummy2_read,				// read max 32 bit
+    dummy2_clkh,				// set clk high
+    dummy2_clkl,				// set clk low
+    dummy2_dath,				// set dat hi
+    dummy2_datl,				// set dat lo
+    dummy2_dats,				// toggle dat (?)
+    dummy2_clk,				// toggle clk (?)
+    dummy2_bitr,				// read 1 bit (?)
+    dummy2_period,				// service to regular poll whether a byte ahs arrived
+    dummy2_macro,				// macro
+    dummy2_setup,				// setup UI
+    dummy2_setup_exc,			// real setup
+    dummy2_cleanup,				// cleanup for HiZ
+    dummy2_pins,				// display pin config
+    dummy2_settings,			// display settings
+    nohelp,					// display small help about the protocol
+    "DUMMY2",				// friendly name (promptname)
 },
 #endif
 
