@@ -39,4 +39,7 @@ void HiZsetup_exc(void)
 	// aux and pwm
 	(void)getAUX();
 	setPWM(0, 0);
+
+	// allow postphoned inits
+	modeConfig.init=0;
 }
