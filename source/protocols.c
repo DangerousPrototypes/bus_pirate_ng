@@ -14,6 +14,9 @@
 #ifdef	BP_USE_HWI2C
     #include "HWI2C.h"
 #endif
+#ifdef	BP_USE_SWI2C
+	#include "SWI2C.h"
+#endif
 #ifdef	BP_USE_HWSPI
     #include "HWSPI.h"
 #endif
@@ -187,6 +190,32 @@ struct _protocol protocols[MAXPROTO]={
     HWI2C_pins,				// display pin config
     HWI2C_settings,				// display settings
     HWI2C_help,				// display small help about the protocol
+    "I2C",				// friendly name (promptname)
+},
+#endif
+#ifdef BP_USE_SWI2C
+{
+    SWI2C_start,				// start
+    SWI2C_start,				// start with read
+    SWI2C_stop,				// stop
+    SWI2C_stop,				// stop with read
+    SWI2C_write,				// swrite(/read) max 32 bit
+    SWI2C_read,				// read max 32 bit
+    nullfunc1,				// set clk high
+    nullfunc1,				// set clk low
+    nullfunc1,				// set dat hi
+    nullfunc1,				// set dat lo
+    nullfunc3,				// toggle dat (?)
+    nullfunc1,				// toggle clk (?)
+    nullfunc3,				// read 1 bit (?)
+    noperiodic,				// service to regular poll whether a byte ahs arrived
+    SWI2C_macro,				// macro
+    SWI2C_setup,				// setup UI
+    SWI2C_setup_exc,			// real setup
+    SWI2C_cleanup,				// cleanup for HiZ
+    SWI2C_pins,				// display pin config
+    SWI2C_settings,				// display settings
+    SWI2C_help,				// display small help about the protocol	
     "I2C",				// friendly name (promptname)
 },
 #endif
