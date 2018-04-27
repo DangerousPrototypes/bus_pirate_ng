@@ -5,10 +5,11 @@
 #include "SWI2C.h"
 #include "cdcacm.h"
 
-void I2Csearch(void);
+void SWI2C_search(void);
 
 static uint32_t	period;
 static uint8_t	hiz;
+static uint8_t	speed;
 
 void SWI2C_start(void)
 {
@@ -28,6 +29,8 @@ void SWI2C_start(void)
 
     SWI2C_DATA_LOW();
     SWI2C_CLOCK_LOW();
+
+    //reset read/write mode
 }
 
 void SWI2C_stop(void)
@@ -52,6 +55,9 @@ uint32_t SWI2C_write(uint32_t d)
     int i;
     uint32_t mask;
 
+    //if read/write mode tracker reset, use last bit to set read/write mode
+    //if read mode is set warn write mode may be invalid
+
     SWI2C_setDATAmode(SWI2C_OUTPUT);					// SDA output
     SWI2C_CLOCK_LOW();
 
@@ -74,6 +80,8 @@ uint32_t SWI2C_write(uint32_t d)
 
     }
 
+
+
     return 0;
 }
 
@@ -87,6 +95,8 @@ uint32_t SWI2C_read(void)
 
     returnval=0;
 
+    //check read/write mode, warn if in write mode...
+
     for(i=0; i<modeConfig.numbits; i++)
     {
 
@@ -95,7 +105,7 @@ uint32_t SWI2C_read(void)
         SWI2C_CLOCK_HIGH(); //high
         delayus(period/2); //delay high
         //read data
-        if(gpio_get(BP_SWI2C_SDA_PORT, BP_SWI2C_SDA_PIN)) returnval|=1;
+        if(SWI2C_DATA_READ()) returnval|=1;
         returnval<<=1;
 
         SWI2C_CLOCK_LOW();//low again, will delay at begin of next bit or byte...
@@ -120,7 +130,7 @@ void SWI2C_macro(uint32_t macro)
         case 0:		cdcprintf(" 1. I2C Address search\r\n");
 //				cdcprintf(" 2. I2C sniffer\r\n";
             break;
-        case 1:		SWI2Csearch();
+        case 1:		SWI2C_search();
             break;
          default:	cdcprintf("Macro not defined");
             modeConfig.error=1;
@@ -149,18 +159,16 @@ void SWI2C_setup_exc(void)
 
     if(hiz)
     {
-        gpio_set_mode(BP_SWI2C_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SWI2C_SDA_PIN);
-        gpio_set_mode(BP_SWI2C_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SWI2C_CLK_PIN);
+        SWI2C_SETUP_OPENDRAIN();
     }
     else
     {
-        gpio_set_mode(BP_SWI2C_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SWI2C_SDA_PIN);
-        gpio_set_mode(BP_SWI2C_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SWI2C_CLK_PIN);
-    }
+        SWI2C_SETUP_PUSHPULL();
+     }
 
     // update modeConfig pins
-    modeConfig.mosiport=BP_SWI2C_SDA_PORT;
-    modeConfig.clkport=BP_SWI2C_CLK_PORT;
+    modeConfig.mosiport=BP_SW2W_SDA_PORT;
+    modeConfig.clkport=BP_SW2W_CLK_PORT;
 
     //a guess... 72 period in the PWM is .99999uS. Multiply the period in uS * 72, divide by 4 four 4* over sample
     modeConfig.logicanalyzerperiod=((period*72)/4);
@@ -172,8 +180,7 @@ void SWI2C_cleanup(void)
     cdcprintf("SWI2C cleanup()");
 
     // make all GPIO input
-    gpio_set_mode(BP_SWI2C_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SWI2C_SDA_PIN);
-    gpio_set_mode(BP_SWI2C_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SWI2C_CLK_PIN);
+    SWI2C_SETUP_HIZ();
 
     // update modeConfig pins
     modeConfig.misoport=0;
@@ -200,24 +207,24 @@ void SWI2C_setDATAmode(uint8_t input)
 
     if(input)
     {
-        gpio_set_mode(BP_SWI2C_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SWI2C_SDA_PIN);
+        SWI2C_DATA_INPUT();
     }
     else
     {
         // set SDA as output
         if(hiz)
         {
-            gpio_set_mode(BP_SWI2C_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SWI2C_SDA_PIN);
+            SWI2C_DATA_OPENDRAIN();
         }
         else
         {
-            gpio_set_mode(BP_SWI2C_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SWI2C_SDA_PIN);
+            SWI2C_DATA_PUSHPULL();
         }
     }
 
 }
 
-void I2Csearch(void){
+void SWI2C_search(void){
 /*bbH(MOSI + CLK, 0);
 //bpWline(OUMSG_I2C_MACRO_SEARCH);
 BPMSG1070;
@@ -269,4 +276,37 @@ if (((i2cinternal == 0) && (BP_CLK == 0 || BP_MOSI == 0)) || ((i2cinternal == 1)
     }
     bpWBR;
     */
+}
+
+void SWI2C_help(void)
+{
+    cdcprintf("Muli-Master-multi-slave 2 wire protocol using a CLOCK and an bidirectional DATA\r\n");
+    cdcprintf("line in opendrain configuration. Standard clock frequencies are 100KHz, 400KHz\r\n");
+    cdcprintf("and 1MHz.\r\n");
+    cdcprintf("\r\n");
+    cdcprintf("More info: https://en.wikipedia.org/wiki/I2C\r\n");
+    cdcprintf("\r\n");
+    cdcprintf("Electrical:\r\n");
+    cdcprintf("\r\n");
+    cdcprintf("BPCMD\t   { |            ADDRES(7bits+R/!W bit)             |\r\n");
+    cdcprintf("CMD\tSTART| A6  | A5  | A4  | A3  | A2  | A1  | A0  | R/!W| ACK* \r\n");
+    cdcprintf("\t-----|-----|-----|-----|-----|-----|-----|-----|-----|-----\r\n");
+    cdcprintf("SDA\t\"\"___|_###_|_###_|_###_|_###_|_###_|_###_|_###_|_###_|_###_ ..\r\n");
+    cdcprintf("SCL\t\"\"\"\"\"|__\"__|__\"__|__\"__|__\"__|__\"__|__\"__|__\"__|__\"__|__\"__ ..\r\n");
+    cdcprintf("\r\n");
+    cdcprintf("BPCMD\t   |                      DATA (8bit)              |     |  ]  |\r\n");
+    cdcprintf("CMD\t.. | D7  | D6  | D5  | D4  | D3  | D2  | D1  | D0  | ACK*| STOP|  \r\n");
+    cdcprintf("\t  -|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|\r\n");
+    cdcprintf("SDA\t.. |_###_|_###_|_###_|_###_|_###_|_###_|_###_|_###_|_###_|___\"\"|\r\n");
+    cdcprintf("SCL\t.. |__\"__|__\"__|__\"__|__\"__|__\"__|__\"__|__\"__|__\"__|__\"__|\"\"\"\"\"|\r\n");
+    cdcprintf("\r\n");
+    cdcprintf("* Receiver needs to pull SDA down when address/byte is received correctly\r\n");
+    cdcprintf("\r\n");
+    cdcprintf("Connection:\r\n");
+    cdcprintf("\t\t  +--[4k7]---+--- +3V3 or +5V0\r\n");
+    cdcprintf("\t\t  | +-[4k7]--|\r\n");
+    cdcprintf("\t\t  | |\r\n");
+    cdcprintf("\tSDA \t--+-|------------- SDA\r\n");
+    cdcprintf("{BP}\tSCL\t----+------------- SCL  {DUT}\r\n");
+    cdcprintf("\tGND\t------------------ GND\r\n");
 }
