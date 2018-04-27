@@ -168,6 +168,7 @@ void initUI(void)
 	modeConfig.error=0;
 	modeConfig.displaymode=0;
 	modeConfig.pwm=0;
+	modeConfig.init=0;
 	modeConfig.mosiport=0;
 	modeConfig.mosipin=0;
 	modeConfig.misoport=0;
@@ -180,7 +181,38 @@ void initUI(void)
 	modeConfig.subprotocolname=0;
 }
 
-
+int isbuscmd(char c)
+{
+	switch(c)
+	{
+		case '[':	// start
+		case ']':	// stop
+		case '{':	// start 
+		case '}':	// stop
+		case '/':	// clk h
+		case '\\':	// clk l
+		case '^':	// clk tick
+		case '-':	// dat hi
+		case '_':	// dat l
+		case '.':	// dat s
+		case '!':	// read bit
+		case 'r':	// read
+		case '0':	
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':	// send value
+		case '\"':	// send string
+				return 1;
+				break;
+		default: 	return 0;
+	}
+}
 
 // one big loop eating all user input. executed/interpretted it when the user presses enter
 //
@@ -229,6 +261,18 @@ void doUI(void)
 		while((go==1)&&(cmdtail!=cmdhead))
 		{
 			c=cmdbuff[cmdtail];
+
+			// delayed init is handled here
+			if((!modeConfig.init)&&(isbuscmd(c)))
+			{
+				if(modeConfig.mode!=0)
+				{
+					cdcprintf("running postphoned HWinit()\r\n");
+					protocols[modeConfig.mode].protocol_setup_exc();
+					modeConfig.init=1;
+				}
+			}
+
 			switch (c)
 			{
 				case '(':	
@@ -654,7 +698,7 @@ void versioninfo(void)
 		}
 		showstates();
 	}
-	
+	if(modeConfig.init==0) cdcprintf("Pending HWinit()\r\n");
 }
 
 const char pinstates[][4] = {
@@ -723,21 +767,21 @@ void showstates(void)
 	if(modeConfig.csport)
 		csmode=getpinmode(modeConfig.csport, modeConfig.cspin);
 	else
-		csmode=9;
+		csmode=8;
 
 	if(modeConfig.misoport)
 		misomode=getpinmode(modeConfig.misoport, modeConfig.misopin);
 	else
-		misomode=9;
+		misomode=8;
 
 	if(modeConfig.clkport)
 		clkmode=getpinmode(modeConfig.clkport, modeConfig.clkpin);
 	else
-		clkmode=9;
+		clkmode=8;
 	if(modeConfig.mosiport)
 		mosimode=getpinmode(modeConfig.mosiport, modeConfig.mosipin);
 	else
-		mosimode=9;
+		mosimode=8;
 
 	cdcprintf("PWR\tPWR\tPWR\tPWR\tAN\t%s\t%s\t%s\t%s\t%s\r\n", pinmodes[auxmode], pinmodes[csmode], pinmodes[misomode], pinmodes[clkmode], pinmodes[mosimode]);
 
@@ -816,7 +860,11 @@ void changemode(void)
 	protocols[0].protocol_setup_exc();			// disables powersuppy etc.
 	modeConfig.mode=mode-1;
 	protocols[modeConfig.mode].protocol_setup();		// setup the new mode
-	protocols[modeConfig.mode].protocol_setup_exc();
+	
+	if(modeConfig.mode!=0)					// postphone the setup, this allows the user to setup the powersupply first 
+	{
+		cdcprintf("Postphoning HWinit()\r\n");
+	}
 
 	if(modeConfig.mode==0) 	gpio_clear(BP_MODE_LED_PORT, BP_MODE_LED_PIN);
 		else 	gpio_set(BP_MODE_LED_PORT, BP_MODE_LED_PIN);

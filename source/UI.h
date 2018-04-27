@@ -12,6 +12,7 @@ typedef struct _modeConfig
 	uint8_t error;					// error occurred
 	uint8_t displaymode;				// display mode (dec, hex, oct, bin)
 	uint8_t pwm;					// pwm active?
+	uint8_t init;					// for postphoning the init
 	char *subprotocolname;				// can be set if there is a sub protocol
 	
 	uint8_t	logicanalyzertriggersactive;
@@ -63,6 +64,7 @@ uint32_t orderbits(uint32_t d);
 uint8_t getpinmode(uint32_t port, uint16_t pin);
 void jumptobootloader(void);
 void reset(void);
+int isbuscmd(char c);
 
 // macro
 #define SKIPCURCHAR	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
