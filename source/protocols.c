@@ -425,33 +425,7 @@ struct _protocol protocols[MAXPROTO]={
     dummy1_settings,			// display settings
     nohelp,					// display small help about the protocol
     "DUMMY1",				// friendly name (promptname)
-},
-#endif
-#ifdef BP_USE_DUMMY2
-{
-    dummy2_start,				// start
-    dummy2_startr,				// start with read
-    dummy2_stop,				// stop
-    dummy2_stopr,				// stop with read
-    dummy2_send,				// send(/read) max 32 bit
-    dummy2_read,				// read max 32 bit
-    dummy2_clkh,				// set clk high
-    dummy2_clkl,				// set clk low
-    dummy2_dath,				// set dat hi
-    dummy2_datl,				// set dat lo
-    dummy2_dats,				// toggle dat (?)
-    dummy2_clk,				// toggle clk (?)
-    dummy2_bitr,				// read 1 bit (?)
-    dummy2_period,				// service to regular poll whether a byte ahs arrived
-    dummy2_macro,				// macro
-    dummy2_setup,				// setup UI
-    dummy2_setup_exc,			// real setup
-    dummy2_cleanup,				// cleanup for HiZ
-    dummy2_pins,				// display pin config
-    dummy2_settings,			// display settings
-    nohelp,					// display small help about the protocol
-    "DUMMY2",				// friendly name (promptname)
-},
+}
 #endif
 
 };

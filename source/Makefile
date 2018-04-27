@@ -23,7 +23,7 @@ CFLAGS +=-DFWVER=\"$(GIT_VERSION)\"
 
 OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o HiZ.o HWSPI.o 
 OBJS += AUXpin.o ADC.o HWUSART.o bpflash.o HWI2C.o LA.o SW2W.o SW3W.o sump.o
-OBJS += DIO.o LCDSPI.o HD44780.o ST7735.o 1WIRE.o
+OBJS += DIO.o LCDSPI.o HD44780.o ST7735.o 1WIRE.o SWI2C.o
 
 BINARY = buspirateNG
 

@@ -14,8 +14,8 @@
 // enable protocols
 #define		BP_USE_1WIRE
 #define		BP_USE_HWUSART
-#define		BP_USE_HWI2C
-//#define		BP_USE_SWI2C
+//#define		BP_USE_HWI2C
+#define		BP_USE_SWI2C
 #define		BP_USE_HWSPI
 #define		BP_USE_SW2W
 #define		BP_USE_SW3W

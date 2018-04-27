@@ -5,6 +5,8 @@
 #include "SWI2C.h"
 #include "cdcacm.h"
 
+void I2Csearch(void);
+
 static uint32_t	period;
 static uint8_t	hiz;
 
@@ -12,7 +14,7 @@ void SWI2C_start(void)
 {
     cdcprintf("I2C START");
 
-    setSDAmode(SWI2C_OUTPUT);					// SDA output
+    SWI2C_setDATAmode(SWI2C_OUTPUT);					// SDA output
 
     SWI2C_DATA_HIGH();
     SWI2C_CLOCK_HIGH();
@@ -32,7 +34,7 @@ void SWI2C_stop(void)
 {
     cdcprintf("I2C STOP");
 
-    setSDAmode(SWI2C_OUTPUT);					// SDA output
+    SWI2C_setDATAmode(SWI2C_OUTPUT);					// SDA output
 
     SWI2C_DATA_LOW();
     SWI2C_CLOCK_HIGH();
@@ -50,7 +52,7 @@ uint32_t SWI2C_write(uint32_t d)
     int i;
     uint32_t mask;
 
-    setSDAmode(SWI2C_OUTPUT);					// SDA output
+    SWI2C_setDATAmode(SWI2C_OUTPUT);					// SDA output
     SWI2C_CLOCK_LOW();
 
     mask=0x80000000>>(32-modeConfig.numbits);
@@ -80,7 +82,7 @@ uint32_t SWI2C_read(void)
     int i;
     uint32_t returnval;
 
-    setSDAmode(SWI2C_INPUT);						// SDA input
+    SWI2C_setDATAmode(SWI2C_INPUT);						// SDA input
     SWI2C_CLOCK_LOW();
 
     returnval=0;
@@ -193,7 +195,7 @@ void SWI2C_settings(void)
     cdcprintf("SWI2C (period hiz)=(%d %d)", period, hiz);
 }
 
-void setSDAmode(uint8_t input)
+void SWI2C_setDATAmode(uint8_t input)
 {
 
     if(input)
