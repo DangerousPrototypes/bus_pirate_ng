@@ -1,4 +1,7 @@
-//TODO: combine SWI2C and SW2W to reuse functions, pseudo functions, and defines
+//TODO: I2C search
+//TODO: ack/nack tracking
+//TODO: read/write mode tracking
+//TODO: speed validation
 void SWI2C_start(void);
 void SWI2C_stop(void);
 uint32_t SWI2C_write(uint32_t d);
@@ -9,29 +12,9 @@ void SWI2C_setup_exc(void);
 void SWI2C_cleanup(void);
 void SWI2C_pins(void);
 void SWI2C_settings(void);
-void SWI2C_printI2Cflags(void);
 void SWI2C_help(void);
-
-void SWI2C_setDATAmode(uint8_t input);
-#define SWI2C_INPUT	1
-#define SWI2C_OUTPUT 0
 
 #define SWI2CSPEEDMENU	"\r\nSpeed\r\n 1. 100KHz\r\n 2. 400Khz\r\nspeed> "
 
 #define LA_SWI2C_PERIOD_100KHZ (((100000000/100)/4)/(10000000/72000))/10
 #define LA_SWI2C_PERIOD_400KHZ (((100000000/400)/4)/(10000000/72000))/10
-
-#define SWI2C_CLOCK_HIGH() gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN)
-#define SWI2C_CLOCK_LOW() gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN)
-
-#define SWI2C_DATA_HIGH() gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN)
-#define SWI2C_DATA_LOW() gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN)
-
-#define SWI2C_DATA_OPENDRAIN() gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_SDA_PIN)
-#define SWI2C_DATA_PUSHPULL() gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_SDA_PIN)
-#define SWI2C_DATA_INPUT() gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_SDA_PIN)
-#define SWI2C_DATA_READ() gpio_get(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN)
-
-#define SWI2C_SETUP_OPENDRAIN() gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_SDA_PIN); gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_CLK_PIN)
-#define SWI2C_SETUP_PUSHPULL() gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_SDA_PIN); gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_CLK_PIN)
-#define SWI2C_SETUP_HIZ() gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_SDA_PIN); gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_CLK_PIN)

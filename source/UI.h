@@ -28,6 +28,7 @@ typedef struct _modeConfig
 	uint32_t clkpin;
 	uint32_t mosiport;				// cs is located on this port/gpio
 	uint32_t mosipin;
+	uint8_t hiz;				//is hiz pin mode?
 } _modeConfig;
 
 

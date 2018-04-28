@@ -176,6 +176,7 @@ void initUI(void)
 	modeConfig.cspin=0;
 	modeConfig.clkport=0;
 	modeConfig.clkpin=0;
+	modeConfig.hiz=1;
 
 	modeConfig.subprotocolname=0;
 }

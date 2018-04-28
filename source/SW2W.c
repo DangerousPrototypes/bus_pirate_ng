@@ -8,78 +8,69 @@
 #include "cdcacm.h"
 
 static uint32_t	period;
-static uint8_t	hiz;
 
 void SW2W_start(void)
 {
 	cdcprintf("I2C START");
 
-	setSDAmode(SW2W_OUTPUT);					// SDA output
+	SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
 
-	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
-	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
-
-	delayus(period/2);
-
-	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
-	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
+	SW2W_DATA_HIGH();
+	SW2W_CLOCK_HIGH();
 
 	delayus(period/2);
 
-	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
-	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
-}
+	SW2W_DATA_LOW();
+	SW2W_CLOCK_HIGH();
 
-void SW2W_startr(void)
-{
-	cdcprintf("SW2W startr()");
+	delayus(period/2);
+
+	SW2W_DATA_LOW();
+	SW2W_CLOCK_LOW();
+
+	//reset read/write mode
 }
 
 void SW2W_stop(void)
 {
 	cdcprintf("I2C STOP");
 
-	setSDAmode(SW2W_OUTPUT);					// SDA output
+	SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
 
-	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
-	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN); 
+	SW2W_DATA_LOW();
+	SW2W_CLOCK_HIGH();
 
 	delayus(period/2);
 
-	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
-	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN); 
+	SW2W_DATA_HIGH();
+	SW2W_DATA_HIGH();
 
 	delayus(period/2);
 }
-void SW2W_stopr(void)
-{
-	cdcprintf("SW2W stopr()");
-}
+
+
 uint32_t SW2W_send(uint32_t d)
 {
 	int i;
 	uint32_t mask;
 
-	setSDAmode(SW2W_OUTPUT);					// SDA output
+	SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
+	SW2W_CLOCK_LOW();
 
 	mask=0x80000000>>(32-modeConfig.numbits);
 
 	for(i=0; i<modeConfig.numbits; i++)
 	{
-		// level checking TODO: edge ?
-		if(d&mask) gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
-			else gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
-		gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
+		if(d&mask) SW2W_DATA_HIGH();
+		else SW2W_DATA_LOW(); //setup the data to write
 
-		delayus(period/4);
 
-		gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
+		delayus(period/2); //delay low
 
-		delayus(period/2);
+		SW2W_CLOCK_HIGH(); //clock high
+		delayus(period/2); //delay high
 
-		gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
-
-		delayus(period/4);
+		SW2W_CLOCK_LOW(); //low again, will delay at begin of next bit or byte
 
 	}
 	
@@ -91,23 +82,21 @@ uint32_t SW2W_read(void)
 	int i;
 	uint32_t returnval;
 
-	setSDAmode(SW2W_INPUT);						// SDA output
+	SW2W_setDATAmode(SW2W_INPUT);						// SDA input
 
 	returnval=0;
 
 	for(i=0; i<modeConfig.numbits; i++)
 	{
-		gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
-		delayus(period/4);
-		gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
-		delayus(period/4);
+		delayus(period/2); //delay low
 
-		if(gpio_get(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN)) returnval|=1;
+		SW2W_CLOCK_HIGH(); //high
+		delayus(period/2); //delay high
+		//read data
+		if(SW2W_DATA_READ()) returnval|=1;
 		returnval<<=1;
 
-		delayus(period/4);
-		gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
-		delayus(period/4);
+		SW2W_CLOCK_LOW();//low again, will delay at begin of next bit or byte...
 	}
 
 	return returnval;
@@ -116,34 +105,34 @@ void SW2W_clkh(void)
 {
 	cdcprintf("set CLK=1");
 
-	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
+	SW2W_CLOCK_HIGH(); //high
 }
 void SW2W_clkl(void)
 {
 	cdcprintf("set CLK=0");
 
-	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
+	SW2W_CLOCK_LOW();//low
 }
 void SW2W_dath(void)
 {
 	cdcprintf("set SDA=1");
 
-	setSDAmode(SW2W_OUTPUT);					// SDA output
-	gpio_set(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
+	SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
+	SW2W_DATA_HIGH();
 }
 void SW2W_datl(void)
 {
 	cdcprintf("set SDA=0");
 
-	setSDAmode(SW2W_OUTPUT);					// SDA output
-	gpio_clear(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN);
+	SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
+	SW2W_DATA_LOW();
 }
 uint32_t SW2W_dats(void)
 {
 	uint32_t dat;
 
-	setSDAmode(SW2W_INPUT);						// SDA input
-	dat=(gpio_get(BP_SW2W_SDA_PORT, BP_SW2W_SDA_PIN)?1:0);
+	SW2W_setDATAmode(SW2W_INPUT);						// SDA input
+	dat=(SW2W_DATA_READ()?1:0);
 
 	cdcprintf("SDA=%d", dat);
 
@@ -151,12 +140,13 @@ uint32_t SW2W_dats(void)
 }
 void SW2W_clk(void)
 {
-	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
-	delayus(period/4);
-	gpio_set(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
-	delayus(period/2);
-	gpio_clear(BP_SW2W_CLK_PORT, BP_SW2W_CLK_PIN);
-	delayus(period/4);
+	delayus(period/1); //delay low
+
+	SW2W_CLOCK_HIGH(); //clock high
+	delayus(period/2); //delay high
+
+	SW2W_CLOCK_LOW(); //low again
+	delayus(period/1); //delay low
 
 	cdcprintf("set CLK=0");
 	cdcprintf("set CLK=1");
@@ -164,11 +154,22 @@ void SW2W_clk(void)
 }
 uint32_t SW2W_bitr(void)
 {
-	uint32_t returnval;
+	uint32_t dat;
 
-	returnval=0;
-	cdcprintf("SW2W bitr()=%08X", returnval);
-	return returnval;
+	SW2W_setDATAmode(SW2W_INPUT);						// SDA input
+
+	delayus(period/1); //delay low
+
+	SW2W_CLOCK_HIGH(); //clock high
+	delayus(period/2); //delay high
+
+	dat=(SW2W_DATA_READ()?1:0);
+
+	SW2W_CLOCK_LOW(); //low again
+	delayus(period/1); //delay low
+
+	cdcprintf("SW2W bitr()=%08X", dat);
+	return dat;
 }
 uint32_t SW2W_period(void)
 {
@@ -181,33 +182,33 @@ void SW2W_macro(uint32_t macro)
 {
 	switch(macro)
 	{
-		case 0:		cdcprintf("No macros available");
-				break;
+		case 0:		cdcprintf(" 1. I2C Address search\r\n");
+//				cdcprintf(" 2. I2C sniffer\r\n";
+			break;
+		case 1:		SWI2C_search();
+			break;
 		default:	cdcprintf("Macro not defined");
-				modeConfig.error=1;
+			modeConfig.error=1;
 	}
 }
 void SW2W_setup(void)
 {
-	cdcprintf("SW2W setup()");
 
+	//todo: offer speeds, get HiZ
 
 	period=1000;
 	hiz=0;
 }
 void SW2W_setup_exc(void)
 {
-	cdcprintf("SW2W setup_exc()");
 
-	if(hiz)
+	if(modeConfig.hiz)
 	{
-		gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_SDA_PIN);
-		gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_CLK_PIN);
+		SW2W_SETUP_OPENDRAIN();
 	}
 	else
 	{
-		gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_SDA_PIN);
-		gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_CLK_PIN);
+		SW2W_SETUP_PUSHPULL();
 	}
 
 	// update modeConfig pins
@@ -224,8 +225,7 @@ void SW2W_cleanup(void)
 	cdcprintf("SW2W cleanup()");
 
 	// make all GPIO input
-	gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_SDA_PIN);
-	gpio_set_mode(BP_SW2W_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_CLK_PIN);
+	SW2W_SETUP_HIZ();
 
 	// update modeConfig pins
 	modeConfig.misoport=0;
@@ -247,25 +247,62 @@ void SW2W_settings(void)
 	cdcprintf("SW2W (period hiz)=(%d %d)", period, hiz);
 }
 
-void setSDAmode(uint8_t input)
+void SW2W_setDATAmode(uint8_t input)
 {
 
 	if(input)
 	{
-		gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SW2W_SDA_PIN);
+		SW2W_DATA_INPUT();
 	}
 	else
 	{
 		// set SDA as output
-		if(hiz)
+		if(modeConfig.hiz)
 		{
-			gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SW2W_SDA_PIN);
+			SW2W_DATA_OPENDRAIN();
 		}
 		else
 		{
-			gpio_set_mode(BP_SW2W_SDA_PORT, GPIO_MODE_OUTPUT_10_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SW2W_SDA_PIN);
+			SW2W_DATA_PUSHPULL();
 		}
 	}
+
+}
+
+void I2C_search(void){
+
+	/*bbH(MOSI + CLK, 0); //clock and data high
+
+	BPMSG1070; //search
+
+	if (BP_CLK == 0 || BP_MOSI == 0) {
+		BPMSG1019; //warning
+		BPMSG1020; //short or no pullups
+		bpBR;
+		return;
+	}
+    for (i = 0; i < 0x100; i++) {
+        bbI2Cstart(); //send start
+        bbWriteByte(i); //send address
+        c = bbReadBit(); //look for ack
+
+        if (c == 0) {//0 is ACK
+            bpWbyte(i);
+            bpWchar('('); //bpWstring("(");
+            bpWbyte((i >> 1));
+            if ((i & 0b1) == 0) {//if the first bit is set it's a read address, send a byte plus nack to clean up
+                bpWstring(" W");
+            } else {
+                bbReadByte();
+                bbI2Cnack(); //bbWriteBit(1);//high bit is NACK
+                bpWstring(" R");
+            }
+            bpWstring(")");
+            bpSP;
+        }
+        bbI2Cstop();
+    }
+    bpWBR;*/
 
 }
 
