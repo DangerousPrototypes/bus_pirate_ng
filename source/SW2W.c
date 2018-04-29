@@ -63,7 +63,7 @@ uint32_t SW2W_send(uint32_t d)
 	{
 		if(d&mask) SW2W_DATA_HIGH();
 		else SW2W_DATA_LOW(); //setup the data to write
-
+		mask>>1;
 
 		delayus(period/2); //delay low
 

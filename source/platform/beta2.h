@@ -140,6 +140,13 @@
 #define BP_SW2W_SDA_PIN		GPIO7
 #define BP_SW2W_CLK_PIN		GPIO6
 
+// universal pinset for bitbang protocols
+#define BP_BB_PORT          GPIOB
+#define BP_BB_MISO_PIN	    GPIO14
+#define BP_BB_MOSI_PIN	    GPIO15
+#define BP_BB_CS_PIN		GPIO12
+#define BP_BB_CLK_PIN		GPIO13
+
 // DIO
 #define BP_DIO_DIO0_PORT	GPIOB
 #define BP_DIO_DIO0_PIN		GPIO12

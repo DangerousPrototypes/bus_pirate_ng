@@ -30,7 +30,17 @@ void SWI2C_start(void)
 
     SW2W_start();
 
-    //reset read/write mode
+    //todo:reset read/write mode
+}
+
+static uint8_t checkshort(void)
+{
+    uint8_t temp;
+
+    temp=(gpio_get(BP_I2C_SDA_SENSE_PORT, BP_I2C_SDA_SENSE_PIN)==0?1:0);
+    temp|=(gpio_get(BP_I2C_SCL_SENSE_PORT, BP_I2C_SCL_SENSE_PIN)==0?2:0);
+
+    return (temp==3);			// there is only a short when both are 0 otherwise repeated start wont work
 }
 
 void SWI2C_stop(void)
@@ -52,24 +62,26 @@ void SWI2C_stop(void)
     SW2W_stop();
 }
 
+
+//todo: move to a generic BBwrite/BBgetACK functions for reuse in search...
 uint32_t SWI2C_write(uint32_t d)
 {
-    int i;
+    int i,ack;
     uint32_t mask;
 
-    //if read/write mode tracker reset, use last bit to set read/write mode
-    //if read mode is set warn write mode may be invalid
+    //TODO:if read/write mode tracker reset, use last bit to set read/write mode
+    //TODO:if read mode is set warn write mode may be invalid
 
     SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
     SW2W_CLOCK_LOW();
 
-    mask=0x80000000>>(32-modeConfig.numbits);
+    mask=0x80;
 
-    for(i=0; i<modeConfig.numbits; i++)
+    for(i=0; i<8; i++)
     {
         if(d&mask) SW2W_DATA_HIGH();
         else SW2W_DATA_LOW(); //setup the data to write
-
+        mask>>1;
 
         delayus(period/2); //delay low
 
@@ -77,10 +89,17 @@ uint32_t SWI2C_write(uint32_t d)
         delayus(period/2); //delay high
 
         SW2W_CLOCK_LOW(); //low again, will delay at begin of next bit or byte
-
-        //TODO: ack/nack management
-
     }
+
+    //TODO: get ACK/NACK
+    SW2W_setDATAmode(SW2W_INPUT);					// SDA output
+    delayus(period/2); //delay low
+    SW2W_CLOCK_HIGH(); //clock high
+    delayus(period/2); //delay high
+    ack=(SW2W_DATA_READ()?1:0);
+    SW2W_CLOCK_LOW(); //low again, will delay at begin of next bit or byte
+
+    //TODO: report ACK or NACK
 
     return 0;
 }
