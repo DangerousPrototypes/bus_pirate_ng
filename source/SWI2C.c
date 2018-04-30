@@ -8,132 +8,71 @@
 
 static uint32_t	period;
 static uint8_t	speed;
+static uint8_t ackPending;
 
 void SWI2C_start(void)
 {
-    /*cdcprintf("I2C START");
+    if (ackPending) {
+        cdcprintf("NACK");
+        bbI2Cnack();
+        ackPending = 0;
+    }
 
-    SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
+    if (bbI2Cstart()) {//bus contention
+        cdcprintf("Short or no pullups!");
+    }
 
-    SW2W_DATA_HIGH();
-    SW2W_CLOCK_HIGH();
-
-    delayus(period/2);
-
-    SW2W_DATA_LOW();
-    SW2W_CLOCK_HIGH();
-
-    delayus(period/2);
-
-    SW2W_DATA_LOW();
-    SW2W_CLOCK_LOW();*/
-
-    SW2W_start();
+    cdcprintf("START");
 
     //todo:reset read/write mode
 }
 
-static uint8_t checkshort(void)
-{
-    uint8_t temp;
-
-    temp=(gpio_get(BP_I2C_SDA_SENSE_PORT, BP_I2C_SDA_SENSE_PIN)==0?1:0);
-    temp|=(gpio_get(BP_I2C_SCL_SENSE_PORT, BP_I2C_SCL_SENSE_PIN)==0?2:0);
-
-    return (temp==3);			// there is only a short when both are 0 otherwise repeated start wont work
-}
-
 void SWI2C_stop(void)
 {
-    /*cdcprintf("I2C STOP");
+    if (ackPending) {
+        cdcprintf("NACK");
+        bbI2Cnack();
+        ackPending = 0;
+    }
 
-    SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
-
-    SW2W_DATA_LOW();
-    SW2W_CLOCK_HIGH();
-
-    delayus(period/2);
-
-    SW2W_DATA_HIGH();
-    SW2W_DATA_HIGH();
-
-    delayus(period/2);*/
-
-    SW2W_stop();
+    bbI2Cstop();
+    cdcprintf("STOP");
 }
 
 
-//todo: move to a generic BBwrite/BBgetACK functions for reuse in search...
 uint32_t SWI2C_write(uint32_t d)
 {
-    int i,ack;
-    uint32_t mask;
-
     //TODO:if read/write mode tracker reset, use last bit to set read/write mode
     //TODO:if read mode is set warn write mode may be invalid
 
-    SW2W_setDATAmode(SW2W_OUTPUT);					// SDA output
-    SW2W_CLOCK_LOW();
-
-    mask=0x80;
-
-    for(i=0; i<8; i++)
-    {
-        if(d&mask) SW2W_DATA_HIGH();
-        else SW2W_DATA_LOW(); //setup the data to write
-        mask>>1;
-
-        delayus(period/2); //delay low
-
-        SW2W_CLOCK_HIGH(); //clock high
-        delayus(period/2); //delay high
-
-        SW2W_CLOCK_LOW(); //low again, will delay at begin of next bit or byte
+    if (ackPending) {
+        cdcprintf("NACK");
+        bbI2Cnack();
+        ackPending = 0;
     }
+    bbWriteByte(c);
+    c = bbReadBit();
 
-    //TODO: get ACK/NACK
-    SW2W_setDATAmode(SW2W_INPUT);					// SDA output
-    delayus(period/2); //delay low
-    SW2W_CLOCK_HIGH(); //clock high
-    delayus(period/2); //delay high
-    ack=(SW2W_DATA_READ()?1:0);
-    SW2W_CLOCK_LOW(); //low again, will delay at begin of next bit or byte
-
-    //TODO: report ACK or NACK
-
-    return 0;
+    if (c == 0) { //bpWmessage(MSG_ACK);
+        cdcprintf("ACK");
+        return 0x300; // bit 9=ack
+    } else { //bpWmessage(MSG_NACK);
+        cdcprintf("No ACK received!");
+        return 0x100; // bit 9=ack
+    }
 }
 
 uint32_t SWI2C_read(void)
 {
-    int i;
-    uint32_t returnval;
-
-    SW2W_setDATAmode(SW2W_INPUT);						// SDA input
-    SW2W_CLOCK_LOW();
-
-    returnval=0;
-
-    //check read/write mode, warn if in write mode...
-
-    for(i=0; i<modeConfig.numbits; i++)
-    {
-
-        delayus(period/2); //delay low
-
-        SW2W_CLOCK_HIGH(); //high
-        delayus(period/2); //delay high
-        //read data
-        if(SW2W_DATA_READ()) returnval|=1;
-        returnval<<=1;
-
-        SW2W_CLOCK_LOW();//low again, will delay at begin of next bit or byte...
-
-        //TODO: ack/nack management
-
+    if (ackPending) {
+        cdcprintf(" NACK");
+        bbI2Cnack();
+        ackPending = 0;
     }
 
-    return returnval;
+    c = bbReadByte();
+    ackPending = 1;
+    return c;
 }
 
 void SWI2C_macro(uint32_t macro)
@@ -165,23 +104,17 @@ void SWI2C_setup(void)
         speed=(askint(SWI2CSPEEDMENU, 1, 2, 1));
     }
 
+    ackPending =0;
 }
 
 void SWI2C_setup_exc(void)
 {
-    if(modeConfig.hiz)
-    {
-        SW2W_SETUP_OPENDRAIN();
-    }
-    else
-    {
-        SW2W_SETUP_PUSHPULL();
-     }
-
     // update modeConfig pins
     modeConfig.mosiport=BP_SW2W_SDA_PORT;
     modeConfig.clkport=BP_SW2W_CLK_PORT;
     modeConfig.hiz=1;
+
+    bbSetup(2, 0); //configure the bitbang library for 2-wire, set the speed
 
     //a guess... 72 period in the PWM is .99999uS. Multiply the period in uS * 72, divide by 4 four 4* over sample
     //TODO: used fixed calculated period for I2C
@@ -247,4 +180,35 @@ void SWI2C_help(void)
     cdcprintf("\tSDA \t--+-|------------- SDA\r\n");
     cdcprintf("{BP}\tSCL\t----+------------- SCL  {DUT}\r\n");
     cdcprintf("\tGND\t------------------ GND\r\n");
+}
+
+void I2C_search(void){
+
+    uint8_t i;
+
+    bbH(MOSI + CLK, 0); //clock and data high
+
+    cdcprintf("I2C address search:");
+
+    /*if (BP_CLK == 0 || BP_MOSI == 0) {
+        BPMSG1019; //warning
+        BPMSG1020; //short or no pullups
+        bpBR;
+        return;
+    }*/
+    for (i = 0; i < 0x100; i++) {
+        bbI2Cstart(); //send start
+        bbWriteByte(i); //send address
+        //look for ack
+        if (bbReadBit()==0) {//0 is ACK
+            if ((i & 0b1) == 0) {
+                cdcprintf("%d (%d W)", i, (i >> 1));
+            } else { //if the first bit is set it's a read address, send a byte plus nack to clean up
+                cdcprintf("%d (%d R)", i, (i >> 1));
+                bbReadByte();
+                bbI2Cnack(); //NACK
+            }
+        }
+        bbI2Cstop();
+    }
 }

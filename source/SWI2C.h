@@ -1,5 +1,4 @@
-//TODO: I2C search
-//TODO: ack/nack tracking
+//TODO: Short/pullup detection
 //TODO: read/write mode tracking
 //TODO: speed validation
 void SWI2C_start(void);
@@ -13,6 +12,7 @@ void SWI2C_cleanup(void);
 void SWI2C_pins(void);
 void SWI2C_settings(void);
 void SWI2C_help(void);
+void I2C_search(void);
 
 #define SWI2CSPEEDMENU	"\r\nSpeed\r\n 1. 100KHz\r\n 2. 400Khz\r\nspeed> "
 

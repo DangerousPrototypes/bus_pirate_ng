@@ -269,41 +269,4 @@ void SW2W_setDATAmode(uint8_t input)
 
 }
 
-void I2C_search(void){
-
-	/*bbH(MOSI + CLK, 0); //clock and data high
-
-	BPMSG1070; //search
-
-	if (BP_CLK == 0 || BP_MOSI == 0) {
-		BPMSG1019; //warning
-		BPMSG1020; //short or no pullups
-		bpBR;
-		return;
-	}
-    for (i = 0; i < 0x100; i++) {
-        bbI2Cstart(); //send start
-        bbWriteByte(i); //send address
-        c = bbReadBit(); //look for ack
-
-        if (c == 0) {//0 is ACK
-            bpWbyte(i);
-            bpWchar('('); //bpWstring("(");
-            bpWbyte((i >> 1));
-            if ((i & 0b1) == 0) {//if the first bit is set it's a read address, send a byte plus nack to clean up
-                bpWstring(" W");
-            } else {
-                bbReadByte();
-                bbI2Cnack(); //bbWriteBit(1);//high bit is NACK
-                bpWstring(" R");
-            }
-            bpWstring(")");
-            bpSP;
-        }
-        bbI2Cstop();
-    }
-    bpWBR;*/
-
-}
-
 

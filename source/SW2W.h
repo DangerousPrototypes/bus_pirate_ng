@@ -19,7 +19,6 @@ void SW2W_setup_exc(void);
 void SW2W_cleanup(void);
 void SW2W_pins(void);
 void SW2W_settings(void);
-void I2C_search(void);
 
 void SW2W_setDATAmode(uint8_t input);
 
