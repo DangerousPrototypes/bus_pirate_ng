@@ -40,10 +40,10 @@
 //extern struct _modeConfig modeConfig;
 
 struct _bitbang{
-    unsigned int MOpin;
-    unsigned int MIpin;
-    unsigned char delaySettle;
-    unsigned char delayClock;
+    uint32_t MOpin;
+    uint32_t MIpin;
+    uint8_t delaySettle;
+    uint8_t delayClock;
 } bitbang;
 
 void bbSetup(uint8_t pins, uint8_t speed){
@@ -258,15 +258,27 @@ uint8_t bbMISO (void){
 //
 // BASE IO functions
 //
-/*void BB_HIGH_DELAY(unsigned int pins, unsigned char delay){
+void BB_HIGH_DELAY(unsigned int pins, unsigned char delay){
+
     BB_HIGH(pins);
+    if(modeConfig.hiz){
+        BB_OUTPUT_OPENDRAIN(pins);
+    }else{
+        BB_OUTPUT_PUSHPULL(pins);
+    }
     bpDelayUS(delay);//delay
 }
 
 void BB_LOW_DELAY(unsigned int pins, unsigned char delay){
+
     BB_LOW(pins);
+    if(modeConfig.hiz){
+        BB_OUTPUT_OPENDRAIN(pins);
+    }else{
+        BB_OUTPUT_PUSHPULL(pins);
+    }
     bpDelayUS(delay);//delay
-}*/
+}
 
 void bbPins(uint8_t dir, uint32_t pins, uint32_t delay){
     if(dir==0){

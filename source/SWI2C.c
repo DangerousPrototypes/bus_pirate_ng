@@ -68,8 +68,8 @@ uint32_t SWI2C_read(void)
     uint32_t c;
 
     if (ackPending) {
-        cdcprintf(" NACK");
-        bbI2Cnack();
+        cdcprintf("ACK");
+        bbI2Cack();
         ackPending = 0;
     }
 

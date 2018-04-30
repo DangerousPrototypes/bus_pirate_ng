@@ -53,8 +53,8 @@ uint8_t bbI2Cstop(void);
 #define BB_HIGH(pins) BB_SET(BP_BB_PORT, pins)
 #define BB_LOW(pins) BB_CLEAR(BP_BB_PORT, pins)
 
-#define BB_HIGH_DELAY(pins, delay) BB_HIGH(pins); delayus(delay)
-#define BB_LOW_DELAY(pins, delay) BB_LOW(pins); delayus(delay)
+//#define BB_HIGH_DELAY(pins, delay) BB_HIGH(pins); delayus(delay)
+//#define BB_LOW_DELAY(pins, delay) BB_LOW(pins); delayus(delay)
 
 #define BB_DATA_HIGH() BB_SET(BP_BB_PORT,BP_BB_MOSI_PIN)
 #define BB_DATA_LOW() BB_CLEAR(BP_BB_PORT,BP_BB_MOSI_PIN)
