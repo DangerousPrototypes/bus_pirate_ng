@@ -157,12 +157,12 @@ uint32_t bbReadWrite(uint32_t c){
         BB_HIGH_DELAY(BP_BB_CLK_PIN,bitbang.delayClock);//set clock high
 
         //get MSB first
-        dat<<1;  //shift the data input byte bits
+        dat=dat<<1;  //shift the data input byte bits
 
         dat|=(BB_DATA_READ(BP_BB_MISO_PIN)?1:0); //read data pin
         BB_LOW_DELAY(BP_BB_CLK_PIN,bitbang.delayClock);;//set clock low
 
-        c<<1;  //shift data output bits
+        c=c<<1;  //shift data output bits
 
     }
 
@@ -181,7 +181,7 @@ void bbWrite(uint32_t c){
         BB_HIGH_DELAY(BP_BB_CLK_PIN,bitbang.delayClock);
         BB_LOW_DELAY(BP_BB_CLK_PIN,bitbang.delayClock);
 
-        c<<1; //next output bit
+        c=c<<1; //next output bit
 
     }
 }
@@ -197,7 +197,7 @@ uint32_t bbRead(void){
         BB_HIGH_DELAY(BP_BB_CLK_PIN,bitbang.delayClock);//set clock high
 
         //get MSB first
-        dat<<1;//shift the data input byte bits
+        dat=dat<<1;//shift the data input byte bits
         dat|=bbR(bitbang.MIpin); //same as BP_SW_MISO_PIN on 2-wire
 
         BB_LOW_DELAY(BP_BB_CLK_PIN,bitbang.delayClock);;//set clock low
@@ -285,9 +285,6 @@ void bbPins(uint8_t dir, uint32_t pins, uint32_t delay){
 
 uint8_t bbR(uint32_t pin){
     BB_INPUT(pin); //pin as input
-    Nop();
-    Nop();
-    Nop();
     return (BB_DATA_READ(pin)?1:0);//clear all but pin bit and return result
 }
 

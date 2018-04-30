@@ -8,6 +8,7 @@
 #include "cdcacm.h"
 
 static uint32_t	period;
+static uint8_t hiz;
 
 void SW2W_start(void)
 {
@@ -63,7 +64,7 @@ uint32_t SW2W_send(uint32_t d)
 	{
 		if(d&mask) SW2W_DATA_HIGH();
 		else SW2W_DATA_LOW(); //setup the data to write
-		mask>>1;
+		mask=mask>>1;
 
 		delayus(period/2); //delay low
 
@@ -182,11 +183,7 @@ void SW2W_macro(uint32_t macro)
 {
 	switch(macro)
 	{
-		case 0:		cdcprintf(" 1. I2C Address search\r\n");
-//				cdcprintf(" 2. I2C sniffer\r\n";
-			break;
-		case 1:		SWI2C_search();
-			break;
+		case 0:
 		default:	cdcprintf("Macro not defined");
 			modeConfig.error=1;
 	}

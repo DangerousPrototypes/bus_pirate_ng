@@ -3,8 +3,8 @@
 #include "buspirateNG.h"
 #include "UI.h"
 #include "SWI2C.h"
-#include "SW2W.h"
 #include "cdcacm.h"
+#include "bitbang.h"
 
 static uint32_t	period;
 static uint8_t	speed;
@@ -42,6 +42,7 @@ void SWI2C_stop(void)
 
 uint32_t SWI2C_write(uint32_t d)
 {
+
     //TODO:if read/write mode tracker reset, use last bit to set read/write mode
     //TODO:if read mode is set warn write mode may be invalid
 
@@ -50,10 +51,10 @@ uint32_t SWI2C_write(uint32_t d)
         bbI2Cnack();
         ackPending = 0;
     }
-    bbWriteByte(c);
-    c = bbReadBit();
 
-    if (c == 0) { //bpWmessage(MSG_ACK);
+    bbWrite(d);
+
+    if (bbReadBit() == 0) { //bpWmessage(MSG_ACK);
         cdcprintf("ACK");
         return 0x300; // bit 9=ack
     } else { //bpWmessage(MSG_NACK);
@@ -64,13 +65,15 @@ uint32_t SWI2C_write(uint32_t d)
 
 uint32_t SWI2C_read(void)
 {
+    uint32_t c;
+
     if (ackPending) {
         cdcprintf(" NACK");
         bbI2Cnack();
         ackPending = 0;
     }
 
-    c = bbReadByte();
+    c = bbRead();
     ackPending = 1;
     return c;
 }
@@ -82,7 +85,7 @@ void SWI2C_macro(uint32_t macro)
         case 0:		cdcprintf(" 1. I2C Address search\r\n");
 //				cdcprintf(" 2. I2C sniffer\r\n";
             break;
-        case 1:		SWI2C_search();
+        case 1:		I2C_search();
             break;
          default:	cdcprintf("Macro not defined");
             modeConfig.error=1;
@@ -113,6 +116,7 @@ void SWI2C_setup_exc(void)
     modeConfig.mosiport=BP_SW2W_SDA_PORT;
     modeConfig.clkport=BP_SW2W_CLK_PORT;
     modeConfig.hiz=1;
+    modeConfig.numbits=8;
 
     bbSetup(2, 0); //configure the bitbang library for 2-wire, set the speed
 
@@ -124,10 +128,10 @@ void SWI2C_setup_exc(void)
 
 void SWI2C_cleanup(void)
 {
-    /*cdcprintf("SWI2C cleanup()");
+    cdcprintf("SWI2C cleanup()");
 
     // make all GPIO input
-    SW2W_SETUP_HIZ();
+    //SW2W_SETUP_HIZ();
 
     // update modeConfig pins
     modeConfig.misoport=0;
@@ -138,8 +142,8 @@ void SWI2C_cleanup(void)
     modeConfig.mosipin=0;
     modeConfig.cspin=0;
     modeConfig.clkpin=0;
-     */
-    SW2W_cleanup();
+
+    //SW2W_cleanup();
 }
 void SWI2C_pins(void)
 {
@@ -147,7 +151,7 @@ void SWI2C_pins(void)
 }
 void SWI2C_settings(void)
 {
-    cdcprintf("SWI2C (period hiz)=(%d %d)", period, hiz);
+    cdcprintf("SWI2C (period hiz)=(%d %d)", period, modeConfig.hiz);
 }
 void SWI2C_help(void)
 {
@@ -184,9 +188,9 @@ void SWI2C_help(void)
 
 void I2C_search(void){
 
-    uint8_t i;
+    uint16_t i;
 
-    bbH(MOSI + CLK, 0); //clock and data high
+    //bbH(MOSI + CLK, 0); //clock and data high
 
     cdcprintf("I2C address search:");
 
@@ -198,14 +202,14 @@ void I2C_search(void){
     }*/
     for (i = 0; i < 0x100; i++) {
         bbI2Cstart(); //send start
-        bbWriteByte(i); //send address
+        bbWrite(i); //send address
         //look for ack
         if (bbReadBit()==0) {//0 is ACK
             if ((i & 0b1) == 0) {
                 cdcprintf("%d (%d W)", i, (i >> 1));
             } else { //if the first bit is set it's a read address, send a byte plus nack to clean up
                 cdcprintf("%d (%d R)", i, (i >> 1));
-                bbReadByte();
+                bbRead();
                 bbI2Cnack(); //NACK
             }
         }
