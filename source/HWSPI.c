@@ -10,7 +10,7 @@
 #include "LA.h"
 
 
-static uint32_t cpol, cpha, br, dff, lsbfirst, csidle;
+static uint32_t cpol, cpha, br, dff, lsbfirst, csidle, od;
 
 static uint16_t LA_period[8]={
 	LA_SPI_PERIOD_18MHZ,
@@ -148,6 +148,13 @@ void HWSPI_setup(void)
 	if(csidle<=1) csidle=csidle;
 		else modeConfig.error=1;
 
+	// opendrain
+	if(cmdtail!=cmdhead) cmdtail=(cmdtail+1)&(CMDBUFFSIZE-1);
+	consumewhitechars();
+	od=getint()-1;
+	if(od<=1) od=od;
+		else modeConfig.error=1;
+
 	// did the user did it right?
 	if(modeConfig.error)			// go interactive 
 	{
@@ -156,6 +163,7 @@ void HWSPI_setup(void)
 		cpol=((askint(SPICPOLMENU, 1, 2, 1)-1)<<1);
 		cpha=(askint(SPICPHAMENU, 1, 2, 2)-1);
 		csidle=(askint(SPICSIDLEMENU, 1, 2, 2)-1);
+		od=(askint(SPIODMENU, 1, 2, 2)-1);
 
 		// 8bit and lsb/msb handled in UI.c
 		dff=SPI_CR1_DFF_8BIT;
@@ -170,11 +178,22 @@ void HWSPI_setup_exc(void)
 	rcc_periph_clock_enable(BP_SPI_CLK);
 
 	// setup gpio as alternate function
-	gpio_set_mode(BP_SPI_MOSI_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_MOSI_PIN);
-//	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CS_PIN);
-	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SPI_CS_PIN);
-	gpio_set_mode(BP_SPI_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CLK_PIN);
-	gpio_set_mode(BP_SPI_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_MISO_PIN);
+	if(od)
+	{
+		gpio_set_mode(BP_SPI_MOSI_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, BP_SPI_MOSI_PIN);
+	//	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, BP_SPI_CS_PIN);
+		gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, BP_SPI_CS_PIN);
+		gpio_set_mode(BP_SPI_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, BP_SPI_CLK_PIN);
+		gpio_set_mode(BP_SPI_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_MISO_PIN);
+	}
+	else
+	{
+		gpio_set_mode(BP_SPI_MOSI_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_MOSI_PIN);
+	//	gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CS_PIN);
+		gpio_set_mode(BP_SPI_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_SPI_CS_PIN);
+		gpio_set_mode(BP_SPI_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, BP_SPI_CLK_PIN);
+		gpio_set_mode(BP_SPI_MISO_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,BP_SPI_MISO_PIN);
+	}
 
 	// reset all registers
 	spi_reset(BP_SPI);

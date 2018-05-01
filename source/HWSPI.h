@@ -29,6 +29,7 @@ uint16_t HWSPI_xfer(uint16_t d);
 #define SPICPOLMENU	"\r\nClock polarity\r\n 1. idle low*\r\n 2. idle high\r\ncpol> "
 #define SPICPHAMENU	"\r\nClock phase\r\n 1. leading edge\r\n 2. trailing edge*\r\ncpha> "
 #define SPICSIDLEMENU	"\r\nCS mode\r\n 1. CS\r\n 2. !CS*\r\ncs> "
+#define SPIODMENU	"\r\nOpen drain mode\r\n 1. Pushpull\r\n 2. Opendrain*\r\nod> "
 
 #define LA_SPI_PERIOD_140KHZ (((100000000/140)/4)/(10000000/72000))/10
 #define LA_SPI_PERIOD_280KHZ (((100000000/280)/4)/(10000000/72000))/10

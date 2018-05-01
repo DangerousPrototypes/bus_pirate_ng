@@ -1,0 +1,722 @@
+FSMC: BCR1 @ 0xa0000000	SRAM/NOR-Flash chip-select control register          1
+FSMC: BTR1 @ 0xa0000004	SRAM/NOR-Flash chip-select timing register          1
+FSMC: BCR2 @ 0xa0000008	SRAM/NOR-Flash chip-select control register          2
+FSMC: BTR2 @ 0xa000000c	SRAM/NOR-Flash chip-select timing register          2
+FSMC: BCR3 @ 0xa0000010	SRAM/NOR-Flash chip-select control register          3
+FSMC: BTR3 @ 0xa0000014	SRAM/NOR-Flash chip-select timing register          3
+FSMC: BCR4 @ 0xa0000018	SRAM/NOR-Flash chip-select control register          4
+FSMC: BTR4 @ 0xa000001c	SRAM/NOR-Flash chip-select timing register          4
+FSMC: PCR2 @ 0xa0000060	PC Card/NAND Flash control register          2
+FSMC: SR2 @ 0xa0000064	FIFO status and interrupt register          2
+FSMC: PMEM2 @ 0xa0000068	Common memory space timing register          2
+FSMC: PATT2 @ 0xa000006c	Attribute memory space timing register          2
+FSMC: ECCR2 @ 0xa0000074	ECC result register 2
+FSMC: PCR3 @ 0xa0000080	PC Card/NAND Flash control register          3
+FSMC: SR3 @ 0xa0000084	FIFO status and interrupt register          3
+FSMC: PMEM3 @ 0xa0000088	Common memory space timing register          3
+FSMC: PATT3 @ 0xa000008c	Attribute memory space timing register          3
+FSMC: ECCR3 @ 0xa0000094	ECC result register 3
+FSMC: PCR4 @ 0xa00000a0	PC Card/NAND Flash control register          4
+FSMC: SR4 @ 0xa00000a4	FIFO status and interrupt register          4
+FSMC: PMEM4 @ 0xa00000a8	Common memory space timing register          4
+FSMC: PATT4 @ 0xa00000ac	Attribute memory space timing register          4
+FSMC: PIO4 @ 0xa00000b0	I/O space timing register 4
+FSMC: BWTR1 @ 0xa0000104	SRAM/NOR-Flash write timing registers          1
+FSMC: BWTR2 @ 0xa000010c	SRAM/NOR-Flash write timing registers          2
+FSMC: BWTR3 @ 0xa0000114	SRAM/NOR-Flash write timing registers          3
+FSMC: BWTR4 @ 0xa000011c	SRAM/NOR-Flash write timing registers          4
+PWR: CR @ 0x40007000	Power control register          (PWR_CR)
+PWR: CSR @ 0x40007004	Power control register          (PWR_CR)
+RCC: CR @ 0x40021000	Clock control register
+RCC: CFGR @ 0x40021004	Clock configuration register          (RCC_CFGR)
+RCC: CIR @ 0x40021008	Clock interrupt register          (RCC_CIR)
+RCC: APB2RSTR @ 0x4002100c	APB2 peripheral reset register          (RCC_APB2RSTR)
+RCC: APB1RSTR @ 0x40021010	APB1 peripheral reset register          (RCC_APB1RSTR)
+RCC: AHBENR @ 0x40021014	AHB Peripheral Clock enable register          (RCC_AHBENR)
+RCC: APB2ENR @ 0x40021018	APB2 peripheral clock enable register          (RCC_APB2ENR)
+RCC: APB1ENR @ 0x4002101c	APB1 peripheral clock enable register          (RCC_APB1ENR)
+RCC: BDCR @ 0x40021020	Backup domain control register          (RCC_BDCR)
+RCC: CSR @ 0x40021024	Control/status register          (RCC_CSR)
+GPIOA: CRL @ 0x40010800	Port configuration register low          (GPIOn_CRL)
+GPIOA: CRH @ 0x40010804	Port configuration register high          (GPIOn_CRL)
+GPIOA: IDR @ 0x40010808	Port input data register          (GPIOn_IDR)
+GPIOA: ODR @ 0x4001080c	Port output data register          (GPIOn_ODR)
+GPIOA: BSRR @ 0x40010810	Port bit set/reset register          (GPIOn_BSRR)
+GPIOA: BRR @ 0x40010814	Port bit reset register          (GPIOn_BRR)
+GPIOA: LCKR @ 0x40010818	Port configuration lock          register
+GPIOB: CRL @ 0x40010c00	Port configuration register low          (GPIOn_CRL)
+GPIOB: CRH @ 0x40010c04	Port configuration register high          (GPIOn_CRL)
+GPIOB: IDR @ 0x40010c08	Port input data register          (GPIOn_IDR)
+GPIOB: ODR @ 0x40010c0c	Port output data register          (GPIOn_ODR)
+GPIOB: BSRR @ 0x40010c10	Port bit set/reset register          (GPIOn_BSRR)
+GPIOB: BRR @ 0x40010c14	Port bit reset register          (GPIOn_BRR)
+GPIOB: LCKR @ 0x40010c18	Port configuration lock          register
+GPIOC: CRL @ 0x40011000	Port configuration register low          (GPIOn_CRL)
+GPIOC: CRH @ 0x40011004	Port configuration register high          (GPIOn_CRL)
+GPIOC: IDR @ 0x40011008	Port input data register          (GPIOn_IDR)
+GPIOC: ODR @ 0x4001100c	Port output data register          (GPIOn_ODR)
+GPIOC: BSRR @ 0x40011010	Port bit set/reset register          (GPIOn_BSRR)
+GPIOC: BRR @ 0x40011014	Port bit reset register          (GPIOn_BRR)
+GPIOC: LCKR @ 0x40011018	Port configuration lock          register
+GPIOD: CRL @ 0x40011400	Port configuration register low          (GPIOn_CRL)
+GPIOD: CRH @ 0x40011404	Port configuration register high          (GPIOn_CRL)
+GPIOD: IDR @ 0x40011408	Port input data register          (GPIOn_IDR)
+GPIOD: ODR @ 0x4001140c	Port output data register          (GPIOn_ODR)
+GPIOD: BSRR @ 0x40011410	Port bit set/reset register          (GPIOn_BSRR)
+GPIOD: BRR @ 0x40011414	Port bit reset register          (GPIOn_BRR)
+GPIOD: LCKR @ 0x40011418	Port configuration lock          register
+GPIOE: CRL @ 0x40011800	Port configuration register low          (GPIOn_CRL)
+GPIOE: CRH @ 0x40011804	Port configuration register high          (GPIOn_CRL)
+GPIOE: IDR @ 0x40011808	Port input data register          (GPIOn_IDR)
+GPIOE: ODR @ 0x4001180c	Port output data register          (GPIOn_ODR)
+GPIOE: BSRR @ 0x40011810	Port bit set/reset register          (GPIOn_BSRR)
+GPIOE: BRR @ 0x40011814	Port bit reset register          (GPIOn_BRR)
+GPIOE: LCKR @ 0x40011818	Port configuration lock          register
+GPIOF: CRL @ 0x40011c00	Port configuration register low          (GPIOn_CRL)
+GPIOF: CRH @ 0x40011c04	Port configuration register high          (GPIOn_CRL)
+GPIOF: IDR @ 0x40011c08	Port input data register          (GPIOn_IDR)
+GPIOF: ODR @ 0x40011c0c	Port output data register          (GPIOn_ODR)
+GPIOF: BSRR @ 0x40011c10	Port bit set/reset register          (GPIOn_BSRR)
+GPIOF: BRR @ 0x40011c14	Port bit reset register          (GPIOn_BRR)
+GPIOF: LCKR @ 0x40011c18	Port configuration lock          register
+GPIOG: CRL @ 0x40012000	Port configuration register low          (GPIOn_CRL)
+GPIOG: CRH @ 0x40012004	Port configuration register high          (GPIOn_CRL)
+GPIOG: IDR @ 0x40012008	Port input data register          (GPIOn_IDR)
+GPIOG: ODR @ 0x4001200c	Port output data register          (GPIOn_ODR)
+GPIOG: BSRR @ 0x40012010	Port bit set/reset register          (GPIOn_BSRR)
+GPIOG: BRR @ 0x40012014	Port bit reset register          (GPIOn_BRR)
+GPIOG: LCKR @ 0x40012018	Port configuration lock          register
+AFIO: EVCR @ 0x40010000	Event Control Register          (AFIO_EVCR)
+AFIO: MAPR @ 0x40010004	AF remap and debug I/O configuration          register (AFIO_MAPR)
+AFIO: EXTICR1 @ 0x40010008	External interrupt configuration register 1          (AFIO_EXTICR1)
+AFIO: EXTICR2 @ 0x4001000c	External interrupt configuration register 2          (AFIO_EXTICR2)
+AFIO: EXTICR3 @ 0x40010010	External interrupt configuration register 3          (AFIO_EXTICR3)
+AFIO: EXTICR4 @ 0x40010014	External interrupt configuration register 4          (AFIO_EXTICR4)
+AFIO: MAPR2 @ 0x4001001c	AF remap and debug I/O configuration          register
+EXTI: IMR @ 0x40010400	Interrupt mask register          (EXTI_IMR)
+EXTI: EMR @ 0x40010404	Event mask register (EXTI_EMR)
+EXTI: RTSR @ 0x40010408	Rising Trigger selection register          (EXTI_RTSR)
+EXTI: FTSR @ 0x4001040c	Falling Trigger selection register          (EXTI_FTSR)
+EXTI: SWIER @ 0x40010410	Software interrupt event register          (EXTI_SWIER)
+EXTI: PR @ 0x40010414	Pending register (EXTI_PR)
+DMA1: ISR @ 0x40020000	DMA interrupt status register          (DMA_ISR)
+DMA1: IFCR @ 0x40020004	DMA interrupt flag clear register          (DMA_IFCR)
+DMA1: CCR1 @ 0x40020008	DMA channel configuration register          (DMA_CCR)
+DMA1: CNDTR1 @ 0x4002000c	DMA channel 1 number of data          register
+DMA1: CPAR1 @ 0x40020010	DMA channel 1 peripheral address          register
+DMA1: CMAR1 @ 0x40020014	DMA channel 1 memory address          register
+DMA1: CCR2 @ 0x4002001c	DMA channel configuration register          (DMA_CCR)
+DMA1: CNDTR2 @ 0x40020020	DMA channel 2 number of data          register
+DMA1: CPAR2 @ 0x40020024	DMA channel 2 peripheral address          register
+DMA1: CMAR2 @ 0x40020028	DMA channel 2 memory address          register
+DMA1: CCR3 @ 0x40020030	DMA channel configuration register          (DMA_CCR)
+DMA1: CNDTR3 @ 0x40020034	DMA channel 3 number of data          register
+DMA1: CPAR3 @ 0x40020038	DMA channel 3 peripheral address          register
+DMA1: CMAR3 @ 0x4002003c	DMA channel 3 memory address          register
+DMA1: CCR4 @ 0x40020044	DMA channel configuration register          (DMA_CCR)
+DMA1: CNDTR4 @ 0x40020048	DMA channel 4 number of data          register
+DMA1: CPAR4 @ 0x4002004c	DMA channel 4 peripheral address          register
+DMA1: CMAR4 @ 0x40020050	DMA channel 4 memory address          register
+DMA1: CCR5 @ 0x40020058	DMA channel configuration register          (DMA_CCR)
+DMA1: CNDTR5 @ 0x4002005c	DMA channel 5 number of data          register
+DMA1: CPAR5 @ 0x40020060	DMA channel 5 peripheral address          register
+DMA1: CMAR5 @ 0x40020064	DMA channel 5 memory address          register
+DMA1: CCR6 @ 0x4002006c	DMA channel configuration register          (DMA_CCR)
+DMA1: CNDTR6 @ 0x40020070	DMA channel 6 number of data          register
+DMA1: CPAR6 @ 0x40020074	DMA channel 6 peripheral address          register
+DMA1: CMAR6 @ 0x40020078	DMA channel 6 memory address          register
+DMA1: CCR7 @ 0x40020080	DMA channel configuration register          (DMA_CCR)
+DMA1: CNDTR7 @ 0x40020084	DMA channel 7 number of data          register
+DMA1: CPAR7 @ 0x40020088	DMA channel 7 peripheral address          register
+DMA1: CMAR7 @ 0x4002008c	DMA channel 7 memory address          register
+DMA2: ISR @ 0x40020400	DMA interrupt status register          (DMA_ISR)
+DMA2: IFCR @ 0x40020404	DMA interrupt flag clear register          (DMA_IFCR)
+DMA2: CCR1 @ 0x40020408	DMA channel configuration register          (DMA_CCR)
+DMA2: CNDTR1 @ 0x4002040c	DMA channel 1 number of data          register
+DMA2: CPAR1 @ 0x40020410	DMA channel 1 peripheral address          register
+DMA2: CMAR1 @ 0x40020414	DMA channel 1 memory address          register
+DMA2: CCR2 @ 0x4002041c	DMA channel configuration register          (DMA_CCR)
+DMA2: CNDTR2 @ 0x40020420	DMA channel 2 number of data          register
+DMA2: CPAR2 @ 0x40020424	DMA channel 2 peripheral address          register
+DMA2: CMAR2 @ 0x40020428	DMA channel 2 memory address          register
+DMA2: CCR3 @ 0x40020430	DMA channel configuration register          (DMA_CCR)
+DMA2: CNDTR3 @ 0x40020434	DMA channel 3 number of data          register
+DMA2: CPAR3 @ 0x40020438	DMA channel 3 peripheral address          register
+DMA2: CMAR3 @ 0x4002043c	DMA channel 3 memory address          register
+DMA2: CCR4 @ 0x40020444	DMA channel configuration register          (DMA_CCR)
+DMA2: CNDTR4 @ 0x40020448	DMA channel 4 number of data          register
+DMA2: CPAR4 @ 0x4002044c	DMA channel 4 peripheral address          register
+DMA2: CMAR4 @ 0x40020450	DMA channel 4 memory address          register
+DMA2: CCR5 @ 0x40020458	DMA channel configuration register          (DMA_CCR)
+DMA2: CNDTR5 @ 0x4002045c	DMA channel 5 number of data          register
+DMA2: CPAR5 @ 0x40020460	DMA channel 5 peripheral address          register
+DMA2: CMAR5 @ 0x40020464	DMA channel 5 memory address          register
+DMA2: CCR6 @ 0x4002046c	DMA channel configuration register          (DMA_CCR)
+DMA2: CNDTR6 @ 0x40020470	DMA channel 6 number of data          register
+DMA2: CPAR6 @ 0x40020474	DMA channel 6 peripheral address          register
+DMA2: CMAR6 @ 0x40020478	DMA channel 6 memory address          register
+DMA2: CCR7 @ 0x40020480	DMA channel configuration register          (DMA_CCR)
+DMA2: CNDTR7 @ 0x40020484	DMA channel 7 number of data          register
+DMA2: CPAR7 @ 0x40020488	DMA channel 7 peripheral address          register
+DMA2: CMAR7 @ 0x4002048c	DMA channel 7 memory address          register
+SDIO: POWER @ 0x40018000	Bits 1:0 = PWRCTRL: Power supply control          bits
+SDIO: CLKCR @ 0x40018004	SDI clock control register          (SDIO_CLKCR)
+SDIO: ARG @ 0x40018008	Bits 31:0 = : Command argument
+SDIO: CMD @ 0x4001800c	SDIO command register          (SDIO_CMD)
+SDIO: RESPCMD @ 0x40018010	SDIO command register
+SDIO: RESPI1 @ 0x40018014	Bits 31:0 = CARDSTATUS1
+SDIO: RESP2 @ 0x40018018	Bits 31:0 = CARDSTATUS2
+SDIO: RESP3 @ 0x4001801c	Bits 31:0 = CARDSTATUS3
+SDIO: RESP4 @ 0x40018020	Bits 31:0 = CARDSTATUS4
+SDIO: DTIMER @ 0x40018024	Bits 31:0 = DATATIME: Data timeout          period
+SDIO: DLEN @ 0x40018028	Bits 24:0 = DATALENGTH: Data length          value
+SDIO: DCTRL @ 0x4001802c	SDIO data control register          (SDIO_DCTRL)
+SDIO: DCOUNT @ 0x40018030	Bits 24:0 = DATACOUNT: Data count          value
+SDIO: STA @ 0x40018034	SDIO status register          (SDIO_STA)
+SDIO: ICR @ 0x40018038	SDIO interrupt clear register          (SDIO_ICR)
+SDIO: MASK @ 0x4001803c	SDIO mask register (SDIO_MASK)
+SDIO: FIFOCNT @ 0x40018048	Bits 23:0 = FIFOCOUNT: Remaining number of          words to be written to or read from the          FIFO
+SDIO: FIFO @ 0x40018080	bits 31:0 = FIFOData: Receive and transmit          FIFO data
+RTC: CRH @ 0x40002800	RTC Control Register High
+RTC: CRL @ 0x40002804	RTC Control Register Low
+RTC: PRLH @ 0x40002808	RTC Prescaler Load Register          High
+RTC: PRLL @ 0x4000280c	RTC Prescaler Load Register          Low
+RTC: DIVH @ 0x40002810	RTC Prescaler Divider Register          High
+RTC: DIVL @ 0x40002814	RTC Prescaler Divider Register          Low
+RTC: CNTH @ 0x40002818	RTC Counter Register High
+RTC: CNTL @ 0x4000281c	RTC Counter Register Low
+RTC: ALRH @ 0x40002820	RTC Alarm Register High
+RTC: ALRL @ 0x40002824	RTC Alarm Register Low
+BKP: DR1 @ 0x40006c04	Backup data register (BKP_DR)
+BKP: DR2 @ 0x40006c08	Backup data register (BKP_DR)
+BKP: DR3 @ 0x40006c0c	Backup data register (BKP_DR)
+BKP: DR4 @ 0x40006c10	Backup data register (BKP_DR)
+BKP: DR5 @ 0x40006c14	Backup data register (BKP_DR)
+BKP: DR6 @ 0x40006c18	Backup data register (BKP_DR)
+BKP: DR7 @ 0x40006c1c	Backup data register (BKP_DR)
+BKP: DR8 @ 0x40006c20	Backup data register (BKP_DR)
+BKP: DR9 @ 0x40006c24	Backup data register (BKP_DR)
+BKP: DR10 @ 0x40006c28	Backup data register (BKP_DR)
+BKP: DR11 @ 0x40006c40	Backup data register (BKP_DR)
+BKP: DR12 @ 0x40006c44	Backup data register (BKP_DR)
+BKP: DR13 @ 0x40006c48	Backup data register (BKP_DR)
+BKP: DR14 @ 0x40006c4c	Backup data register (BKP_DR)
+BKP: DR15 @ 0x40006c50	Backup data register (BKP_DR)
+BKP: DR16 @ 0x40006c54	Backup data register (BKP_DR)
+BKP: DR17 @ 0x40006c58	Backup data register (BKP_DR)
+BKP: DR18 @ 0x40006c5c	Backup data register (BKP_DR)
+BKP: DR19 @ 0x40006c60	Backup data register (BKP_DR)
+BKP: DR20 @ 0x40006c64	Backup data register (BKP_DR)
+BKP: DR21 @ 0x40006c68	Backup data register (BKP_DR)
+BKP: DR22 @ 0x40006c6c	Backup data register (BKP_DR)
+BKP: DR23 @ 0x40006c70	Backup data register (BKP_DR)
+BKP: DR24 @ 0x40006c74	Backup data register (BKP_DR)
+BKP: DR25 @ 0x40006c78	Backup data register (BKP_DR)
+BKP: DR26 @ 0x40006c7c	Backup data register (BKP_DR)
+BKP: DR27 @ 0x40006c80	Backup data register (BKP_DR)
+BKP: DR28 @ 0x40006c84	Backup data register (BKP_DR)
+BKP: DR29 @ 0x40006c88	Backup data register (BKP_DR)
+BKP: DR30 @ 0x40006c8c	Backup data register (BKP_DR)
+BKP: DR31 @ 0x40006c90	Backup data register (BKP_DR)
+BKP: DR32 @ 0x40006c94	Backup data register (BKP_DR)
+BKP: DR33 @ 0x40006c98	Backup data register (BKP_DR)
+BKP: DR34 @ 0x40006c9c	Backup data register (BKP_DR)
+BKP: DR35 @ 0x40006ca0	Backup data register (BKP_DR)
+BKP: DR36 @ 0x40006ca4	Backup data register (BKP_DR)
+BKP: DR37 @ 0x40006ca8	Backup data register (BKP_DR)
+BKP: DR38 @ 0x40006cac	Backup data register (BKP_DR)
+BKP: DR39 @ 0x40006cb0	Backup data register (BKP_DR)
+BKP: DR40 @ 0x40006cb4	Backup data register (BKP_DR)
+BKP: DR41 @ 0x40006cb8	Backup data register (BKP_DR)
+BKP: DR42 @ 0x40006cbc	Backup data register (BKP_DR)
+BKP: RTCCR @ 0x40006c2c	RTC clock calibration register          (BKP_RTCCR)
+BKP: CR @ 0x40006c30	Backup control register          (BKP_CR)
+BKP: CSR @ 0x40006c34	BKP_CSR control/status register          (BKP_CSR)
+IWDG: KR @ 0x40003000	Key register (IWDG_KR)
+IWDG: PR @ 0x40003004	Prescaler register (IWDG_PR)
+IWDG: RLR @ 0x40003008	Reload register (IWDG_RLR)
+IWDG: SR @ 0x4000300c	Status register (IWDG_SR)
+WWDG: CR @ 0x40002c00	Control register (WWDG_CR)
+WWDG: CFR @ 0x40002c04	Configuration register          (WWDG_CFR)
+WWDG: SR @ 0x40002c08	Status register (WWDG_SR)
+TIM1: CR1 @ 0x40012c00	control register 1
+TIM1: CR2 @ 0x40012c04	control register 2
+TIM1: SMCR @ 0x40012c08	slave mode control register
+TIM1: DIER @ 0x40012c0c	DMA/Interrupt enable register
+TIM1: SR @ 0x40012c10	status register
+TIM1: EGR @ 0x40012c14	event generation register
+TIM1: CCMR1_Output @ 0x40012c18	capture/compare mode register (output          mode)
+TIM1: CCMR1_Input @ 0x40012c18	capture/compare mode register 1 (input          mode)
+TIM1: CCMR2_Output @ 0x40012c1c	capture/compare mode register (output          mode)
+TIM1: CCMR2_Input @ 0x40012c1c	capture/compare mode register 2 (input          mode)
+TIM1: CCER @ 0x40012c20	capture/compare enable          register
+TIM1: CNT @ 0x40012c24	counter
+TIM1: PSC @ 0x40012c28	prescaler
+TIM1: ARR @ 0x40012c2c	auto-reload register
+TIM1: CCR1 @ 0x40012c34	capture/compare register 1
+TIM1: CCR2 @ 0x40012c38	capture/compare register 2
+TIM1: CCR3 @ 0x40012c3c	capture/compare register 3
+TIM1: CCR4 @ 0x40012c40	capture/compare register 4
+TIM1: DCR @ 0x40012c48	DMA control register
+TIM1: DMAR @ 0x40012c4c	DMA address for full transfer
+TIM1: RCR @ 0x40012c30	repetition counter register
+TIM1: BDTR @ 0x40012c44	break and dead-time register
+TIM8: CR1 @ 0x40013400	control register 1
+TIM8: CR2 @ 0x40013404	control register 2
+TIM8: SMCR @ 0x40013408	slave mode control register
+TIM8: DIER @ 0x4001340c	DMA/Interrupt enable register
+TIM8: SR @ 0x40013410	status register
+TIM8: EGR @ 0x40013414	event generation register
+TIM8: CCMR1_Output @ 0x40013418	capture/compare mode register (output          mode)
+TIM8: CCMR1_Input @ 0x40013418	capture/compare mode register 1 (input          mode)
+TIM8: CCMR2_Output @ 0x4001341c	capture/compare mode register (output          mode)
+TIM8: CCMR2_Input @ 0x4001341c	capture/compare mode register 2 (input          mode)
+TIM8: CCER @ 0x40013420	capture/compare enable          register
+TIM8: CNT @ 0x40013424	counter
+TIM8: PSC @ 0x40013428	prescaler
+TIM8: ARR @ 0x4001342c	auto-reload register
+TIM8: CCR1 @ 0x40013434	capture/compare register 1
+TIM8: CCR2 @ 0x40013438	capture/compare register 2
+TIM8: CCR3 @ 0x4001343c	capture/compare register 3
+TIM8: CCR4 @ 0x40013440	capture/compare register 4
+TIM8: DCR @ 0x40013448	DMA control register
+TIM8: DMAR @ 0x4001344c	DMA address for full transfer
+TIM8: RCR @ 0x40013430	repetition counter register
+TIM8: BDTR @ 0x40013444	break and dead-time register
+TIM2: CR1 @ 0x40000000	control register 1
+TIM2: CR2 @ 0x40000004	control register 2
+TIM2: SMCR @ 0x40000008	slave mode control register
+TIM2: DIER @ 0x4000000c	DMA/Interrupt enable register
+TIM2: SR @ 0x40000010	status register
+TIM2: EGR @ 0x40000014	event generation register
+TIM2: CCMR1_Output @ 0x40000018	capture/compare mode register 1 (output          mode)
+TIM2: CCMR1_Input @ 0x40000018	capture/compare mode register 1 (input          mode)
+TIM2: CCMR2_Output @ 0x4000001c	capture/compare mode register 2 (output          mode)
+TIM2: CCMR2_Input @ 0x4000001c	capture/compare mode register 2 (input          mode)
+TIM2: CCER @ 0x40000020	capture/compare enable          register
+TIM2: CNT @ 0x40000024	counter
+TIM2: PSC @ 0x40000028	prescaler
+TIM2: ARR @ 0x4000002c	auto-reload register
+TIM2: CCR1 @ 0x40000034	capture/compare register 1
+TIM2: CCR2 @ 0x40000038	capture/compare register 2
+TIM2: CCR3 @ 0x4000003c	capture/compare register 3
+TIM2: CCR4 @ 0x40000040	capture/compare register 4
+TIM2: DCR @ 0x40000048	DMA control register
+TIM2: DMAR @ 0x4000004c	DMA address for full transfer
+TIM3: CR1 @ 0x40000400	control register 1
+TIM3: CR2 @ 0x40000404	control register 2
+TIM3: SMCR @ 0x40000408	slave mode control register
+TIM3: DIER @ 0x4000040c	DMA/Interrupt enable register
+TIM3: SR @ 0x40000410	status register
+TIM3: EGR @ 0x40000414	event generation register
+TIM3: CCMR1_Output @ 0x40000418	capture/compare mode register 1 (output          mode)
+TIM3: CCMR1_Input @ 0x40000418	capture/compare mode register 1 (input          mode)
+TIM3: CCMR2_Output @ 0x4000041c	capture/compare mode register 2 (output          mode)
+TIM3: CCMR2_Input @ 0x4000041c	capture/compare mode register 2 (input          mode)
+TIM3: CCER @ 0x40000420	capture/compare enable          register
+TIM3: CNT @ 0x40000424	counter
+TIM3: PSC @ 0x40000428	prescaler
+TIM3: ARR @ 0x4000042c	auto-reload register
+TIM3: CCR1 @ 0x40000434	capture/compare register 1
+TIM3: CCR2 @ 0x40000438	capture/compare register 2
+TIM3: CCR3 @ 0x4000043c	capture/compare register 3
+TIM3: CCR4 @ 0x40000440	capture/compare register 4
+TIM3: DCR @ 0x40000448	DMA control register
+TIM3: DMAR @ 0x4000044c	DMA address for full transfer
+TIM4: CR1 @ 0x40000800	control register 1
+TIM4: CR2 @ 0x40000804	control register 2
+TIM4: SMCR @ 0x40000808	slave mode control register
+TIM4: DIER @ 0x4000080c	DMA/Interrupt enable register
+TIM4: SR @ 0x40000810	status register
+TIM4: EGR @ 0x40000814	event generation register
+TIM4: CCMR1_Output @ 0x40000818	capture/compare mode register 1 (output          mode)
+TIM4: CCMR1_Input @ 0x40000818	capture/compare mode register 1 (input          mode)
+TIM4: CCMR2_Output @ 0x4000081c	capture/compare mode register 2 (output          mode)
+TIM4: CCMR2_Input @ 0x4000081c	capture/compare mode register 2 (input          mode)
+TIM4: CCER @ 0x40000820	capture/compare enable          register
+TIM4: CNT @ 0x40000824	counter
+TIM4: PSC @ 0x40000828	prescaler
+TIM4: ARR @ 0x4000082c	auto-reload register
+TIM4: CCR1 @ 0x40000834	capture/compare register 1
+TIM4: CCR2 @ 0x40000838	capture/compare register 2
+TIM4: CCR3 @ 0x4000083c	capture/compare register 3
+TIM4: CCR4 @ 0x40000840	capture/compare register 4
+TIM4: DCR @ 0x40000848	DMA control register
+TIM4: DMAR @ 0x4000084c	DMA address for full transfer
+TIM5: CR1 @ 0x40000c00	control register 1
+TIM5: CR2 @ 0x40000c04	control register 2
+TIM5: SMCR @ 0x40000c08	slave mode control register
+TIM5: DIER @ 0x40000c0c	DMA/Interrupt enable register
+TIM5: SR @ 0x40000c10	status register
+TIM5: EGR @ 0x40000c14	event generation register
+TIM5: CCMR1_Output @ 0x40000c18	capture/compare mode register 1 (output          mode)
+TIM5: CCMR1_Input @ 0x40000c18	capture/compare mode register 1 (input          mode)
+TIM5: CCMR2_Output @ 0x40000c1c	capture/compare mode register 2 (output          mode)
+TIM5: CCMR2_Input @ 0x40000c1c	capture/compare mode register 2 (input          mode)
+TIM5: CCER @ 0x40000c20	capture/compare enable          register
+TIM5: CNT @ 0x40000c24	counter
+TIM5: PSC @ 0x40000c28	prescaler
+TIM5: ARR @ 0x40000c2c	auto-reload register
+TIM5: CCR1 @ 0x40000c34	capture/compare register 1
+TIM5: CCR2 @ 0x40000c38	capture/compare register 2
+TIM5: CCR3 @ 0x40000c3c	capture/compare register 3
+TIM5: CCR4 @ 0x40000c40	capture/compare register 4
+TIM5: DCR @ 0x40000c48	DMA control register
+TIM5: DMAR @ 0x40000c4c	DMA address for full transfer
+TIM9: CR1 @ 0x40014c00	control register 1
+TIM9: CR2 @ 0x40014c04	control register 2
+TIM9: SMCR @ 0x40014c08	slave mode control register
+TIM9: DIER @ 0x40014c0c	DMA/Interrupt enable register
+TIM9: SR @ 0x40014c10	status register
+TIM9: EGR @ 0x40014c14	event generation register
+TIM9: CCMR1_Output @ 0x40014c18	capture/compare mode register 1 (output          mode)
+TIM9: CCMR1_Input @ 0x40014c18	capture/compare mode register 1 (input          mode)
+TIM9: CCER @ 0x40014c20	capture/compare enable          register
+TIM9: CNT @ 0x40014c24	counter
+TIM9: PSC @ 0x40014c28	prescaler
+TIM9: ARR @ 0x40014c2c	auto-reload register
+TIM9: CCR1 @ 0x40014c34	capture/compare register 1
+TIM9: CCR2 @ 0x40014c38	capture/compare register 2
+TIM12: CR1 @ 0x40001800	control register 1
+TIM12: CR2 @ 0x40001804	control register 2
+TIM12: SMCR @ 0x40001808	slave mode control register
+TIM12: DIER @ 0x4000180c	DMA/Interrupt enable register
+TIM12: SR @ 0x40001810	status register
+TIM12: EGR @ 0x40001814	event generation register
+TIM12: CCMR1_Output @ 0x40001818	capture/compare mode register 1 (output          mode)
+TIM12: CCMR1_Input @ 0x40001818	capture/compare mode register 1 (input          mode)
+TIM12: CCER @ 0x40001820	capture/compare enable          register
+TIM12: CNT @ 0x40001824	counter
+TIM12: PSC @ 0x40001828	prescaler
+TIM12: ARR @ 0x4000182c	auto-reload register
+TIM12: CCR1 @ 0x40001834	capture/compare register 1
+TIM12: CCR2 @ 0x40001838	capture/compare register 2
+TIM10: CR1 @ 0x40015000	control register 1
+TIM10: CR2 @ 0x40015004	control register 2
+TIM10: DIER @ 0x4001500c	DMA/Interrupt enable register
+TIM10: SR @ 0x40015010	status register
+TIM10: EGR @ 0x40015014	event generation register
+TIM10: CCMR1_Output @ 0x40015018	capture/compare mode register (output          mode)
+TIM10: CCMR1_Input @ 0x40015018	capture/compare mode register (input          mode)
+TIM10: CCER @ 0x40015020	capture/compare enable          register
+TIM10: CNT @ 0x40015024	counter
+TIM10: PSC @ 0x40015028	prescaler
+TIM10: ARR @ 0x4001502c	auto-reload register
+TIM10: CCR1 @ 0x40015034	capture/compare register 1
+TIM11: CR1 @ 0x40015400	control register 1
+TIM11: CR2 @ 0x40015404	control register 2
+TIM11: DIER @ 0x4001540c	DMA/Interrupt enable register
+TIM11: SR @ 0x40015410	status register
+TIM11: EGR @ 0x40015414	event generation register
+TIM11: CCMR1_Output @ 0x40015418	capture/compare mode register (output          mode)
+TIM11: CCMR1_Input @ 0x40015418	capture/compare mode register (input          mode)
+TIM11: CCER @ 0x40015420	capture/compare enable          register
+TIM11: CNT @ 0x40015424	counter
+TIM11: PSC @ 0x40015428	prescaler
+TIM11: ARR @ 0x4001542c	auto-reload register
+TIM11: CCR1 @ 0x40015434	capture/compare register 1
+TIM13: CR1 @ 0x40001c00	control register 1
+TIM13: CR2 @ 0x40001c04	control register 2
+TIM13: DIER @ 0x40001c0c	DMA/Interrupt enable register
+TIM13: SR @ 0x40001c10	status register
+TIM13: EGR @ 0x40001c14	event generation register
+TIM13: CCMR1_Output @ 0x40001c18	capture/compare mode register (output          mode)
+TIM13: CCMR1_Input @ 0x40001c18	capture/compare mode register (input          mode)
+TIM13: CCER @ 0x40001c20	capture/compare enable          register
+TIM13: CNT @ 0x40001c24	counter
+TIM13: PSC @ 0x40001c28	prescaler
+TIM13: ARR @ 0x40001c2c	auto-reload register
+TIM13: CCR1 @ 0x40001c34	capture/compare register 1
+TIM14: CR1 @ 0x40002000	control register 1
+TIM14: CR2 @ 0x40002004	control register 2
+TIM14: DIER @ 0x4000200c	DMA/Interrupt enable register
+TIM14: SR @ 0x40002010	status register
+TIM14: EGR @ 0x40002014	event generation register
+TIM14: CCMR1_Output @ 0x40002018	capture/compare mode register (output          mode)
+TIM14: CCMR1_Input @ 0x40002018	capture/compare mode register (input          mode)
+TIM14: CCER @ 0x40002020	capture/compare enable          register
+TIM14: CNT @ 0x40002024	counter
+TIM14: PSC @ 0x40002028	prescaler
+TIM14: ARR @ 0x4000202c	auto-reload register
+TIM14: CCR1 @ 0x40002034	capture/compare register 1
+TIM6: CR1 @ 0x40001000	control register 1
+TIM6: CR2 @ 0x40001004	control register 2
+TIM6: DIER @ 0x4000100c	DMA/Interrupt enable register
+TIM6: SR @ 0x40001010	status register
+TIM6: EGR @ 0x40001014	event generation register
+TIM6: CNT @ 0x40001024	counter
+TIM6: PSC @ 0x40001028	prescaler
+TIM6: ARR @ 0x4000102c	auto-reload register
+TIM7: CR1 @ 0x40001400	control register 1
+TIM7: CR2 @ 0x40001404	control register 2
+TIM7: DIER @ 0x4000140c	DMA/Interrupt enable register
+TIM7: SR @ 0x40001410	status register
+TIM7: EGR @ 0x40001414	event generation register
+TIM7: CNT @ 0x40001424	counter
+TIM7: PSC @ 0x40001428	prescaler
+TIM7: ARR @ 0x4000142c	auto-reload register
+I2C1: CR1 @ 0x40005400	Control register 1
+I2C1: CR2 @ 0x40005404	Control register 2
+I2C1: OAR1 @ 0x40005408	Own address register 1
+I2C1: OAR2 @ 0x4000540c	Own address register 2
+I2C1: DR @ 0x40005410	Data register
+I2C1: SR1 @ 0x40005414	Status register 1
+I2C1: SR2 @ 0x40005418	Status register 2
+I2C1: CCR @ 0x4000541c	Clock control register
+I2C1: TRISE @ 0x40005420	TRISE register
+I2C2: CR1 @ 0x40005800	Control register 1
+I2C2: CR2 @ 0x40005804	Control register 2
+I2C2: OAR1 @ 0x40005808	Own address register 1
+I2C2: OAR2 @ 0x4000580c	Own address register 2
+I2C2: DR @ 0x40005810	Data register
+I2C2: SR1 @ 0x40005814	Status register 1
+I2C2: SR2 @ 0x40005818	Status register 2
+I2C2: CCR @ 0x4000581c	Clock control register
+I2C2: TRISE @ 0x40005820	TRISE register
+SPI1: CR1 @ 0x40013000	control register 1
+SPI1: CR2 @ 0x40013004	control register 2
+SPI1: SR @ 0x40013008	status register
+SPI1: DR @ 0x4001300c	data register
+SPI1: CRCPR @ 0x40013010	CRC polynomial register
+SPI1: RXCRCR @ 0x40013014	RX CRC register
+SPI1: TXCRCR @ 0x40013018	TX CRC register
+SPI1: I2SCFGR @ 0x4001301c	I2S configuration register
+SPI1: I2SPR @ 0x40013020	I2S prescaler register
+SPI2: CR1 @ 0x40003800	control register 1
+SPI2: CR2 @ 0x40003804	control register 2
+SPI2: SR @ 0x40003808	status register
+SPI2: DR @ 0x4000380c	data register
+SPI2: CRCPR @ 0x40003810	CRC polynomial register
+SPI2: RXCRCR @ 0x40003814	RX CRC register
+SPI2: TXCRCR @ 0x40003818	TX CRC register
+SPI2: I2SCFGR @ 0x4000381c	I2S configuration register
+SPI2: I2SPR @ 0x40003820	I2S prescaler register
+SPI3: CR1 @ 0x40003c00	control register 1
+SPI3: CR2 @ 0x40003c04	control register 2
+SPI3: SR @ 0x40003c08	status register
+SPI3: DR @ 0x40003c0c	data register
+SPI3: CRCPR @ 0x40003c10	CRC polynomial register
+SPI3: RXCRCR @ 0x40003c14	RX CRC register
+SPI3: TXCRCR @ 0x40003c18	TX CRC register
+SPI3: I2SCFGR @ 0x40003c1c	I2S configuration register
+SPI3: I2SPR @ 0x40003c20	I2S prescaler register
+USART1: SR @ 0x40013800	Status register
+USART1: DR @ 0x40013804	Data register
+USART1: BRR @ 0x40013808	Baud rate register
+USART1: CR1 @ 0x4001380c	Control register 1
+USART1: CR2 @ 0x40013810	Control register 2
+USART1: CR3 @ 0x40013814	Control register 3
+USART1: GTPR @ 0x40013818	Guard time and prescaler          register
+USART2: SR @ 0x40004400	Status register
+USART2: DR @ 0x40004404	Data register
+USART2: BRR @ 0x40004408	Baud rate register
+USART2: CR1 @ 0x4000440c	Control register 1
+USART2: CR2 @ 0x40004410	Control register 2
+USART2: CR3 @ 0x40004414	Control register 3
+USART2: GTPR @ 0x40004418	Guard time and prescaler          register
+USART3: SR @ 0x40004800	Status register
+USART3: DR @ 0x40004804	Data register
+USART3: BRR @ 0x40004808	Baud rate register
+USART3: CR1 @ 0x4000480c	Control register 1
+USART3: CR2 @ 0x40004810	Control register 2
+USART3: CR3 @ 0x40004814	Control register 3
+USART3: GTPR @ 0x40004818	Guard time and prescaler          register
+ADC1: SR @ 0x40012400	status register
+ADC1: CR1 @ 0x40012404	control register 1
+ADC1: CR2 @ 0x40012408	control register 2
+ADC1: SMPR1 @ 0x4001240c	sample time register 1
+ADC1: SMPR2 @ 0x40012410	sample time register 2
+ADC1: JOFR1 @ 0x40012414	injected channel data offset register          x
+ADC1: JOFR2 @ 0x40012418	injected channel data offset register          x
+ADC1: JOFR3 @ 0x4001241c	injected channel data offset register          x
+ADC1: JOFR4 @ 0x40012420	injected channel data offset register          x
+ADC1: HTR @ 0x40012424	watchdog higher threshold          register
+ADC1: LTR @ 0x40012428	watchdog lower threshold          register
+ADC1: SQR1 @ 0x4001242c	regular sequence register 1
+ADC1: SQR2 @ 0x40012430	regular sequence register 2
+ADC1: SQR3 @ 0x40012434	regular sequence register 3
+ADC1: JSQR @ 0x40012438	injected sequence register
+ADC1: JDR1 @ 0x4001243c	injected data register x
+ADC1: JDR2 @ 0x40012440	injected data register x
+ADC1: JDR3 @ 0x40012444	injected data register x
+ADC1: JDR4 @ 0x40012448	injected data register x
+ADC1: DR @ 0x4001244c	regular data register
+ADC2: SR @ 0x40012800	status register
+ADC2: CR1 @ 0x40012804	control register 1
+ADC2: CR2 @ 0x40012808	control register 2
+ADC2: SMPR1 @ 0x4001280c	sample time register 1
+ADC2: SMPR2 @ 0x40012810	sample time register 2
+ADC2: JOFR1 @ 0x40012814	injected channel data offset register          x
+ADC2: JOFR2 @ 0x40012818	injected channel data offset register          x
+ADC2: JOFR3 @ 0x4001281c	injected channel data offset register          x
+ADC2: JOFR4 @ 0x40012820	injected channel data offset register          x
+ADC2: HTR @ 0x40012824	watchdog higher threshold          register
+ADC2: LTR @ 0x40012828	watchdog lower threshold          register
+ADC2: SQR1 @ 0x4001282c	regular sequence register 1
+ADC2: SQR2 @ 0x40012830	regular sequence register 2
+ADC2: SQR3 @ 0x40012834	regular sequence register 3
+ADC2: JSQR @ 0x40012838	injected sequence register
+ADC2: JDR1 @ 0x4001283c	injected data register x
+ADC2: JDR2 @ 0x40012840	injected data register x
+ADC2: JDR3 @ 0x40012844	injected data register x
+ADC2: JDR4 @ 0x40012848	injected data register x
+ADC2: DR @ 0x4001284c	regular data register
+ADC3: SR @ 0x40013c00	status register
+ADC3: CR1 @ 0x40013c04	control register 1
+ADC3: CR2 @ 0x40013c08	control register 2
+ADC3: SMPR1 @ 0x40013c0c	sample time register 1
+ADC3: SMPR2 @ 0x40013c10	sample time register 2
+ADC3: JOFR1 @ 0x40013c14	injected channel data offset register          x
+ADC3: JOFR2 @ 0x40013c18	injected channel data offset register          x
+ADC3: JOFR3 @ 0x40013c1c	injected channel data offset register          x
+ADC3: JOFR4 @ 0x40013c20	injected channel data offset register          x
+ADC3: HTR @ 0x40013c24	watchdog higher threshold          register
+ADC3: LTR @ 0x40013c28	watchdog lower threshold          register
+ADC3: SQR1 @ 0x40013c2c	regular sequence register 1
+ADC3: SQR2 @ 0x40013c30	regular sequence register 2
+ADC3: SQR3 @ 0x40013c34	regular sequence register 3
+ADC3: JSQR @ 0x40013c38	injected sequence register
+ADC3: JDR1 @ 0x40013c3c	injected data register x
+ADC3: JDR2 @ 0x40013c40	injected data register x
+ADC3: JDR3 @ 0x40013c44	injected data register x
+ADC3: JDR4 @ 0x40013c48	injected data register x
+ADC3: DR @ 0x40013c4c	regular data register
+CAN: CAN_MCR @ 0x40006400	CAN_MCR
+CAN: CAN_MSR @ 0x40006404	CAN_MSR
+CAN: CAN_TSR @ 0x40006408	CAN_TSR
+CAN: CAN_RF0R @ 0x4000640c	CAN_RF0R
+CAN: CAN_RF1R @ 0x40006410	CAN_RF1R
+CAN: CAN_IER @ 0x40006414	CAN_IER
+CAN: CAN_ESR @ 0x40006418	CAN_ESR
+CAN: CAN_BTR @ 0x4000641c	CAN_BTR
+CAN: CAN_TI0R @ 0x40006580	CAN_TI0R
+CAN: CAN_TDT0R @ 0x40006584	CAN_TDT0R
+CAN: CAN_TDL0R @ 0x40006588	CAN_TDL0R
+CAN: CAN_TDH0R @ 0x4000658c	CAN_TDH0R
+CAN: CAN_TI1R @ 0x40006590	CAN_TI1R
+CAN: CAN_TDT1R @ 0x40006594	CAN_TDT1R
+CAN: CAN_TDL1R @ 0x40006598	CAN_TDL1R
+CAN: CAN_TDH1R @ 0x4000659c	CAN_TDH1R
+CAN: CAN_TI2R @ 0x400065a0	CAN_TI2R
+CAN: CAN_TDT2R @ 0x400065a4	CAN_TDT2R
+CAN: CAN_TDL2R @ 0x400065a8	CAN_TDL2R
+CAN: CAN_TDH2R @ 0x400065ac	CAN_TDH2R
+CAN: CAN_RI0R @ 0x400065b0	CAN_RI0R
+CAN: CAN_RDT0R @ 0x400065b4	CAN_RDT0R
+CAN: CAN_RDL0R @ 0x400065b8	CAN_RDL0R
+CAN: CAN_RDH0R @ 0x400065bc	CAN_RDH0R
+CAN: CAN_RI1R @ 0x400065c0	CAN_RI1R
+CAN: CAN_RDT1R @ 0x400065c4	CAN_RDT1R
+CAN: CAN_RDL1R @ 0x400065c8	CAN_RDL1R
+CAN: CAN_RDH1R @ 0x400065cc	CAN_RDH1R
+CAN: CAN_FMR @ 0x40006600	CAN_FMR
+CAN: CAN_FM1R @ 0x40006604	CAN_FM1R
+CAN: CAN_FS1R @ 0x4000660c	CAN_FS1R
+CAN: CAN_FFA1R @ 0x40006614	CAN_FFA1R
+CAN: CAN_FA1R @ 0x4000661c	CAN_FA1R
+CAN: F0R1 @ 0x40006640	Filter bank 0 register 1
+CAN: F0R2 @ 0x40006644	Filter bank 0 register 2
+CAN: F1R1 @ 0x40006648	Filter bank 1 register 1
+CAN: F1R2 @ 0x4000664c	Filter bank 1 register 2
+CAN: F2R1 @ 0x40006650	Filter bank 2 register 1
+CAN: F2R2 @ 0x40006654	Filter bank 2 register 2
+CAN: F3R1 @ 0x40006658	Filter bank 3 register 1
+CAN: F3R2 @ 0x4000665c	Filter bank 3 register 2
+CAN: F4R1 @ 0x40006660	Filter bank 4 register 1
+CAN: F4R2 @ 0x40006664	Filter bank 4 register 2
+CAN: F5R1 @ 0x40006668	Filter bank 5 register 1
+CAN: F5R2 @ 0x4000666c	Filter bank 5 register 2
+CAN: F6R1 @ 0x40006670	Filter bank 6 register 1
+CAN: F6R2 @ 0x40006674	Filter bank 6 register 2
+CAN: F7R1 @ 0x40006678	Filter bank 7 register 1
+CAN: F7R2 @ 0x4000667c	Filter bank 7 register 2
+CAN: F8R1 @ 0x40006680	Filter bank 8 register 1
+CAN: F8R2 @ 0x40006684	Filter bank 8 register 2
+CAN: F9R1 @ 0x40006688	Filter bank 9 register 1
+CAN: F9R2 @ 0x4000668c	Filter bank 9 register 2
+CAN: F10R1 @ 0x40006690	Filter bank 10 register 1
+CAN: F10R2 @ 0x40006694	Filter bank 10 register 2
+CAN: F11R1 @ 0x40006698	Filter bank 11 register 1
+CAN: F11R2 @ 0x4000669c	Filter bank 11 register 2
+CAN: F12R1 @ 0x400066a0	Filter bank 4 register 1
+CAN: F12R2 @ 0x400066a4	Filter bank 12 register 2
+CAN: F13R1 @ 0x400066a8	Filter bank 13 register 1
+CAN: F13R2 @ 0x400066ac	Filter bank 13 register 2
+DAC: CR @ 0x40007400	Control register (DAC_CR)
+DAC: SWTRIGR @ 0x40007404	DAC software trigger register          (DAC_SWTRIGR)
+DAC: DHR12R1 @ 0x40007408	DAC channel1 12-bit right-aligned data          holding register(DAC_DHR12R1)
+DAC: DHR12L1 @ 0x4000740c	DAC channel1 12-bit left aligned data          holding register (DAC_DHR12L1)
+DAC: DHR8R1 @ 0x40007410	DAC channel1 8-bit right aligned data          holding register (DAC_DHR8R1)
+DAC: DHR12R2 @ 0x40007414	DAC channel2 12-bit right aligned data          holding register (DAC_DHR12R2)
+DAC: DHR12L2 @ 0x40007418	DAC channel2 12-bit left aligned data          holding register (DAC_DHR12L2)
+DAC: DHR8R2 @ 0x4000741c	DAC channel2 8-bit right-aligned data          holding register (DAC_DHR8R2)
+DAC: DHR12RD @ 0x40007420	Dual DAC 12-bit right-aligned data holding          register (DAC_DHR12RD), Bits 31:28 Reserved, Bits 15:12          Reserved
+DAC: DHR12LD @ 0x40007424	DUAL DAC 12-bit left aligned data holding          register (DAC_DHR12LD), Bits 19:16 Reserved, Bits 3:0          Reserved
+DAC: DHR8RD @ 0x40007428	DUAL DAC 8-bit right aligned data holding          register (DAC_DHR8RD), Bits 31:16 Reserved
+DAC: DOR1 @ 0x4000742c	DAC channel1 data output register          (DAC_DOR1)
+DAC: DOR2 @ 0x40007430	DAC channel2 data output register          (DAC_DOR2)
+DBG: IDCODE @ 0xe0042000	DBGMCU_IDCODE
+DBG: CR @ 0xe0042004	DBGMCU_CR
+UART4: SR @ 0x40004c00	UART4_SR
+UART4: DR @ 0x40004c04	UART4_DR
+UART4: BRR @ 0x40004c08	UART4_BRR
+UART4: CR1 @ 0x40004c0c	UART4_CR1
+UART4: CR2 @ 0x40004c10	UART4_CR2
+UART4: CR3 @ 0x40004c14	UART4_CR3
+UART5: SR @ 0x40005000	UART4_SR
+UART5: DR @ 0x40005004	UART4_DR
+UART5: BRR @ 0x40005008	UART4_BRR
+UART5: CR1 @ 0x4000500c	UART4_CR1
+UART5: CR2 @ 0x40005010	UART4_CR2
+UART5: CR3 @ 0x40005014	UART4_CR3
+CRC: DR @ 0x40023000	Data register
+CRC: IDR @ 0x40023004	Independent Data register
+CRC: CR @ 0x40023008	Control register
+FLASH: ACR @ 0x40022000	Flash access control register
+FLASH: KEYR @ 0x40022004	Flash key register
+FLASH: OPTKEYR @ 0x40022008	Flash option key register
+FLASH: SR @ 0x4002200c	Status register
+FLASH: CR @ 0x40022010	Control register
+FLASH: AR @ 0x40022014	Flash address register
+FLASH: OBR @ 0x4002201c	Option byte register
+FLASH: WRPR @ 0x40022020	Write protection register
+NVIC: ICTR @ 0xe000e004	Interrupt Controller Type          Register
+NVIC: STIR @ 0xe000ef00	Software Triggered Interrupt          Register
+NVIC: ISER0 @ 0xe000e100	Interrupt Set-Enable Register
+NVIC: ISER1 @ 0xe000e104	Interrupt Set-Enable Register
+NVIC: ICER0 @ 0xe000e180	Interrupt Clear-Enable          Register
+NVIC: ICER1 @ 0xe000e184	Interrupt Clear-Enable          Register
+NVIC: ISPR0 @ 0xe000e200	Interrupt Set-Pending Register
+NVIC: ISPR1 @ 0xe000e204	Interrupt Set-Pending Register
+NVIC: ICPR0 @ 0xe000e280	Interrupt Clear-Pending          Register
+NVIC: ICPR1 @ 0xe000e284	Interrupt Clear-Pending          Register
+NVIC: IABR0 @ 0xe000e300	Interrupt Active Bit Register
+NVIC: IABR1 @ 0xe000e304	Interrupt Active Bit Register
+NVIC: IPR0 @ 0xe000e400	Interrupt Priority Register
+NVIC: IPR1 @ 0xe000e404	Interrupt Priority Register
+NVIC: IPR2 @ 0xe000e408	Interrupt Priority Register
+NVIC: IPR3 @ 0xe000e40c	Interrupt Priority Register
+NVIC: IPR4 @ 0xe000e410	Interrupt Priority Register
+NVIC: IPR5 @ 0xe000e414	Interrupt Priority Register
+NVIC: IPR6 @ 0xe000e418	Interrupt Priority Register
+NVIC: IPR7 @ 0xe000e41c	Interrupt Priority Register
+NVIC: IPR8 @ 0xe000e420	Interrupt Priority Register
+NVIC: IPR9 @ 0xe000e424	Interrupt Priority Register
+NVIC: IPR10 @ 0xe000e428	Interrupt Priority Register
+NVIC: IPR11 @ 0xe000e42c	Interrupt Priority Register
+NVIC: IPR12 @ 0xe000e430	Interrupt Priority Register
+NVIC: IPR13 @ 0xe000e434	Interrupt Priority Register
+NVIC: IPR14 @ 0xe000e438	Interrupt Priority Register
+USB: EP0R @ 0x40005c00	endpoint 0 register
+USB: EP1R @ 0x40005c04	endpoint 1 register
+USB: EP2R @ 0x40005c08	endpoint 2 register
+USB: EP3R @ 0x40005c0c	endpoint 3 register
+USB: EP4R @ 0x40005c10	endpoint 4 register
+USB: EP5R @ 0x40005c14	endpoint 5 register
+USB: EP6R @ 0x40005c18	endpoint 6 register
+USB: EP7R @ 0x40005c1c	endpoint 7 register
+USB: CNTR @ 0x40005c40	control register
+USB: ISTR @ 0x40005c44	interrupt status register
+USB: FNR @ 0x40005c48	frame number register
+USB: DADDR @ 0x40005c4c	device address
+USB: BTABLE @ 0x40005c50	Buffer table address
