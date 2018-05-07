@@ -8,6 +8,7 @@
 #include "cdcacm.h"
 #include "UI.h"
 #include "LA.h"
+#include "sniffer.h"
 
 
 static uint32_t cpol, cpha, br, dff, lsbfirst, csidle, od;
@@ -110,7 +111,50 @@ void HWSPI_macro(uint32_t macro)
 {
 	switch(macro)
 	{
-		case 0:		cdcprintf("No macros available");
+		case 0:		cdcprintf("Available macros\r\n");
+				cdcprintf(" 1. EXTI SPI sniffer\r\n";
+				cdcprintf(" 2. HW SPI sniffer\r\n";
+				cdcprintf(" 11. cpol=0\r\n";
+				cdcprintf(" 12. cpol=1\r\n";
+				cdcprintf(" 13. cpha=0\r\n";
+				cdcprintf(" 14. cpha=1\r\n";
+				break;
+		case 1:		cdcprintf("Sniff settings cpol=%d, cpha=%d, csidle=%d\r\n", (cpol>>1), cpha, csidle);
+				cdcprintf("press any key to exit\r\n");
+				HWSPI_cleanup();
+				sniffSPI((cpol>>1), cpha, csidle);
+				HWSPI_setup_exc();
+				break;
+		case 2:		cdcprintf("Sniff settings cpol=%d, cpha=%d, csidle=%d\r\n", (cpol>>1), cpha, csidle);
+				cdcprintf("press any key to exit\r\n");
+				HWSPI_cleanup();
+				rcc_periph_clock_enable(BP_SPI_CLK);
+				spi_reset(BP_SPI);
+				if(cpol) spi_set_clock_polarity_1(BP_SPI);
+					else spi_set_clock_polarity_0(BP_SPI);
+				if(cpha) spi_set_clock_phase_1(BP_SPI);
+					else spi_set_clock_phase_0(BP_SPI);
+//				spi_set_standard_mode(BP_SPI, 0);
+				spi_enable(BP_SPI);
+				spi_set_slave_mode(BP_SPI);
+				spi_enable_software_slave_management(BP_SPI);
+				while(!cdcbyteready())
+				{
+					if(SPI_SR(BP_SPI)&SPI_SR_RXNE)
+					{
+						cdcputc((gpio_get(BP_SPI_CS_PORT, BP_SPI_CS_PIN)?'-':'_'));
+						cdcprintf("0x%02X", spi_read(BP_SPI));
+					}
+				}
+				if(modeConfig.init) HWSPI_setup_exc();
+				break;
+		case 11:	spi_set_clock_polarity_0(BP_SPI);
+				break;
+		case 12:	spi_set_clock_polarity_1(BP_SPI);
+				break;
+		case 13:	spi_set_clock_phase_0(BP_SPI);
+				break;
+		case 14:	spi_set_clock_phase_1(BP_SPI);
 				break;
 		default:	cdcprintf("Macro not defined");
 				modeConfig.error=1;
@@ -380,4 +424,10 @@ uint16_t HWSPI_xfer(uint16_t d)
 {
 	return (uint16_t) spi_xfer(BP_SPI, (uint16_t)d);
 }
+
+
+
+
+
+
 
