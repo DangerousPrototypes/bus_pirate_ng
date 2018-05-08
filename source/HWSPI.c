@@ -112,12 +112,12 @@ void HWSPI_macro(uint32_t macro)
 	switch(macro)
 	{
 		case 0:		cdcprintf("Available macros\r\n");
-				cdcprintf(" 1. EXTI SPI sniffer\r\n";
-				cdcprintf(" 2. HW SPI sniffer\r\n";
-				cdcprintf(" 11. cpol=0\r\n";
-				cdcprintf(" 12. cpol=1\r\n";
-				cdcprintf(" 13. cpha=0\r\n";
-				cdcprintf(" 14. cpha=1\r\n";
+				cdcprintf(" 1. EXTI SPI sniffer (duplex)\r\n");
+				cdcprintf(" 2. HW SPI sniffer (MISO ony)\r\n");
+				cdcprintf(" 11. cpol=0\r\n");
+				cdcprintf(" 12. cpol=1\r\n");
+				cdcprintf(" 13. cpha=0\r\n");
+				cdcprintf(" 14. cpha=1\r\n");
 				break;
 		case 1:		cdcprintf("Sniff settings cpol=%d, cpha=%d, csidle=%d\r\n", (cpol>>1), cpha, csidle);
 				cdcprintf("press any key to exit\r\n");

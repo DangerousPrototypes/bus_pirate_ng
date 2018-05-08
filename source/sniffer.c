@@ -8,12 +8,43 @@
 #include "UI.h"
 #include "sniffer.h"
 
-static volatile uint8_t armed;
+static volatile uint8_t armed, state;
 static volatile uint8_t csidle;
-static uint8_t miso, mosi, clock;
+static uint8_t miso, mosi, clock, data;
 
 
+enum {
+	WAITFORSTART,
+	GET8BITS,
+	GETACK,
+};
 
+
+void (*sniffisr)(void);
+
+void sniffI2C(void)
+{
+	exti_set_trigger(EXTI13, EXTI_TRIGGER_RISING);
+	exti_set_trigger(EXTI15, EXTI_TRIGGER_BOTH);
+	
+	data=0;
+	clock=0;
+	state=WAITFORSTART;
+	sniffisr=exti15_10_isr_i2c;
+
+	exti_select_source(EXTI13, GPIOB);
+	exti_select_source(EXTI15, GPIOB);
+	exti_enable_request(EXTI13);
+	exti_enable_request(EXTI15);
+//	nvic_set_priority(NVIC_EXTI15_10_IRQ, 0);
+	nvic_enable_irq(NVIC_EXTI15_10_IRQ);
+
+	cdcgetc();
+
+	nvic_disable_irq(NVIC_EXTI15_10_IRQ);
+	exti_disable_request(EXTI13);
+	exti_disable_request(EXTI15);
+}
 
 void sniffSPI(uint8_t cpol, uint8_t cpha, uint8_t cs)
 {
@@ -47,6 +78,8 @@ void sniffSPI(uint8_t cpol, uint8_t cpha, uint8_t cs)
 	mosi=0;
 	armed=0;
 
+	sniffisr=exti15_10_isr_spi;
+
 	exti_select_source(EXTI12, GPIOB);
 	exti_select_source(EXTI13, GPIOB);
 	exti_enable_request(EXTI12);
@@ -64,6 +97,12 @@ void sniffSPI(uint8_t cpol, uint8_t cpha, uint8_t cs)
 
 //
 void exti15_10_isr(void)
+{
+	sniffisr();
+}
+
+// SPi isr
+void exti15_10_isr_spi(void)
 {
 	if(exti_get_flag_status(EXTI10))		// not used
 	{
@@ -123,6 +162,75 @@ void exti15_10_isr(void)
 	}
 	if(exti_get_flag_status(EXTI15))		// MOSI/SDA
 	{
+		exti_reset_request(EXTI15);
+	}
+}
+
+
+
+// i2c isr
+void exti15_10_isr_i2c(void)
+{
+	if(exti_get_flag_status(EXTI10))		// not used
+	{
+		exti_reset_request(EXTI10);
+	}
+	if(exti_get_flag_status(EXTI11))		// not used
+	{
+		exti_reset_request(EXTI11);
+	}
+	if(exti_get_flag_status(EXTI12))		// CS
+	{
+		exti_reset_request(EXTI12);
+	}
+	if(exti_get_flag_status(EXTI13))		// CLOCK/SCL
+	{
+		switch(state)
+		{
+			case GETACK:
+				if(gpio_get(GPIOB, GPIO15)) cdcputc('.');
+					else cdcputc('A');
+				state=GET8BITS;
+				break;
+			case GET8BITS:
+				data<<=1;
+				if(gpio_get(GPIOB, GPIO15)) data|=1;
+				clock++;
+				if(clock==8)
+				{
+					state=GETACK;
+					clock=0;
+					cdcprintf("0x%02X", data);
+				}
+			default:
+				break;
+		}
+		exti_reset_request(EXTI13);
+	}
+	if(exti_get_flag_status(EXTI14))		// MISO/-
+	{
+		exti_reset_request(EXTI14);
+	}
+	if(exti_get_flag_status(EXTI15))		// MOSI/SDA
+	{
+		if((state!=GETACK))	//&&(clock==1))	//	(!((state==GETACK)||(clock!=0)))
+		{
+			if(gpio_get(GPIOB, GPIO13))
+			{
+				if(gpio_get(GPIOB, GPIO15))
+				{
+					cdcputc(']');
+					state=WAITFORSTART;
+					clock=0;
+				}
+				else
+				{
+					cdcputc('[');
+					state=GET8BITS;
+					clock=0;
+				}
+			}
+		}
 		exti_reset_request(EXTI15);
 	}
 }

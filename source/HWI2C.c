@@ -7,6 +7,7 @@
 #include "HWI2C.h"
 #include "cdcacm.h"
 #include "UI.h"
+#include "sniffer.h"
 
 static uint8_t	speed;
 
@@ -164,11 +165,16 @@ void HWI2C_macro(uint32_t macro)
 	switch(macro)
 	{
 		case 0:		cdcprintf(" 1. I2C Address search\r\n");
-//				cdcprintf(" 2. I2C sniffer\r\n";
+				cdcprintf(" 2. I2C sniffer\r\n");
 				break;
 		case 1:		I2Csearch();
 				break;
-		case 2:		cdcprintf("Macro not available");
+		case 2:		cdcprintf("press any key to exit\r\n");
+				HWI2C_cleanup();
+				sniffI2C();
+				HWI2C_setup_exc();
+				break;
+
 				break;
 		default:	cdcprintf("Macro not defined");
 				modeConfig.error=1;
