@@ -24,26 +24,26 @@ void (*sniffisr)(void);
 
 void sniffI2C(void)
 {
-	exti_set_trigger(EXTI13, EXTI_TRIGGER_RISING);
-	exti_set_trigger(EXTI15, EXTI_TRIGGER_BOTH);
+	exti_set_trigger(BP_EXTI_CLK, EXTI_TRIGGER_RISING);
+	exti_set_trigger(BP_EXTI_MOSI, EXTI_TRIGGER_BOTH);
 	
 	data=0;
 	clock=0;
 	state=WAITFORSTART;
 	sniffisr=exti15_10_isr_i2c;
 
-	exti_select_source(EXTI13, GPIOB);
-	exti_select_source(EXTI15, GPIOB);
-	exti_enable_request(EXTI13);
-	exti_enable_request(EXTI15);
-//	nvic_set_priority(NVIC_EXTI15_10_IRQ, 0);
+	exti_select_source(BP_EXTI_CLK, BP_EXTI_PORT);
+	exti_select_source(BP_EXTI_MOSI, BP_EXTI_PORT);
+	exti_enable_request(BP_EXTI_CLK);
+	exti_enable_request(BP_EXTI_MOSI);
+//	nvic_set_priority(NVIC_BP_EXTI_MOSI_10_IRQ, 0);
 	nvic_enable_irq(NVIC_EXTI15_10_IRQ);
 
 	cdcgetc();
 
 	nvic_disable_irq(NVIC_EXTI15_10_IRQ);
-	exti_disable_request(EXTI13);
-	exti_disable_request(EXTI15);
+	exti_disable_request(BP_EXTI_CLK);
+	exti_disable_request(BP_EXTI_MOSI);
 }
 
 void sniffSPI(uint8_t cpol, uint8_t cpha, uint8_t cs)
@@ -51,26 +51,26 @@ void sniffSPI(uint8_t cpol, uint8_t cpha, uint8_t cs)
 	if(cpol==0)
 	{
 		if(cpha==0)
-			exti_set_trigger(EXTI13, EXTI_TRIGGER_RISING);
+			exti_set_trigger(BP_EXTI_CLK, EXTI_TRIGGER_RISING);
 		else
-			exti_set_trigger(EXTI13, EXTI_TRIGGER_FALLING);
+			exti_set_trigger(BP_EXTI_CLK, EXTI_TRIGGER_FALLING);
 	}
 	else
 	{
 		if(cpha==0)
-			exti_set_trigger(EXTI13, EXTI_TRIGGER_FALLING);
+			exti_set_trigger(BP_EXTI_CLK, EXTI_TRIGGER_FALLING);
 		else
-			exti_set_trigger(EXTI13, EXTI_TRIGGER_RISING);
+			exti_set_trigger(BP_EXTI_CLK, EXTI_TRIGGER_RISING);
 	}
 
 
 	if(cs)
 	{
-		exti_set_trigger(EXTI12, EXTI_TRIGGER_FALLING);
+		exti_set_trigger(BP_EXTI_CS, EXTI_TRIGGER_FALLING);
 	}
 	else
 	{
-		exti_set_trigger(EXTI12, EXTI_TRIGGER_RISING);
+		exti_set_trigger(BP_EXTI_CS, EXTI_TRIGGER_RISING);
 	}
 
 	csidle=cs;
@@ -80,18 +80,18 @@ void sniffSPI(uint8_t cpol, uint8_t cpha, uint8_t cs)
 
 	sniffisr=exti15_10_isr_spi;
 
-	exti_select_source(EXTI12, GPIOB);
-	exti_select_source(EXTI13, GPIOB);
-	exti_enable_request(EXTI12);
-	exti_enable_request(EXTI13);
-	nvic_set_priority(NVIC_EXTI15_10_IRQ, 0);
+	exti_select_source(BP_EXTI_CS, BP_EXTI_PORT);
+	exti_select_source(BP_EXTI_CLK, BP_EXTI_PORT);
+	exti_enable_request(BP_EXTI_CS);
+	exti_enable_request(BP_EXTI_CLK);
+//	nvic_set_priority(NVIC_EXTI15_10_IRQ, 0);
 	nvic_enable_irq(NVIC_EXTI15_10_IRQ);
 
 	cdcgetc();
 
 	nvic_disable_irq(NVIC_EXTI15_10_IRQ);
-	exti_disable_request(EXTI12);
-	exti_disable_request(EXTI13);
+	exti_disable_request(BP_EXTI_CS);
+	exti_disable_request(BP_EXTI_CLK);
 }
 
 
@@ -112,38 +112,38 @@ void exti15_10_isr_spi(void)
 	{
 		exti_reset_request(EXTI11);
 	}
-	if(exti_get_flag_status(EXTI12))		// CS
+	if(exti_get_flag_status(BP_EXTI_CS))		// CS
 	{
 		if(armed)
 		{
 			if(csidle)
-				exti_set_trigger(EXTI12, EXTI_TRIGGER_FALLING);
+				exti_set_trigger(BP_EXTI_CS, EXTI_TRIGGER_FALLING);
 			else
-				exti_set_trigger(EXTI12, EXTI_TRIGGER_RISING);
+				exti_set_trigger(BP_EXTI_CS, EXTI_TRIGGER_RISING);
 			armed=0;
 			cdcputc(']');
 		}
 		else
 		{
 			if(csidle)
-				exti_set_trigger(EXTI12, EXTI_TRIGGER_RISING);
+				exti_set_trigger(BP_EXTI_CS, EXTI_TRIGGER_RISING);
 			else
-				exti_set_trigger(EXTI12, EXTI_TRIGGER_FALLING);
+				exti_set_trigger(BP_EXTI_CS, EXTI_TRIGGER_FALLING);
 			armed=1;
 			cdcputc('[');
 		}
 		cdcputc(' ');
-		exti_reset_request(EXTI12);
+		exti_reset_request(BP_EXTI_CS);
 	}
-	if(exti_get_flag_status(EXTI13))		// CLOCK/SCL
+	if(exti_get_flag_status(BP_EXTI_CLK))		// CLOCK/SCL
 	{
 		if(armed)
 		{
 			miso<<=1;
 			mosi<<=1;
-			if(gpio_get(GPIOB, GPIO14))
+			if(gpio_get(BP_SNIFF_PORT, BP_SNIFF_MISO))
 				miso|=1;
-			if(gpio_get(GPIOB, GPIO15))
+			if(gpio_get(BP_SNIFF_PORT, BP_SNIFF_MOSI))
 				mosi|=1;
 			clock++;
 			if(clock==8)
@@ -154,15 +154,15 @@ void exti15_10_isr_spi(void)
 				mosi=0;
 			}
 		}
-		exti_reset_request(EXTI13);
+		exti_reset_request(BP_EXTI_CLK);
 	}
-	if(exti_get_flag_status(EXTI14))		// MISO/-
+	if(exti_get_flag_status(BP_EXTI_MISO))		// MISO/-
 	{
-		exti_reset_request(EXTI14);
+		exti_reset_request(BP_EXTI_MISO);
 	}
-	if(exti_get_flag_status(EXTI15))		// MOSI/SDA
+	if(exti_get_flag_status(BP_EXTI_MOSI))		// MOSI/SDA
 	{
-		exti_reset_request(EXTI15);
+		exti_reset_request(BP_EXTI_MOSI);
 	}
 }
 
@@ -179,22 +179,22 @@ void exti15_10_isr_i2c(void)
 	{
 		exti_reset_request(EXTI11);
 	}
-	if(exti_get_flag_status(EXTI12))		// CS
+	if(exti_get_flag_status(BP_EXTI_CS))		// CS
 	{
-		exti_reset_request(EXTI12);
+		exti_reset_request(BP_EXTI_CS);
 	}
-	if(exti_get_flag_status(EXTI13))		// CLOCK/SCL
+	if(exti_get_flag_status(BP_EXTI_CLK))		// CLOCK/SCL
 	{
 		switch(state)
 		{
 			case GETACK:
-				if(gpio_get(GPIOB, GPIO15)) cdcputc('.');
+				if(gpio_get(BP_SNIFF_PORT, BP_SNIFF_MOSI)) cdcputc('.');
 					else cdcputc('A');
 				state=GET8BITS;
 				break;
 			case GET8BITS:
 				data<<=1;
-				if(gpio_get(GPIOB, GPIO15)) data|=1;
+				if(gpio_get(BP_SNIFF_PORT, BP_SNIFF_MOSI)) data|=1;
 				clock++;
 				if(clock==8)
 				{
@@ -205,19 +205,19 @@ void exti15_10_isr_i2c(void)
 			default:
 				break;
 		}
-		exti_reset_request(EXTI13);
+		exti_reset_request(BP_EXTI_CLK);
 	}
-	if(exti_get_flag_status(EXTI14))		// MISO/-
+	if(exti_get_flag_status(BP_EXTI_MISO))		// MISO/-
 	{
-		exti_reset_request(EXTI14);
+		exti_reset_request(BP_EXTI_MISO);
 	}
-	if(exti_get_flag_status(EXTI15))		// MOSI/SDA
+	if(exti_get_flag_status(BP_EXTI_MOSI))		// MOSI/SDA
 	{
 		if((state!=GETACK))	//&&(clock==1))	//	(!((state==GETACK)||(clock!=0)))
 		{
-			if(gpio_get(GPIOB, GPIO13))
+			if(gpio_get(BP_SNIFF_PORT, BP_SNIFF_CLK))
 			{
-				if(gpio_get(GPIOB, GPIO15))
+				if(gpio_get(BP_SNIFF_PORT, BP_SNIFF_MOSI))
 				{
 					cdcputc(']');
 					state=WAITFORSTART;
@@ -231,6 +231,6 @@ void exti15_10_isr_i2c(void)
 				}
 			}
 		}
-		exti_reset_request(EXTI15);
+		exti_reset_request(BP_EXTI_MOSI);
 	}
 }

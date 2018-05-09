@@ -40,7 +40,43 @@ void HWUSART_macro(uint32_t macro)
 {
 	switch(macro)
 	{
-		case 0:		cdcprintf("No macros available");
+		case 0:		cdcprintf(" 1. transparant bridge\r\n");
+				cdcprintf(" 2. live view (num)\r\n");
+				cdcprintf(" 3. live view (char)\r\n");
+				break;
+		case 1:		cdcprintf("Reset to exit\r\n");
+				while(1)
+				{
+					if((USART_SR(BP_USART) & USART_SR_RXNE))	// received a byte?
+					{
+						cdcputc(usart_recv(BP_USART));
+					}
+					if(cdcbyteready())				// send a byte
+					{
+						usart_send(BP_USART, cdcgetc());	
+					}
+				}
+				break;
+		case 2:		cdcprintf("Press a key to exit\r\n");
+				while(!cdcbyteready())
+				{
+					if((USART_SR(BP_USART) & USART_SR_RXNE))
+					{
+						printnum(usart_recv(BP_USART));		// numerical output
+						cdcputc(' ');
+					}
+				}
+				cdcgetc();						// consume the userpresed key
+				break;
+		case 3:		cdcprintf("Press a key to exit\r\n");
+				while(!cdcbyteready())
+				{
+					if((USART_SR(BP_USART) & USART_SR_RXNE))
+					{
+						cdcputc(usart_recv(BP_USART));		// output as char
+					}
+				}
+				cdcgetc();						// consume the userpresed key
 				break;
 		default:	cdcprintf("Macro not defined");
 				modeConfig.error=1;
