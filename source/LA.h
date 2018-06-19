@@ -8,6 +8,18 @@ void LA_cleanup(void);
 void LA_pins(void);
 void LA_settings(void);
 
+// for selftest:
+void setup_spix1rw(void);
+void spiWx1(uint8_t d);
+void setup_spix4w(void);
+void setup_spix4r(void);
+uint8_t spiRx4(void);
+void spiWx4(uint8_t d);
+void cleanup_spi(void);
+
+
+
+
 //ians test functions
 void logicAnalyzerSetup(void);
 void logicAnalyzerCaptureStop(void);
@@ -31,14 +43,17 @@ void logicAnalyzerDumpSamples(uint32_t numSamples);
 #define BP_LA_COUNTER_PRELOAD (0xFFFF-(0)) //preload the sample counter, can be used to avoid sampling overrun
 
 #define BP_LA_LATCH_SETUP() gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_LATCH_PIN)
+#define BP_LA_LATCH_CLEANUP() gpio_set_mode(BP_LA_LATCH_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_LATCH_PIN)
 #define BP_LA_LATCH_OPEN() gpio_clear(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN)
 #define BP_LA_LATCH_CLOSE() gpio_set(BP_LA_LATCH_PORT, BP_LA_LATCH_PIN)
 
 #define BP_LA_SRAM_CS_SETUP() gpio_set_mode(BP_LA_SRAM_CS_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CS_PIN)
+#define BP_LA_SRAM_CS_CLEANUP() gpio_set_mode(BP_LA_SRAM_CS_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_SRAM_CS_PIN)
 #define BP_LA_SRAM_DESELECT() gpio_set(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN)
 #define BP_LA_SRAM_SELECT() gpio_clear(BP_LA_SRAM_CS_PORT, BP_LA_SRAM_CS_PIN)
 
 #define BP_LA_SRAM_CLOCK_SETUP() gpio_set_mode(BP_LA_SRAM_CLK_PORT, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, BP_LA_SRAM_CLK_PIN);
+#define BP_LA_SRAM_CLOCK_CLEANUP() gpio_set_mode(BP_LA_SRAM_CLK_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_SRAM_CLK_PIN);
 #define BP_LA_SRAM_CLOCK_LOW() gpio_clear(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN)
 #define BP_LA_SRAM_CLOCK_HIGH() gpio_set(BP_LA_SRAM_CLK_PORT, BP_LA_SRAM_CLK_PIN)
 

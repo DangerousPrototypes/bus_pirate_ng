@@ -17,6 +17,7 @@
 #include "bpflash.h"
 #include "LA.h"
 #include "sump.h"
+#include "selftest.h"
 
 // globals
 uint32_t cmdhead, cmdtail, cursor;		// TODO swap head an tail?
@@ -589,6 +590,8 @@ void doUI(void)
 						}
 						modeConfig.bitorder^=1;
 						modeConfig.numbits=temp3;
+						break;
+				case '~': 	selftest();
 						break;
 				default:	cdcprintf("Unknown command: %c", c);
 						modeConfig.error=1;

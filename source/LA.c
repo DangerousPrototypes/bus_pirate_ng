@@ -11,14 +11,6 @@
 #include "cdcacm.h"
 #include "UI.h"
 
-static void setup_spix1rw(void);
-static void spiWx1(uint8_t d);
-
-static void setup_spix4w(void);
-static void spiWx4(uint8_t d);
-
-static void setup_spix4r(void);
-static uint8_t spiRx4(void);
 
 /*static enum _stop
         {
@@ -361,7 +353,7 @@ void setup_spix1rw(void)
 	BP_LA_SRAM_DESELECT(); //SRAM CS high
 }
 
-static void spiWx1(uint8_t d)
+void spiWx1(uint8_t d)
 {
 	int i;
 	uint8_t mask;
@@ -413,7 +405,23 @@ void setup_spix4r(void)
 	BP_LA_SRAM_CLOCK_LOW();
 }
 
-static uint8_t spiRx4(void)
+// TODO: better name??
+void cleanup_spi(void)
+{
+	// set SIO pins to input
+	gpio_set_mode(BP_LA_CHAN1_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN1_PIN);
+	gpio_set_mode(BP_LA_CHAN2_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN2_PIN);
+	gpio_set_mode(BP_LA_CHAN3_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN3_PIN);
+	gpio_set_mode(BP_LA_CHAN4_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN4_PIN);
+	gpio_set_mode(BP_LA_CHAN5_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN5_PIN);
+	gpio_set_mode(BP_LA_CHAN6_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN6_PIN);
+	gpio_set_mode(BP_LA_CHAN7_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN7_PIN);
+	gpio_set_mode(BP_LA_CHAN8_PORT, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, BP_LA_CHAN8_PIN);
+	BP_LA_SRAM_CLOCK_CLEANUP();
+	BP_LA_SRAM_CS_CLEANUP();
+}
+
+uint8_t spiRx4(void)
 {
 	uint8_t received;
 
@@ -444,7 +452,7 @@ static uint8_t spiRx4(void)
 	return received;
 }
 
-static void spiWx4(uint8_t d)
+void spiWx4(uint8_t d)
 {
 	int i;
 	uint8_t mask;
