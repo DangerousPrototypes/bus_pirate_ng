@@ -13,7 +13,8 @@
 
 
 // pins directly tested
-#define DIRECT_PIN_TESTS 9
+#define DIRECT_PIN_TESTS_PP 9
+#define DIRECT_PIN_TESTS_OD 7
 struct _testpin testpins[]={
 // MOSI
 { GPIOB, GPIOB, GPIO7, GPIO10 },	// mosi PB10
@@ -142,7 +143,7 @@ void selftest(void)
 	BP_LA_LATCH_SETUP();			// TODO: needed?
 	BP_LA_LATCH_CLOSE();			// TODO: needed?
 
-	for(i=0; i<DIRECT_PIN_TESTS; i++)
+	for(i=0; i<DIRECT_PIN_TESTS_PP; i++)
 	{
 		if(checkpin(testpins[i].portout, testpins[i].pinout, testpins[i].portin, testpins[i].pinin, MODE_PP))
 		{
@@ -160,7 +161,7 @@ void selftest(void)
 
 	gpio_set(BP_VPUEN_PORT, BP_VPUEN_PIN);			// enable pullups
 
-	for(i=0; i<DIRECT_PIN_TESTS; i++)
+	for(i=0; i<DIRECT_PIN_TESTS_OD; i++)			// AUX isn't connected to the 4066 and can;t be pulled high
 	{
 		if(checkpin(testpins[i].portout, testpins[i].pinout, testpins[i].portin, testpins[i].pinin, MODE_OD))
 		{
@@ -237,7 +238,10 @@ int checkpin(uint32_t portout, uint16_t pinout, uint32_t portin, uint16_t pinin,
 delayms(1);
 
 	if(gpio_get(portin, pinin)==0)
+	{
+		cdcputc('1');
 		errors++;
+	}
 
 	// set to 0, check if pin under test=0
 	gpio_clear(portout, pinout);
@@ -245,10 +249,13 @@ delayms(1);
 delayms(1);
 
 	if(gpio_get(portin, pinin) != 0)
+	{
+		cdcputc('0');
 		errors++;
+	}
 
 	// reset pin to input
-	gpio_set_mode(portout, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_INPUT_FLOAT, pinout);
+	gpio_set_mode(portout, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, pinout);
 
 	// return 1 if no errors
 
