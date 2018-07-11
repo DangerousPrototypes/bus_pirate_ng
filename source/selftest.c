@@ -14,7 +14,7 @@
 
 // pins directly tested
 #define DIRECT_PIN_TESTS_PP 9
-#define DIRECT_PIN_TESTS_OD 7
+#define DIRECT_PIN_TESTS_OD 7		// AUX isn't connected through the 4066
 struct _testpin testpins[]={
 // MOSI
 { GPIOB, GPIOB, GPIO7, GPIO10 },	// mosi PB10
@@ -216,6 +216,45 @@ void selftest(void)
 	cleanup_spi();				// TODO: needed?
 
 	cdcprintf("Selftest ended, found %d errors\r\n", errors);
+	cdcprintf("Press any key to continue\r\n");
+
+	if(cdcgetc()!='t')
+		return;
+
+	cdcprintf("HiZ test on CS\r\n");
+	
+	gpio_set(BP_VPUEN_PORT, BP_VPUEN_PIN);			// enable pullups
+
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO12);
+	cdcprintf("input-float\r\n");
+	cdcgetc();
+	
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN, GPIO12);
+	gpio_set(GPIOB, GPIO12);
+	cdcprintf("input-pull-up\r\n");
+	cdcgetc();
+	
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN, GPIO12);
+	gpio_clear(GPIOB, GPIO12);
+	cdcprintf("input-pull-down\r\n");
+	cdcgetc();
+	
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_ANALOG, GPIO12);
+	cdcprintf("input-analog\r\n");
+	cdcgetc();
+	
+	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, GPIO12);
+	gpio_set(GPIOB, GPIO12);
+	cdcprintf("output-od-high\r\n");
+	cdcgetc();
+	
+	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_OPENDRAIN, GPIO12);
+	gpio_clear(GPIOB, GPIO12);
+	cdcprintf("output-od-low\r\n");
+	cdcgetc();
+	
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO12);
+	gpio_clear(BP_VPUEN_PORT, BP_VPUEN_PIN);			// disable pullups
 }
 
 
