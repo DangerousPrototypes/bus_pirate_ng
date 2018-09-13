@@ -2,6 +2,7 @@
 
 // took 1wire implementation from old buspirate
 // fiddled a bit with the timings to make it work on the NG version
+//
 
 #include <stdint.h>
 #include <libopencm3/stm32/gpio.h>
