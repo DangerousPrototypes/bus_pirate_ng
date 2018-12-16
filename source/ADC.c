@@ -59,16 +59,17 @@ uint16_t getADC(uint8_t chan)
 // calculates the voltage
 // hi=0 no voltage divider 0 .. 3V3
 // hi=1 1/2 voltage divider 0 .. 6V6
-float voltage(uint8_t chan, uint8_t hi)
+// output is in mV
+uint16_t voltage(uint8_t chan, uint8_t hi)
 {
-	float voltage;
+	uint32_t voltage;
 	uint32_t temp;
 
 	temp=getADC(chan);
 	if(hi)
-		voltage=6.6*temp;
+		voltage=6600*temp;
 	else
-		voltage=3.3*temp;
+		voltage=3300*temp;
 	voltage/=4096;
 
 	return voltage;

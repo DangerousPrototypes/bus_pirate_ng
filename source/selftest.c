@@ -58,7 +58,7 @@ struct _testpin latestpins[]={
 void selftest(void)
 {
 	int i, errors;
-	float volt;
+	uint16_t volt;
 
 	errors=0;
 
@@ -75,8 +75,8 @@ void selftest(void)
 	delayms(10);
 
 	volt=voltage(BP_3V3_CHAN, 1);
-	cdcprintf(" 3V3=%0.2fV ", volt);
-	if((volt<3.2)||(volt>3.4))
+	cdcprintf(" 3V3=%d.%02dV ", volt / 1000, (volt % 1000) / 10);
+	if((volt<3200)||(volt>3400))
 	{	
 		cdcprintf("NOK\r\n");
 		errors++;
@@ -87,8 +87,8 @@ void selftest(void)
 	}
 
 	volt=voltage(BP_5V0_CHAN, 1);;
-	cdcprintf(" 5V0=%0.2fV ", volt);
-	if((volt<4.9)||(volt>5.1))
+	cdcprintf(" 5V0=%d.%03dV ", volt / 1000, (volt % 1000) / 10);
+	if((volt<4900)||(volt>5100))
 	{	
 		cdcprintf("NOK\r\n");
 		errors++;
@@ -100,8 +100,8 @@ void selftest(void)
 
 
 	volt=voltage(BP_VPU_CHAN, 1); 		// voltage on resistor
-	cdcprintf(" Vpu=%0.2fV ", volt);
-	if((volt<3.2)||(volt>3.4)) 		// TODO: which voltages are ok?
+	cdcprintf(" Vpu=%d.%02dV ", volt / 1000, (volt % 1000) / 10);
+	if((volt<3200)||(volt>3400)) 		// TODO: which voltages are ok?
 	{	
 		cdcprintf("NOK\r\n");
 		errors++;
@@ -112,8 +112,8 @@ void selftest(void)
 	}
 
 	volt=voltage(BP_VEXT_CHAN, 1); 		// voltage on Vpu pin
-	cdcprintf(" Vext=%0.2fV ", volt);
-	if((volt<3.2)||(volt>3.4)) 		// TODO: whihc voltages are ok?
+	cdcprintf(" Vext=%d.%02dV ", volt / 1000, (volt % 1000) / 10);
+	if((volt<3200)||(volt>3400)) 		// TODO: whihc voltages are ok?
 	{	
 		cdcprintf("NOK\r\n");
 		errors++;
@@ -124,8 +124,8 @@ void selftest(void)
 	}
 
 	volt=voltage(BP_ADC_CHAN, 1);
-	cdcprintf(" ADC=%0.2fV ", volt);
-	if((volt<3.2)||(volt>3.4)) 		// TODO: which votlage are ok?
+	cdcprintf(" ADC=%d.%02dV ", volt / 1000, (volt % 1000) / 10);
+	if((volt<3200)||(volt>3400)) 		// TODO: which votlage are ok?
 	{	
 		cdcprintf("NOK\r\n");
 		errors++;

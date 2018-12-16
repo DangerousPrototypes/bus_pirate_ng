@@ -37,6 +37,7 @@
 #include "debug.h"
 #include "cdcacm.h"
 #include "usbdescriptor.h"
+#include "printf.h"
 
 // globals
 static usbd_device *my_usbd_dev;		// usb device
