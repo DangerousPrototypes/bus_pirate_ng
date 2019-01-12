@@ -19,11 +19,16 @@
 
 GIT_VERSION := $(shell git describe --dirty --always --tags)
 
-CFLAGS +=-DFWVER=\"$(GIT_VERSION)\" 
+CFLAGS +=-DFWVER=\"$(GIT_VERSION)\"
+CFLAGS +=-DPRINTF_DISABLE_SUPPORT_FLOAT
+CFLAGS +=-DPRINTF_DISABLE_SUPPORT_LONG_LONG
+CFLAGS +=-DPRINTF_DISABLE_SUPPORT_PTRDIFF_T
+CFLAGS +=-I../printf
 
 OBJS += debug.o cdcacm.o UI.o protocols.o dummy1.o dummy2.o HiZ.o HWSPI.o 
 OBJS += AUXpin.o ADC.o HWUSART.o bpflash.o HWI2C.o LA.o SW2W.o SW3W.o sump.o
 OBJS += DIO.o LCDSPI.o HD44780.o ST7735.o 1WIRE.o sniffer.o selftest.o
+OBJS += ../printf/printf.o
 
 BINARY = buspirateNG
 

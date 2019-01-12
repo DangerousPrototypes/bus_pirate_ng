@@ -385,7 +385,8 @@ void doUI(void)
 						break;
 				case 'd':	if(modeConfig.mode!=HIZ)
 						{
-							cdcprintf("ADC=%0.2fV", voltage(BP_ADC_CHAN, 1));
+							uint16_t adc = voltage(BP_ADC_CHAN, 1);
+							cdcprintf("ADC=%d.%02dV", adc/1000, (adc%1000)/10);
 						}
 						else
 						{
@@ -398,7 +399,8 @@ void doUI(void)
 							cdcprintf("Press any key to exit\r\n");
 							while(!cdcbyteready())
 							{
-								cdcprintf("ADC=%0.2fV\r", voltage(BP_ADC_CHAN, 1));
+								uint16_t adc = voltage(BP_ADC_CHAN, 1);
+								cdcprintf("ADC=%d.%02dV\r", adc/1000, (adc%1000)/10);
 								delayms(250);
 							}
 							cdcgetc();
@@ -454,7 +456,8 @@ void doUI(void)
 							gpio_set(BP_VPUEN_PORT, BP_VPUEN_PIN);
 							cdcprintf("pullups: enabled\r\n");
 							delayms(10);
-							cdcprintf("Vpu=%0.2fV (mode=%s)", voltage(BP_VPU_CHAN, 1), vpumodes[modeConfig.vpumode]);
+							uint16_t vpu = voltage(BP_VPU_CHAN, 1);
+							cdcprintf("Vpu=%d.%02dV (mode=%s)", vpu/1000, (vpu%1000)/10, vpumodes[modeConfig.vpumode]);
 							modeConfig.pullups=1; 
 						}
 						else
@@ -483,8 +486,10 @@ void doUI(void)
 							gpio_set(BP_PSUEN_PORT, BP_PSUEN_PIN); 
 							cdcprintf("PSU: enabled\r\n");
 							delayms(10);
-							cdcprintf("V33=%0.2fV, V50=%0.2fV", voltage(BP_3V3_CHAN, 1), voltage(BP_5V0_CHAN, 1)); 
-							if((voltage(BP_3V3_CHAN, 1)<3.0)||(voltage(BP_5V0_CHAN, 1)<4.5))
+							uint16_t v33 = voltage(BP_3V3_CHAN, 1);
+							uint16_t v50 = voltage(BP_5V0_CHAN, 1);
+							cdcprintf("V33=%d.%02dV, V50=%d.%02dV", v33/100, (v33%1000)/10, v50/1000, (v50%1000)/10); 
+							if((voltage(BP_3V3_CHAN, 1)<3000)||(voltage(BP_5V0_CHAN, 1)<4500))
 							{
 								cdcprintf("\r\nShort circuit!");								
 								gpio_clear(BP_PSUEN_PORT, BP_PSUEN_PIN);
@@ -697,7 +702,7 @@ void versioninfo(void)
 #if(BP_PWM_CHANCHAN==4)	
 			pwmoc=TIM_CCR4(BP_PWM_TIMER);
 #endif
-			cdcprintf("PWM clock %d Hz, dutycycle %0.2f\r\n", (36000000/pwmperiod), (float)((pwmoc*1.0)/pwmperiod));
+			cdcprintf("PWM clock %d Hz, dutycycle %d.%02d\r\n", (36000000/pwmperiod), pwmoc == pwmperiod ? 1 : 0, ((pwmoc*100)/pwmperiod)%100);
 		}
 		showstates();
 	}
@@ -758,7 +763,7 @@ void showstates(void)
 {
 	uint8_t auxstate, csstate, misostate, clkstate, mosistate;
 	uint8_t auxmode, csmode, misomode, clkmode, mosimode;
-	float v50, v33, vpu, adc;
+	uint16_t v50, v33, vpu, adc;
 
 	cdcprintf("1.GND\t2.+5v\t3.+3V3\t4.Vpu\t5.ADC\t6.AUX\t7.CS\t8.MISO\t9.CLK\t10.MOSI\r\n");
 	cdcprintf("GND\t+5v\t+3V3\tVpu\tADC\tAUX\t");
@@ -816,7 +821,7 @@ void showstates(void)
 	adc=voltage(BP_ADC_CHAN, 1);
 
 	// show state of pin
-	cdcprintf("GND\t%0.2fV\t%0.2fV\t%0.2fV\t%0.2fV\t%s\t%s\t%s\t%s\t%s\r\n", v50, v33, vpu, adc, pinstates[auxstate], pinstates[csstate], pinstates[misostate], pinstates[clkstate], pinstates[mosistate]);
+	cdcprintf("GND\t%d.%02dV\t%d.%02dV\t%d.%02dV\t%d.%02dV\t%s\t%s\t%s\t%s\t%s\r\n", v50/1000, (v50%1000)/10, v33/1000, (v33%1000)/10, vpu/1000, (vpu%1000)/10, adc/1000, (adc%1000)/10, pinstates[auxstate], pinstates[csstate], pinstates[misostate], pinstates[clkstate], pinstates[mosistate]);
 
 
 }
