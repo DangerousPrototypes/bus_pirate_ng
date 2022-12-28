@@ -56,11 +56,11 @@ Now simply flash ```source/buspirateNG.bin``` into the stm32 using your favourit
 ---
 ### Pinout
 Pin functions are described at [`source/platform/beta2.h`](source/platform/beta2.h).
-<br><br>
+<br>
 
 ---
 ### Basic functionality using a BluePill
-You can use this firmware in a simple Bluepill, skipping all the extra circuitry, but requires a tweaking to ignore the PSU check.<br>
+You can use this firmware in a simple Bluepill, skipping all the extra circuitry, but requires tweaking to ignore the PSU check.<br>
 Edit ```initUI``` function at [`source/UI.c`](source/UI.c#L167) and change:
 ```
 modeConfig.psu=0;
