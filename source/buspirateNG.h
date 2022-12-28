@@ -1,7 +1,7 @@
 // global config file
 
 // UI stuff
-#define CMDBUFFSIZE	512		// must be power of 2
+#define CMDBUFFSIZE	16384		// must be power of 2
 
 // USB shit :/
 
